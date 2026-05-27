@@ -1,0 +1,1 @@
+../../skill/hedl/templates/epic-template.md

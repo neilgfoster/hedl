@@ -1,0 +1,16 @@
+{
+  "userIgnoreFilters": [
+    ".github",
+    ".claude",
+    ".work",
+    "skill/hedl/scripts",
+    "skill/hedl/workflows",
+    "skill/hedl/integrations",
+    "skill/hedl/agents",
+    "skill/hedl/commands",
+    "skill/hedl/templates"
+  ],
+  "useMarkdownLinks": true,
+  "newLinkFormat": "relative",
+  "alwaysUpdateLinks": true
+}
