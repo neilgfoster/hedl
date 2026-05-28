@@ -79,6 +79,71 @@
         "All count references updated to '8 named agents' / '18 composable prompts' across README, tiers.md, docs/agents.md, generated SKILL.md.",
         "am_i_done.py passes including the config check."
       ]
+    },
+    {
+      "id": "WORK-0006",
+      "title": "feat: lightweight-tier multi-operator support (assignees, claim/release, flock)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "Per ADR-018, lightweight tier must support multi-operator coordination via local `.work/` mechanisms. Add an `assignee` field to work items, change `meta.active_item` to `meta.active_items` keyed by assignee, wrap `.work/work.json` writes with `flock` (mirror the budget_manager.py pattern), and add a claim/release lifecycle (open → claimed → in_progress → released → completed). Bump `schema_version` and add a migration. Solo adoption must be unchanged — assignee defaults to the current operator.",
+      "acceptance_criteria": [
+        "Work items carry an `assignee` field (defaults to current git user if unset).",
+        "`meta.active_items` keyed by assignee replaces singular `meta.active_item`; backward-compat read is supported.",
+        "Concurrent writes to `.work/work.json` are flock-serialised (mirroring budget_manager).",
+        "Claim/release lifecycle: `/claim <id>` and `/release <id>` flows defined in references/commands.md.",
+        "`schema_version` increments; install.py migration handles the upgrade idempotently with state archival.",
+        "Solo operator workflow is functionally unchanged (no new prompts, no extra steps).",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0007",
+      "title": "feat: audit and harden team-tier GitHub Issues multi-operator integration",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "Per ADR-018, team tier inherits multi-operator semantics from the chosen state backend (GitHub Issues today). Audit the existing github-issues backend in install.py / am_i_done.py: does Hedl read GitHub assignees correctly? How are concurrent claims handled? Does the gate detect file-level conflicts across PRs from different operators? Fix or document any gaps found.",
+      "acceptance_criteria": [
+        "Audit report committed (e.g. as a /repo-health-style review).",
+        "GitHub assignees are read into Hedl's view of work-item state.",
+        "Two operators claiming the same issue is detected and surfaced.",
+        "File-level conflict across operator PRs is caught by `--streams` (verify with a test).",
+        "Gaps are either fixed or documented as separate backlog items with clear scope.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0008",
+      "title": "feat: tier-transition coordination-state migrations in install.py",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "Per ADR-018, tier transitions preserve coordination state. install.py migration registry must handle lightweight↔team transitions for assignees and claims: lightweight→team maps local assignees to GitHub Issue assignees; team→lightweight pulls GitHub assignees back to local. Both directions are idempotent and archive prior state before overwriting.",
+      "acceptance_criteria": [
+        "install.py --tier <new> handles assignee/claim migration in both lightweight↔team directions.",
+        "Pre-migration state is archived to `.work/archive/<timestamp>/` (mirroring existing migration archival pattern).",
+        "Migration is idempotent: re-running --tier same is a no-op.",
+        "Tests cover both upgrade and downgrade paths with assignee state present.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0009",
+      "title": "docs: update Principle 4 in CLAUDE.md from 'one work item at a time' to 'one per operator'",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "description": "Per ADR-018, Principle 4 in CLAUDE.md (`One work item at a time — finish and validate before starting the next.`) is clarified as **one per operator**, not one per repo. Update the wording. Light docs change; bundle with the lightweight-multi-op implementation (WORK-0006) or stand alone.",
+      "acceptance_criteria": [
+        "CLAUDE.md Principle 4 reads 'One work item per operator at a time'.",
+        "Any other reference docs that quote the principle (SKILL.md, references/) are updated consistently.",
+        "am_i_done.py passes."
+      ]
     }
   ],
   "completed": []

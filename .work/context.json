@@ -41,7 +41,8 @@
     "ADR-014-security-quality-friction-aware",
     "ADR-015-journey-capture-with-override",
     "ADR-016-preserved-decisions",
-    "ADR-017-adrs-existentially-challenged"
+    "ADR-017-adrs-existentially-challenged",
+    "ADR-018-multi-operator-scales-with-tier"
   ],
   "notes": "Seeded 2026-05-28 from hedl-iteration-seed.md v2. Phase 0 active; phases/ untouched per seed instructions. Phase 1 is Lume bootstrap — define via /phase-complete-driven flow after maintainer confirmation."
 }
