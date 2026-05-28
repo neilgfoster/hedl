@@ -15,13 +15,15 @@
       "change_class": "fix",
       "status": "backlog",
       "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #6c, security-auditor) — `am_i_done.py:169-203` runs arbitrary `[verify.<name>] cmd` strings from `hedl.toml` with no allow-list. Any PR that adds a `[verify.x] cmd = \"…\"` becomes an RCE on the next gate run (locally and in CI). Constrain execution: require `cmd` be a list (not a shell string), execute without `shell=True`, restrict the executable to a configured allow-list of binaries (e.g., `pytest`, `mypy`, `ruff`, `npm`, `pnpm`, `make`, plus an opt-in list from hedl.toml), and document the contract in docs/versioning.md and tiers.md.",
+      "description": "Repo-health 2026-05-28 (BLOCKING #6c, security-auditor) — `am_i_done.py:169-203` runs arbitrary `[verify.<name>] cmd` strings from `hedl.toml` with no allow-list. Any PR that adds a `[verify.x] cmd = \"…\"` becomes an RCE on the next gate run (locally and in CI). Constrain execution: require `cmd` be a list (not a shell string), execute without `shell=True`, restrict the executable to a configured allow-list of binaries (e.g., `pytest`, `mypy`, `ruff`, `npm`, `pnpm`, `make`, plus an opt-in list from hedl.toml), and document the contract in docs/versioning.md and tiers.md.\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code path. am_i_done.py:169-203 (_run_declared_check) may already be safe — the prior external review noted shlex.split + list-form subprocess (shell=False) are already used, and shutil.which gates the executable, so the only real gap may be the executable allow-list (or the finding may be partially/fully wrong). If audit confirms safe behaviour, apply the WORK-0019 resolution pattern: no code change, but add a regression-guard test plus a negative meta-test that proves the test would catch the vulnerable form, plus an evidence note in .work/insights/WORK-0021-<topic>.md. If audit confirms a real vulnerability (e.g. a missing allow-list that permits an arbitrary executable), fix it with adversarial-reviewed code.",
       "acceptance_criteria": [
+        "Audit performed before any code change: trace the actual reachable inputs to am_i_done.py's [verify] cmd execution path (am_i_done.py:169-203, _run_declared_check), document findings in .work/insights/WORK-0021-<topic>.md. Decide fix-vs-guard explicitly.",
         "am_i_done.py rejects hedl.toml `[verify.<name>]` entries that use shell strings, shell metacharacters, or executables outside the allow-list.",
         "subprocess invocation uses an argv list and `shell=False`.",
         "Default allow-list is documented; operator extension path is documented and itself constrained (e.g., still no shell expansion).",
         "Tests cover: shell metacharacter rejection, disallowed executable rejection, allow-list extension, and a happy-path verify invocation.",
-        "am_i_done.py passes."
+        "am_i_done.py passes.",
+        "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
       ]
     },
     {
@@ -32,12 +34,14 @@
       "change_class": "fix",
       "status": "backlog",
       "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #7, edge-case-hunter) — `cmd_status` / `cmd_doctor` (install.py:303, ~397) call `json.loads(.hedl-tier)` with no try/except: a hand-edited or partial file crashes the CLI with a traceback instead of a useful message. Separately, `_flatten_projections` / `_flatten_inits` recurse via `includes` (install.py:99-105) with no cycle detection: a tiers.json cycle hangs or stack-overflows. Add a single corruption-aware reader for `.hedl-tier` (returning a structured error / hint) and add cycle detection to the `includes` flattening (visited-set, clear error naming the cycle).",
+      "description": "Repo-health 2026-05-28 (BLOCKING #7, edge-case-hunter) — `cmd_status` / `cmd_doctor` (install.py:303, ~397) call `json.loads(.hedl-tier)` with no try/except: a hand-edited or partial file crashes the CLI with a traceback instead of a useful message. Separately, `_flatten_projections` / `_flatten_inits` recurse via `includes` (install.py:99-105) with no cycle detection: a tiers.json cycle hangs or stack-overflows. Add a single corruption-aware reader for `.hedl-tier` (returning a structured error / hint) and add cycle detection to the `includes` flattening (visited-set, clear error naming the cycle).\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code paths. Confirm the malformed-.hedl-tier crash (json.loads with no try/except in cmd_status/cmd_doctor) and the includes-cycle in _flatten_projections/_flatten_inits are still reachable as described — line numbers have drifted (WORK-0016 changed cmd_install's marker read, which is already guarded; WORK-0020 added validation calls to cmd_status/cmd_doctor but left their json.loads unguarded). Trace the real reachable inputs and document findings in .work/insights/WORK-0022-<topic>.md. For any path already guarded, apply the WORK-0019 resolution pattern (regression-guard test + negative meta-test + insights note, change_class chore); for paths that genuinely crash or loop, fix with adversarial-reviewed code.",
       "acceptance_criteria": [
+        "Audit performed before any code change: trace the actual reachable inputs to install.py's .hedl-tier parsing (the json.loads calls in cmd_status/cmd_doctor) and the includes-flattening cycle paths (_flatten_projections/_flatten_inits), document findings in .work/insights/WORK-0022-<topic>.md. Decide fix-vs-guard explicitly. Note: line numbers in this item predate WORK-0016/WORK-0020, which edited install.py — verify against current code.",
         "Malformed `.hedl-tier` (truncated JSON, missing keys, wrong types) produces an actionable error message — no Python traceback.",
         "A cycle in tiers.json `includes` is detected, names the cycle path, and exits non-zero — no hang, no stack overflow.",
         "Tests cover both malformed-marker and includes-cycle cases.",
-        "am_i_done.py passes."
+        "am_i_done.py passes.",
+        "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
       ]
     },
     {
@@ -48,12 +52,14 @@
       "change_class": "fix",
       "status": "backlog",
       "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #8, edge-case-hunter) — `release.py:94-95,136` `next_version()` raises IndexError/ValueError on non-canonical `--current-version` (e.g., `1.2`, `v1.2.3`, `1.2.3-rc1`), and the traceback ends up inside what callers expect to be machine-readable JSON output. Validate input against an explicit semver-ish regex, return a structured error response (non-zero exit, parseable error JSON) for non-canonical input, and document the supported version grammar.",
+      "description": "Repo-health 2026-05-28 (BLOCKING #8, edge-case-hunter) — `release.py:94-95,136` `next_version()` raises IndexError/ValueError on non-canonical `--current-version` (e.g., `1.2`, `v1.2.3`, `1.2.3-rc1`), and the traceback ends up inside what callers expect to be machine-readable JSON output. Validate input against an explicit semver-ish regex, return a structured error response (non-zero exit, parseable error JSON) for non-canonical input, and document the supported version grammar.\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code path. Confirm release.py:94-95,136 (next_version) actually raises IndexError/ValueError on non-canonical --current-version and that the traceback reaches the machine-readable JSON output as described — verify against the current code (line numbers may have drifted). Trace the real reachable inputs and document findings in .work/insights/WORK-0023-<topic>.md. If the input is already validated/handled, apply the WORK-0019 resolution pattern (regression-guard test + negative meta-test + insights note, change_class chore); if it genuinely produces an unhandled exception in JSON output, fix with adversarial-reviewed code.",
       "acceptance_criteria": [
+        "Audit performed before any code change: trace the actual reachable inputs to release.py next_version (release.py:94-95,136), document findings in .work/insights/WORK-0023-<topic>.md. Decide fix-vs-guard explicitly.",
         "release.py rejects non-canonical --current-version with a parseable error (non-zero exit, JSON error envelope) instead of an unhandled exception.",
         "Supported version grammar is documented adjacent to the script.",
         "Tests cover representative invalid inputs (`1.2`, `v1.2.3`, `1.2.3-rc1`, empty string) and confirm canonical inputs still behave.",
-        "am_i_done.py passes."
+        "am_i_done.py passes.",
+        "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
       ]
     },
     {
