@@ -1,0 +1,1 @@
+../../skill/hedl/scripts/check_pr_template.py

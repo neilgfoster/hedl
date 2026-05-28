@@ -1,0 +1,1 @@
+../../skill/hedl/integrations/claude-code/scripts/record_insights.py

@@ -1,0 +1,1 @@
+../../skill/hedl/scripts/release.py
