@@ -1,0 +1,58 @@
+{
+  "schema_version": "1",
+  "description": "Hedl tier manifest — single source of truth for install.py projections. All source paths are relative to skill/hedl/.",
+  "tiers": {
+    "gate": {
+      "description": "Deterministic gate only — CI workflow, PR template, scripts. No workflow state, no Claude Code integration.",
+      "projections": [
+        { "source": "scripts/am_i_done.py",              "target": ".github/scripts/am_i_done.py" },
+        { "source": "scripts/budget_manager.py",          "target": ".github/scripts/budget_manager.py" },
+        { "source": "scripts/check_pr_template.py",       "target": ".github/scripts/check_pr_template.py" },
+        { "source": "scripts/check_markdown_schema.py",   "target": ".github/scripts/check_markdown_schema.py" },
+        { "source": "workflows/am-i-done.yml",            "target": ".github/workflows/am-i-done.yml" },
+        { "source": "workflows/codeql.yml",               "target": ".github/workflows/codeql.yml" },
+        { "source": "workflows/dependabot.yml",           "target": ".github/dependabot.yml" },
+        { "source": "workflows/PULL_REQUEST_TEMPLATE.md", "target": ".github/PULL_REQUEST_TEMPLATE.md" },
+        { "source": "requirements-ci.txt",                "target": "requirements-ci.txt" }
+      ]
+    },
+    "lightweight": {
+      "description": "Gate + .work/ state + 4 slash commands + 7 adversarial agents + spec templates.",
+      "includes": ["gate"],
+      "projections": [
+        { "source": "commands/adversarial-review.md",  "target": ".claude/commands/adversarial-review.md" },
+        { "source": "commands/iterate.md",             "target": ".claude/commands/iterate.md" },
+        { "source": "commands/phase-complete.md",      "target": ".claude/commands/phase-complete.md" },
+        { "source": "commands/start-session.md",       "target": ".claude/commands/start-session.md" },
+        { "source": "agents/determinism-auditor.md",   "target": ".claude/agents/determinism-auditor.md" },
+        { "source": "agents/edge-case-hunter.md",      "target": ".claude/agents/edge-case-hunter.md" },
+        { "source": "agents/historian.md",             "target": ".claude/agents/historian.md" },
+        { "source": "agents/review-dispatcher.md",     "target": ".claude/agents/review-dispatcher.md" },
+        { "source": "agents/scope-auditor.md",         "target": ".claude/agents/scope-auditor.md" },
+        { "source": "agents/security-auditor.md",      "target": ".claude/agents/security-auditor.md" },
+        { "source": "agents/simplicity-enforcer.md",   "target": ".claude/agents/simplicity-enforcer.md" },
+        { "source": "templates/prd-template.md",       "target": "docs/spec/prd-template.md" },
+        { "source": "templates/epic-template.md",      "target": "docs/spec/epic-template.md" },
+        { "source": "templates/task-template.md",      "target": "docs/spec/task-template.md" },
+        { "source": "scripts/release.py",              "target": ".github/scripts/release.py" },
+        { "source": "scripts/reflect.py",              "target": ".github/scripts/reflect.py" },
+        { "source": "scripts/contribute.py",           "target": ".github/scripts/contribute.py" }
+      ],
+      "init": [
+        { "source": "work-state", "target": ".work", "on_exists": "skip" }
+      ]
+    },
+    "team": {
+      "description": "Lightweight + Claude Code hooks, startup script, and claudeignore.",
+      "includes": ["lightweight"],
+      "projections": [
+        { "source": "integrations/claude-code/scripts/posttooluse_lint.py", "target": ".claude/scripts/posttooluse_lint.py" },
+        { "source": "integrations/claude-code/scripts/stop_reminder.py",    "target": ".claude/scripts/stop_reminder.py" },
+        { "source": "integrations/claude-code/scripts/record_insights.py",  "target": ".claude/scripts/record_insights.py" },
+        { "source": "integrations/claude-code/settings.json",               "target": ".claude/settings.json" },
+        { "source": "integrations/claude-code/startup.sh",                  "target": ".claude/startup.sh" },
+        { "source": "integrations/claude-code/claudeignore",                "target": ".claudeignore" }
+      ]
+    }
+  }
+}

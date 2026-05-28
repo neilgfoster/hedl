@@ -1,0 +1,42 @@
+# Obsidian vault — commit the config, ignore volatile runtime state
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.obsidian/plugins/
+.obsidian/themes/
+
+node_modules/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+.DS_Store
+*.log
+
+# Spike artifacts — created on demand by the spike flow; never commit
+spikes/
+
+# Secrets and credentials (mirror of .claudeignore — keep in sync; SEC7)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+kubeconfig
+*.kubeconfig
+
+# Local-state files written by budget_manager.py.
+# Avoids generating working-tree diffs every session.
+.work/budget.json
+.work/budget.json.lock
+.work/budget.json.corrupt-*
+.work/reviews/queue.json
+.work/reviews/queue.json.lock
+.work/reviews/queue.json.corrupt-*
