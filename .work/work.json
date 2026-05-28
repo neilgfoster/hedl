@@ -465,6 +465,26 @@
         "Tests cover: invisible install, make-visible round-trip, gitignore block idempotency, skill-from with both absolute and relative paths.",
         "am_i_done.py passes."
       ]
+    },
+    {
+      "id": "WORK-0035",
+      "title": "feat: ship the external adversarial review kit (consistency + report contract)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "normal",
+      "description": "Operationalise the external adversarial review (ADR-028, Proposed) so every run is consistent and its output is reconcilable like /repo-health. Today the review depends on the operator pasting the prompt from memory and runs ad hoc. Ship the canonical prompt as a versioned skill artifact and define the output contract. Captured 2026-05-28 from the mid-Phase-1 dogfood (the operator shared the actual external-review prompt) and the WORK-0001/0002/0003 evidence that external review finds consumer-context defects a self-hosted /repo-health structurally cannot (learning #7). Independence is the point: the review runs OUTSIDE Hedl's context (separate Claude instance, sandbox clone, scripts never executed) — the in-context operator/agent must not be the reviewer. Building the kit does NOT auto-Accept ADR-028's cadence; ADR-028 stays Proposed/gated on reviews #2 and #3.",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "skill/hedl/references/external-review.md ships the canonical prompt: clone-to-sandbox + never-run-scripts protocol; the dimensions (quality, security, utility, accuracy, maintenance, supply-chain) weighed against actual Claude Code utility per CURRENT claude_code_docs; run by an independent Claude instance outside Hedl's context.",
+        "Output contract documented and reuses existing machinery: each adversarial lens emits .work/reviews/external-<date>/<lens>.json using the same per-finding schema as /repo-health ({severity, category, finding, evidence, recommendation}); a synthesised report.md conforms to the existing review-report markdown schema; no new validator is added (the gate's schemas check validates external reports).",
+        "An independent alternatives/disqualifiers pass is part of the review, emitted as .work/reviews/external-<date>/alternatives.md and kept SEPARATE from docs/alternatives.md (merging into the repo's own doc is the operator's reconciliation decision, preserving independence). Feeds ADR-011 / ADR-012.",
+        "The clone/handoff seam is documented: the external instance cannot write into this repo, so it produces eval.md + the per-lens JSON in its sandbox and the operator drops them into .work/reviews/external-<date>/ and reconciles into the backlog (as the 2026-05-28 review was, per meta.reconciliation_note).",
+        "README/tiers/docs reference the kit and any agent/command counts stay consistent (skill-meta + docs-index checks pass).",
+        "Relationship to ADR-028 recorded: this is its implementation; ADR-028 remains Proposed until reviews #2/#3 clear its evidence gate.",
+        "am_i_done.py passes."
+      ]
     }
   ],
   "completed": [
