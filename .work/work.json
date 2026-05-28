@@ -27,6 +27,55 @@
       ]
     },
     {
+      "id": "WORK-0024",
+      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2. Promoted from later in Phase 1 for drift-cleanup batching alongside WORK-0026/0028. NOTE: unlike those two (doc/count drift in review-library.md / commands.md / tiers.json), this item reconciles ADR-022 state_backend storage (hedl.toml vs .work/context.json) and may require code + a one-shot migration, not just a doc edit — it likely warrants its own PR rather than the doc batch.",
+      "acceptance_criteria": [
+        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
+        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
+        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0026",
+      "title": "fix: tiers.json team-tier description matches actual projections",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — `tiers.json:46` describes team tier as 'Lightweight + Claude Code hooks'; README, tiers.md, and team-tier.md describe team tier as 'Lightweight + GitHub Issues backend + parallel worktrees with gate-enforced merge'; `install.py --tier team` actually only projects six Claude Code files. Three sources, three different stories. Audit what team tier actually delivers today, align tiers.json's description to that reality, and align the prose docs to the same reality (or, if the docs describe the intended end state, mark those parts explicitly as 'planned' with the work-item that delivers them). Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state.",
+      "acceptance_criteria": [
+        "tiers.json team description matches what `install.py --tier team` actually projects.",
+        "README, tiers.md, team-tier.md describe the same team tier or clearly mark forward-looking elements as planned (with a referenced work item).",
+        "Test or doctor check fails if tiers.json description diverges from actual projection counts/paths.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0028",
+      "title": "docs: fix count drift (6 vs 7 core agents; 15 vs 18 commands; panel of 8)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — three count drifts shipped today. (1) review-library.md says 'Six core agents' (misses determinism-auditor); /repo-health spec says 'all 6 core agents' so a Full run silently under-panels. (2) `tiers.md:78` says 'all 15 command behaviors'; commands.md has 18. (3) ADR-016 references 'full panel of 8'; only 7 named agents exist (and WORK-0005 will bring this to 8 by adding existential-challenger). Authoritative counts must derive from the filesystem; documentation references that name a number must either reference the same source or be updated together. Coordinate with WORK-0005 so the 7→8 update lands once and consistently. Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state.",
+      "acceptance_criteria": [
+        "review-library.md and /repo-health spec reference the correct number of core agents (7 today, 8 after WORK-0005).",
+        "tiers.md and any other docs that name a command count reference commands.md's actual count (18).",
+        "ADR-016's 'panel of 8' is reconciled with the post-WORK-0005 state.",
+        "A determinism / drift-detector test catches future count divergence (filesystem count vs docs).",
+        "am_i_done.py passes."
+      ]
+    },
+    {
       "id": "WORK-0022",
       "title": "fix: install.py guards .hedl-tier parsing and detects include cycles",
       "phase": 1,
@@ -112,22 +161,6 @@
       ]
     },
     {
-      "id": "WORK-0024",
-      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2.",
-      "acceptance_criteria": [
-        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
-        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
-        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0025",
       "title": "refactor: reconcile .work/ and skill/hedl/work-state/ duplicated state",
       "phase": 1,
@@ -145,22 +178,6 @@
       ]
     },
     {
-      "id": "WORK-0026",
-      "title": "fix: tiers.json team-tier description matches actual projections",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — `tiers.json:46` describes team tier as 'Lightweight + Claude Code hooks'; README, tiers.md, and team-tier.md describe team tier as 'Lightweight + GitHub Issues backend + parallel worktrees with gate-enforced merge'; `install.py --tier team` actually only projects six Claude Code files. Three sources, three different stories. Audit what team tier actually delivers today, align tiers.json's description to that reality, and align the prose docs to the same reality (or, if the docs describe the intended end state, mark those parts explicitly as 'planned' with the work-item that delivers them).",
-      "acceptance_criteria": [
-        "tiers.json team description matches what `install.py --tier team` actually projects.",
-        "README, tiers.md, team-tier.md describe the same team tier or clearly mark forward-looking elements as planned (with a referenced work item).",
-        "Test or doctor check fails if tiers.json description diverges from actual projection counts/paths.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0027",
       "title": "docs: reconcile workstream double-definition (recursive container vs WS-PLAN/REQ/TECH/ARCH categories)",
       "phase": 1,
@@ -173,23 +190,6 @@
         "One canonical meaning of 'workstream' across all shipped docs and code.",
         "The other meaning is renamed consistently and the change is reflected in standards.md, iterate.md, work.json schema, and any am_i_done.py / install.py logic that touches the WS-* prefix.",
         "ADR-019 reads as the source of truth for the recursive primitive (or, if the four-category meaning wins, ADR-019 is superseded with rationale).",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0028",
-      "title": "docs: fix count drift (6 vs 7 core agents; 15 vs 18 commands; panel of 8)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — three count drifts shipped today. (1) review-library.md says 'Six core agents' (misses determinism-auditor); /repo-health spec says 'all 6 core agents' so a Full run silently under-panels. (2) `tiers.md:78` says 'all 15 command behaviors'; commands.md has 18. (3) ADR-016 references 'full panel of 8'; only 7 named agents exist (and WORK-0005 will bring this to 8 by adding existential-challenger). Authoritative counts must derive from the filesystem; documentation references that name a number must either reference the same source or be updated together. Coordinate with WORK-0005 so the 7→8 update lands once and consistently.",
-      "acceptance_criteria": [
-        "review-library.md and /repo-health spec reference the correct number of core agents (7 today, 8 after WORK-0005).",
-        "tiers.md and any other docs that name a command count reference commands.md's actual count (18).",
-        "ADR-016's 'panel of 8' is reconciled with the post-WORK-0005 state.",
-        "A determinism / drift-detector test catches future count divergence (filesystem count vs docs).",
         "am_i_done.py passes."
       ]
     },
