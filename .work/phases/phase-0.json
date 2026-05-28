@@ -1,20 +1,24 @@
 {
-  "_edit_me": "Replace every placeholder below with your project's real content before running /iterate.",
   "phase": 0,
-  "name": "Project Phase 0",
-  "goal": "EDIT ME: One sentence describing what this phase achieves and why it matters.",
-  "status": "active",
-  "started": "EDIT ME: YYYY-MM-DD",
-  "completed": null,
+  "name": "Setup",
+  "goal": "Bootstrap Hedl from nothing to a self-hosting framework: a deterministic completion gate, an adversarial review system, tiered skill distribution, and the work-tracking machinery — all installed into Hedl's own repo so the project develops under its own discipline.",
+  "status": "complete",
+  "started": "2026-05-28",
+  "completed": "2026-05-28",
   "definition_of_done": [
-    "EDIT ME: Replace these with your real acceptance criteria.",
-    "Each criterion should be binary — either true or false, never 'mostly done'.",
-    "am_i_done.py passes on this branch"
+    "The deterministic completion gate (.github/scripts/am_i_done.py) exists and runs locally, exiting 0 only when every applicable check passes. (Gate execution in CI was broken by symlinked workflow files throughout Phase 0 and was repaired early in Phase 1 via WORK-0030.)",
+    "The Hedl skill is installable into a consumer repo via skill/hedl/scripts/install.py across all three tiers (gate, lightweight, team).",
+    "The core slash commands exist in .claude/commands/ and are routed from skill/hedl/SKILL.md.",
+    "The adversarial review system exists: named reviewer agents in .claude/agents/ plus the composable reference library, selected by .work/config/dispatch-rules.json.",
+    "The governance foundation is recorded as ADRs in .work/decisions/.",
+    "The work-tracking machinery exists and is seeded: .work/work.json, .work/context.json, and .work/phases/.",
+    "am_i_done.py passes on this branch."
   ],
   "constraints": [
-    "am_i_done.py must remain deterministic — no inference in the gate",
-    "Existing pytest suite must pass throughout",
-    "EDIT ME: Add any phase-specific constraints here"
+    "am_i_done.py must remain deterministic — no inference in the gate (ADR-003).",
+    "Distribution is an Agent Skill installed by projection, not a fork (ADR-001).",
+    "Repo history stays linear and pristine (ADR-006).",
+    "Existing pytest suite must pass throughout."
   ],
   "workstreams": [
     {
@@ -29,10 +33,12 @@
     }
   ],
   "learning_goals": [
-    "EDIT ME: What assumptions will this phase validate or invalidate?"
+    "Can a deterministic gate plus adversarial review be packaged as a single installable skill with tiered, opt-in adoption?",
+    "Does Hedl dogfooding itself (adopting via install.py --tier team) surface contradictions the design missed?"
   ],
   "assumptions_to_validate": [
-    "EDIT ME: State the biggest assumption you are making entering this phase."
+    "The framework can dogfood itself — Hedl's own development runs under Hedl's gate and phase discipline.",
+    "Process artefacts (ADRs, commands, agents) stay proportionate to shipped capability."
   ],
   "next_phase_trigger": "All DoD items verified. Run /phase-complete."
 }

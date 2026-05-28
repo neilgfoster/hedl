@@ -1,0 +1,46 @@
+{
+  "phase": 1,
+  "name": "Discipline restoration",
+  "goal": "Bring implementation, ADRs, docs, and security posture back into alignment after Phase-0 process-over-product drift. Close the BLOCKING and governance backlog, fix the gate/installer RCE surface, reconcile every ADR-vs-code divergence to a single source of truth, and re-establish that each workstream ends in a shipped, gate-verified capability rather than more process.",
+  "status": "active",
+  "started": "2026-05-28",
+  "completed": null,
+  "definition_of_done": [
+    "Every Phase-1 BLOCKING-band item is closed and the deterministic gate is green on main with required status checks enforced (the four am_i_done matrix contexts).",
+    "The Phase-1 security RCE fixes (startup.sh format string, install.py SKILL_ROOT/repo containment, am_i_done verify allow-list, install.py .hedl-tier parsing and include-cycle guards, release.py version validation) have landed, each with a regression test that fails before the fix.",
+    "Every Phase-1 GOVERNANCE-band item is closed: for each reconciled topic, ADRs, code, tests, docs, and installer agree on one source of truth.",
+    "WORK-0018 (discipline tracker) is closed: a repo-health re-run shows the goal-displacement and validation-theatre findings resolved, and .work/reviews/ holds at least one real review run produced inside Phase 1.",
+    "Every remaining Phase-1 item (POSITIONING, MODEL, BLIND-SPOT, and the github-issues backend items) is either closed or explicitly reclassified to a later phase in .work/work.json with recorded rationale.",
+    "A Phase-1 existential review cycle (ADR-013) runs at the phase boundary and its verdict is recorded under .work/reviews/.",
+    "am_i_done.py passes."
+  ],
+  "constraints": [
+    "Discipline-restoration is the primary scope: reconciliation, security fixes, and retiring or justifying surplus process. A bounded set of forward-capability items ships as the explicit exception that proves a workstream ends in capability rather than process — the github-issues state backend (ADR-022: WORK-0007/0032/0033) and the workstream templates (ADR-020: WORK-0011). Any net-new artefact beyond these must be justified against shipped code (anti goal-displacement, WORK-0018).",
+    "Every security fix ships with a regression test that fails before the fix and passes after.",
+    "am_i_done.py remains deterministic — no inference added to the gate (ADR-003).",
+    "ADR reconciliations either implement the ADR or supersede it explicitly via historian review — no silent divergence between decision and code.",
+    "Existing pytest suite must pass throughout."
+  ],
+  "workstreams": [
+    {
+      "id": "WS-PLAN",
+      "name": "Planning",
+      "items": []
+    },
+    {
+      "id": "WS-ARCH",
+      "name": "Architecture",
+      "items": []
+    }
+  ],
+  "learning_goals": [
+    "Does leading with the gate (over the process surface) change how the framework reads to a new adopter?",
+    "Can WORK-0010's implementation of ADR-019's recursive-workstream model preserve solo/flat usage unchanged?",
+    "Does dogfooding the github-issues backend on Hedl's own queue expose gaps the local-file backend hid?"
+  ],
+  "assumptions_to_validate": [
+    "The surplus process can be retired or justified without losing the discipline the gate enforces.",
+    "Reconciling ADRs to the implementation (rather than the reverse) is the cheaper path for most governance items."
+  ],
+  "next_phase_trigger": "All DoD items verified. Run /phase-complete."
+}

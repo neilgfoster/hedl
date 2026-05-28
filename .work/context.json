@@ -3,15 +3,14 @@
   "meta": {
     "project": "hedl",
     "work_item_prefix": "WORK",
-    "phase": 0,
+    "phase": 1,
     "last_updated": "2026-05-28",
     "description": "Disciplined Claude Code workflow with a deterministic completion gate, adversarial review, and phase-based work tracking."
   },
   "project_version": "0.0.0",
   "releases": {},
   "state": {
-    "phase_0_complete": false,
-    "_edit_me": "Update phase_0_complete to true when /phase-complete has been run."
+    "phase_0_complete": true
   },
   "structure": {
     "CLAUDE.md": "primary project context — read every session",
@@ -49,5 +48,5 @@
     "ADR-022-pm-system-pluggability",
     "ADR-023-hedl-invisible-mode"
   ],
-  "notes": "Seeded 2026-05-28 from hedl-iteration-seed.md v2. Phase 0 active; phases/ untouched per seed instructions. Phase 1 is Lume bootstrap — define via /phase-complete-driven flow after maintainer confirmation."
+  "notes": "Seeded 2026-05-28 from hedl-iteration-seed.md v2. Phase 0 (Setup) authored and closed retroactively via /phase-complete (WORK-0017); Phase 1 (Discipline restoration) active. See .work/phases/ and the phase-0 retro under .work/reviews/phase-0-complete-2026-05-28/."
 }
