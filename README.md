@@ -50,6 +50,7 @@ See [Getting started](docs/getting-started.md).
 - [Team tier](docs/team-tier.md) -- GitHub Issues backend and parallel worktrees
 - [Self-improvement](docs/self-improvement.md) -- /reflect and /contribute flows
 - [Versioning](docs/versioning.md) -- release and version policy
+- [Alternatives](docs/alternatives.md) -- competitive landscape per ADR-012
 
 ### Spec templates
 
