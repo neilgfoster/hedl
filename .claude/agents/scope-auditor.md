@@ -1,0 +1,1 @@
+../../skill/hedl/agents/scope-auditor.md
