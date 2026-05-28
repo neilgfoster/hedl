@@ -1,37 +1,18 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": "WORK-0029",
+    "active_item": "WORK-0030",
     "last_updated": "2026-05-28",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
   "active": [
-    {
-      "id": "WORK-0029",
-      "title": "fix: gate-on-main is currently failing (report.md schema + alternatives.md line-length)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "in_progress",
-      "priority_band": "BLOCKING",
-      "description": "Confirmed 2026-05-28 by running `python3 .github/scripts/am_i_done.py` on a clean checkout of `main`: the gate FAILs with two violations introduced by recently merged PRs. (1) `.work/reviews/repo-health-2026-05-28/report.md` (committed in PR #8) does not match the `review-report` schema enforced by the gate — it is missing the required sections `## Dimension Scores`, `## Blocking Findings`, `## Significant Findings`, `## Minor Findings`, `## Next Actions`, plus the required patterns `log line`, `session type`, `review depth`, `commit SHA`. The report uses different section names instead (`## BLOCKING findings`, `## SIGNIFICANT themes`, etc.). (2) `docs/alternatives.md:183` (committed in PR #10) is 89 chars, exceeding the configured 80-char limit. Until this is fixed, no Phase-1 PR can land green. Either rewrite the report to satisfy the schema, relax the schema to match the prose-style report, or both — and reflow the single long line in alternatives.md. This is itself another instance of validation-theatre captured by WORK-0018: the gate was bypassed (or never re-run) on the merging of PR #8 and #10. Investigate why the gate let those merges land and tighten the merge protection.",
-      "acceptance_criteria": [
-        "Fresh `git checkout main` + `python3 .github/scripts/am_i_done.py` exits 0 with all checks PASS.",
-        "Either report.md is restructured to satisfy the review-report schema, or the schema is updated to accept the actual report shape (with rationale committed).",
-        "alternatives.md:183 reflowed to <= 80 chars (or the global line-length config raised with rationale).",
-        "Investigation note committed to .work/insights/ explaining how PR #8 and PR #10 merged green despite producing a red main, and what (if any) merge-protection adjustment is needed.",
-        "am_i_done.py passes."
-      ]
-    }
-  ],
-  "backlog": [
     {
       "id": "WORK-0030",
       "title": "fix: .github/ files parsed by GitHub must be real files, not symlinks",
       "phase": 1,
       "workstream": "WS-ARCH",
       "change_class": "fix",
-      "status": "backlog",
+      "status": "in_progress",
       "priority_band": "BLOCKING",
       "description": "GitHub does not follow symlinks for files it parses directly (workflows, dependabot, PR template, CODEOWNERS). install.py currently symlinks all these paths from skill/hedl/ projections, so the CI gate has never actually run in CI — all 'runs' since PR #2 are event:push fallback failures with zero check_runs created (verified via `gh api repos/:owner/:repo/commits/<sha>/check-runs` on multiple PR head SHAs: 218d3729, 452a2848, 5c6df42, 97b24a3). The UI label 'This run likely failed because of a workflow file issue' is GitHub rejecting the symlink-text as an invalid workflow file. This invalidates the 'PR-side CI gate' assumption that ADR-014 (Security/quality friction-aware) and the required-status-checks plan in WORK-0029 rest on. Discovered while investigating WORK-0029's acceptance-criterion-4 follow-up — the WORK-0029 investigation note's first hypothesis (no `required_status_checks` on main) is correct as written for the time, but is downstream of this root cause: even if `required_status_checks` had been configured, GitHub never had a context to attach because the workflow never published one.",
       "acceptance_criteria": [
@@ -45,7 +26,9 @@
       "followups": [
         "After WORK-0030 lands and check_runs are confirmed via `gh api`, apply branch protection on main: required_status_checks with contexts ['am_i_done (3.11)', 'am_i_done (3.12)', 'am_i_done (3.13)', 'am_i_done (3.14)'] and strict: true."
       ]
-    },
+    }
+  ],
+  "backlog": [
     {
       "id": "WORK-0016",
       "title": "fix: .hedl-tier ships without a hardcoded developer absolute path",
@@ -516,5 +499,24 @@
       ]
     }
   ],
-  "completed": []
+  "completed": [
+    {
+      "id": "WORK-0029",
+      "title": "fix: gate-on-main is currently failing (report.md schema + alternatives.md line-length)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "BLOCKING",
+      "description": "Confirmed 2026-05-28 by running `python3 .github/scripts/am_i_done.py` on a clean checkout of `main`: the gate FAILs with two violations introduced by recently merged PRs. (1) `.work/reviews/repo-health-2026-05-28/report.md` (committed in PR #8) does not match the `review-report` schema enforced by the gate — it is missing the required sections `## Dimension Scores`, `## Blocking Findings`, `## Significant Findings`, `## Minor Findings`, `## Next Actions`, plus the required patterns `log line`, `session type`, `review depth`, `commit SHA`. The report uses different section names instead (`## BLOCKING findings`, `## SIGNIFICANT themes`, etc.). (2) `docs/alternatives.md:183` (committed in PR #10) is 89 chars, exceeding the configured 80-char limit. Until this is fixed, no Phase-1 PR can land green. Either rewrite the report to satisfy the schema, relax the schema to match the prose-style report, or both — and reflow the single long line in alternatives.md. This is itself another instance of validation-theatre captured by WORK-0018: the gate was bypassed (or never re-run) on the merging of PR #8 and #10. Investigate why the gate let those merges land and tighten the merge protection.",
+      "acceptance_criteria": [
+        "Fresh `git checkout main` + `python3 .github/scripts/am_i_done.py` exits 0 with all checks PASS.",
+        "Either report.md is restructured to satisfy the review-report schema, or the schema is updated to accept the actual report shape (with rationale committed).",
+        "alternatives.md:183 reflowed to <= 80 chars (or the global line-length config raised with rationale).",
+        "Investigation note committed to .work/insights/ explaining how PR #8 and PR #10 merged green despite producing a red main, and what (if any) merge-protection adjustment is needed.",
+        "am_i_done.py passes."
+      ],
+      "completed_date": "2026-05-28"
+    }
+  ]
 }
