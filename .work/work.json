@@ -304,7 +304,7 @@
       "change_class": "feat",
       "status": "backlog",
       "priority_band": "MODEL",
-      "description": "Per ADR-019, `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. Depends on WORK-0027 (canonical workstream definition) being settled.",
+      "description": "Per ADR-019, `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. Depends on WORK-0027 (canonical workstream definition) being settled. Forward-compatibility (ADR-031, Proposed-deferred): design the schema so dependency-edge fields (depends_on / parallel / conflicts_with) can be added without a further migration when ADR-031 is activated — do not foreclose them, but do not build them now (ADR-031 is gated on this item landing + real demand).",
       "acceptance_criteria": [
         "`.work/work.json` schema supports recursive workstreams (children: [workstream...]); flat work items remain valid as leaf workstreams.",
         "`schema_version` increments; install.py --migrate converts existing flat state to recursive shape idempotently.",
@@ -485,6 +485,25 @@
         "`install.py --skill-from <path>` allows installation from a skill at an arbitrary path; default remains the current behaviour.",
         "Invisible-mode install output explicitly warns that team CI gate does not run on the operator's PRs.",
         "Tests cover: invisible install, make-visible round-trip, gitignore block idempotency, skill-from with both absolute and relative paths.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0036",
+      "title": "feat: persona contract + change_class auto-selection (deferred — demand-gated)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "DEFERRED",
+      "dependencies": [
+        "WORK-0010"
+      ],
+      "description": "Backlog capture of the persona idea from the 2026-05-28 design discussion. Proposed as ADR-032 but the manual existential review FAILed it: a persona contract + auto-selection table with no orchestrator to consume them is process-without-product (the validation-theatre pattern repo-health rated BLOCKING), and its 'differentiators' (gate / deterministic dispatch / journey) are existing machinery re-pointed at a 'persona' noun that is relabelled .claude/agents/ frontmatter. Held here, NOT as a Proposed ADR, until there is demonstrated build-side demand for multi-persona work. The idea: a persona contract (frontmatter like .claude/agents/: name, mandate, tools, model, engages_for:[change_class...]) projected from skill/hedl/personas/, deterministic change_class -> persona auto-selection, with the existing gate + adversarial review + journey as the validation substrate; orchestration delegated, not built.",
+      "acceptance_criteria": [
+        "Activated only on demonstrated build-side demand for multi-persona work (e.g. surfaced while bootstrapping Lume) — not built speculatively.",
+        "Before building, evaluate delegating orchestration to CrewAI / AutoGen / Claude subagents vs a Hedl-native contract, per ADR-012 (managed competitive lifecycle); prefer delegation + gate/journey wrap if it suffices.",
+        "If built: persona contract mirrors the .claude/agents/ frontmatter schema; deterministic change_class auto-selection (no inference, ADR-003); gate + journey applied per persona; depends on WORK-0010.",
         "am_i_done.py passes."
       ]
     }
