@@ -8,22 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0019",
-      "title": "fix: startup.sh printf format-string injection (RCE)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #6a, security-auditor) — `.claude/startup.sh` lines ~6-8 interpolate a project-derived name into a `printf` format string without sanitisation. A repo name containing printf conversion specifiers (`%s`, `%n`, etc.) controls the format string and can read/write attacker-chosen memory or arbitrary output. Replace the format-string interpolation with `printf '%s' \"$name\"` or equivalent.",
-      "acceptance_criteria": [
-        "startup.sh treats all dynamic values as `%s` arguments, never as the format string itself.",
-        "Test or smoke-check confirms a repo dir name containing `%n` / `%s` produces literal output, not a format substitution.",
-        "shellcheck (or equivalent) passes on startup.sh.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0020",
       "title": "fix: install.py enforces SKILL_ROOT / repo containment on tier projections (RCE)",
       "phase": 1,
@@ -591,6 +575,24 @@
         "am_i_done.py passes."
       ],
       "completed_date": "2026-05-28"
+    },
+    {
+      "id": "WORK-0019",
+      "title": "fix: startup.sh printf format-string injection (RCE)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "BLOCKING",
+      "description": "Repo-health 2026-05-28 (BLOCKING #6a, security-auditor) — `.claude/startup.sh` lines ~6-8 interpolate a project-derived name into a `printf` format string without sanitisation. A repo name containing printf conversion specifiers (`%s`, `%n`, etc.) controls the format string and can read/write attacker-chosen memory or arbitrary output. Replace the format-string interpolation with `printf '%s' \"$name\"` or equivalent.",
+      "acceptance_criteria": [
+        "startup.sh treats all dynamic values as `%s` arguments, never as the format string itself.",
+        "Test or smoke-check confirms a repo dir name containing `%n` / `%s` produces literal output, not a format substitution.",
+        "shellcheck (or equivalent) passes on startup.sh.",
+        "am_i_done.py passes."
+      ],
+      "completed_date": "2026-05-28",
+      "resolution": "Verified false positive: printf passes the project name as a %s data argument, never the format string (empirically + git history). Closed with a regression guard (test_startup_sh.py) + evidence note .work/insights/WORK-0019-printf-false-positive.md. No code fix needed."
     }
   ]
 }
