@@ -1,14 +1,14 @@
 {
   "date": "2026-05-28",
   "completed": [
-    "WORK-0017: authored phase-0.json (Setup) retroactively, opened phase-1.json (Discipline restoration), transitioned Phase 0 -> 1 via /phase-complete. Reconciled phases.json / work.json / context.json onto current_phase=1. Phase-boundary review (historian, scope-auditor, existential-challenger per ADR-013) recorded under .work/reviews/phase-0-complete-2026-05-28/."
+    "WORK-0017: authored phase-0/phase-1 definitions, transitioned Phase 0 -> 1 via /phase-complete (PR #20, merged).",
+    "WORK-0016: .hedl-tier no longer ships a hardcoded absolute path. Dropped the dead `skill` field (no reader consumed it), git-ignored (/.hedl-tier) and untracked the marker; install.py generates it per-install. Added TestTierMarkerContract (fresh-clone install/status/doctor across all 3 tiers + no-absolute-path guard)."
   ],
   "decisions": [
-    "Phase 0 closed retroactively; no version bump (no completed items attributable to Phase 0; release.py groups empty).",
-    "Phase-1 constraint carves an explicit exception for ADR-022 github-issues backend and ADR-020 workstream templates rather than overriding the operator's commit #19 promotion of those items.",
-    "WORK-0029/0030/0031 left as genuine Phase-1 work (not reclassified to Phase 0) despite predating the formalized boundary."
+    "WORK-0016 contract (operator): option (a) gitignore+untrack, and drop the `skill` field entirely (it was dead data — never read; SKILL_ROOT is recomputed from install.py's location).",
+    "Adversarial panel: determinism PASS, scope PASS, security CONDITIONAL (5 MINOR, 0 BLOCKING). Applied 2 in-scope fixes (anchored gitignore, split path assertions). Deferred the unguarded json.loads in cmd_status/cmd_doctor to WORK-0022 (its explicit scope)."
   ],
-  "next_item": "WORK-0016",
+  "next_item": "WORK-0019",
   "blockers": [],
-  "notes": "Phase 1 active. Next BLOCKING item is WORK-0016 (.hedl-tier hardcoded absolute path) per the operator's chosen ordering. Open Next Actions from the phase-0 retro: wire existential-challenger into phase-complete.md (fold into WORK-0005); groom WORK-0007 DEFERRED band vs Phase-1 placement; re-baseline WORK-0018 metric off the (already inverted) LOC ratio."
+  "notes": "Phase 1. WORK-0016 done on branch fix/hedl-tier-untracked (not yet PR'd). Next BLOCKING: WORK-0019 (startup.sh printf format-string injection). NOTE for WORK-0022: security-auditor confirmed cmd_status (install.py:~328) and cmd_doctor (~431) still call json.loads(marker) unguarded -> traceback on malformed marker; that is WORK-0022's acceptance criterion."
 }
