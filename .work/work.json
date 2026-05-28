@@ -254,6 +254,75 @@
       ]
     },
     {
+      "id": "WORK-0007",
+      "title": "feat: audit and harden the github-issues state backend",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "DEFERRED",
+      "description": "Per ADR-018, team tier inherits multi-operator semantics from the chosen state backend (GitHub Issues today). Audit the existing github-issues backend in install.py / am_i_done.py: does Hedl read GitHub assignees correctly? How are concurrent claims handled? Does the gate detect file-level conflicts across PRs from different operators? Fix or document any gaps found. Reactive trigger: the operator asked how to move Hedl's own work queue to GitHub Issues. Per ADR-022, this is the architectural commitment Hedl is most expected to deliver on. Current depth: am_i_done.py reads open issues for the stale-WORK-ID gate check; everything else (write-back on status change, label scheme, multi-operator integration) is unverified or unbuilt. WORK-0007 is the prerequisite for WORK-0032 and WORK-0033.",
+      "acceptance_criteria": [
+        "Audit report committed (e.g. as a /repo-health-style review).",
+        "GitHub assignees are read into Hedl's view of work-item state.",
+        "Two operators claiming the same issue is detected and surfaced.",
+        "File-level conflict across operator PRs is caught by `--streams` (verify with a test).",
+        "Gaps are either fixed or documented as separate backlog items with clear scope.",
+        "am_i_done.py passes.",
+        "Document the read paths in skill/hedl/references/backends.md (or equivalent): which gate checks consult the backend, what queries they issue, what schema they expect.",
+        "Document the write paths that NEED to exist: status transitions on /finish-task, assignee updates, /phase-complete close-out, etc. Distinguish 'wired and working' from 'not yet built'.",
+        "Propose a label scheme: phase-N, change-class:X, workstream:WS-Y, priority_band:Z, and a hedl:work scope label. Open for refinement in WORK-0032."
+      ]
+    },
+    {
+      "id": "WORK-0032",
+      "title": "feat: state-backend migration script (local-file -> github-issues)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "priority_band": "normal",
+      "dependencies": [
+        "WORK-0007"
+      ],
+      "status": "backlog",
+      "description": "Per ADR-022 and the WORK-0007 audit, build a one-shot migration script that moves an existing .work/work.json backlog to GitHub Issues. Mirrors the existing install.py migration registry pattern (idempotent, archival, explicit). Invocation: install.py --migrate-state-backend github-issues (or a separate skill/hedl/scripts/migrate_state_backend.py — operator's call during implementation). Should be reversible in the sense that the archived local-file state can be restored, even though the resulting GitHub state cannot be cleanly auto-rolled-back.",
+      "acceptance_criteria": [
+        "Script reads .work/work.json backlog, active, completed.",
+        "For each item, creates a GitHub issue via gh api with: title formatted 'WORK-XXXX: <title>' (preserves the historical ID for cross-references in commits/ADRs), body containing the description + acceptance criteria, labels mapping to change_class / phase / workstream / priority_band per the WORK-0007 scheme.",
+        "Records the mapping (issue-number ↔ WORK-XXXX) under .work/archive/<timestamp>/state-backend-migration.json.",
+        "Archives the pre-migration .work/work.json to .work/archive/<timestamp>/work.json.pre-github-issues.",
+        "Updates .work/context.json with state_backend: github-issues and any backend-specific configuration (label_prefix, repo) per ADR-022.",
+        "Empties .work/work.json (or removes it; operator's call — preserve backwards-compat reads if removal breaks the gate).",
+        "Idempotent: re-running on a repo already on github-issues backend is a no-op with a clear message.",
+        "Tests cover: round-trip mapping, idempotency, label correctness, archive contents.",
+        "am_i_done.py passes after migration (including gate read-paths via the github-issues backend)."
+      ]
+    },
+    {
+      "id": "WORK-0033",
+      "title": "feat: ADR-024 record + dogfood github-issues backend migration on Hedl itself",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "priority_band": "normal",
+      "dependencies": [
+        "WORK-0007",
+        "WORK-0032"
+      ],
+      "status": "backlog",
+      "description": "Decide explicitly that Hedl's own development uses github-issues as its state backend (per ADR-022, team tier's recommended backend). Record as ADR-024 with Prior art (per ADR-017) citing CCPM's existing approach, Linear's project model, and GitHub's own project workflow as comparators. Then dogfood: run WORK-0032's migration on this repo's own work.json, verify the full iteration cycle works end-to-end (issue created -> branch referenced via 'closes #N' -> PR merged -> issue auto-closes), tag the milestone (likely v0.2.0).",
+      "acceptance_criteria": [
+        ".work/decisions/ADR-024-hedl-own-state-backend.md exists with Status, Decision, Context, Prior art, Options considered, Consequences sections. Prior-art section actually engages with CCPM and Linear, not just acknowledges them.",
+        "WORK-0032's migration script has been run on this repo; .work/context.json shows state_backend: github-issues.",
+        ".work/archive/ contains the pre-migration snapshot.",
+        "All open WORK-XXXX items now exist as GitHub issues with the label scheme applied; the mapping JSON is committed under .work/archive/.",
+        "At least one new work item is activated, worked, and CLOSED via the new backend end-to-end (issue assigned -> branch references 'closes #N' -> PR merged -> issue auto-closes via 'Fixes #N'). Documented as the verification cycle.",
+        "Existing test suite passes; gate passes with state_backend: github-issues.",
+        "/finish-task is verified to close the right issue when the active item is marked complete.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
       "id": "WORK-0014",
       "title": "docs: README and positioning updates (lead with gate; invisible qualifier; iteration-layer framing)",
       "phase": 1,
@@ -402,24 +471,6 @@
         "Claim/release lifecycle: `/claim <id>` and `/release <id>` flows defined in references/commands.md.",
         "`schema_version` increments; install.py migration handles the upgrade idempotently with state archival.",
         "Solo operator workflow is functionally unchanged (no new prompts, no extra steps).",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0007",
-      "title": "feat: audit and harden team-tier GitHub Issues multi-operator integration",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "DEFERRED",
-      "description": "Per ADR-018, team tier inherits multi-operator semantics from the chosen state backend (GitHub Issues today). Audit the existing github-issues backend in install.py / am_i_done.py: does Hedl read GitHub assignees correctly? How are concurrent claims handled? Does the gate detect file-level conflicts across PRs from different operators? Fix or document any gaps found.",
-      "acceptance_criteria": [
-        "Audit report committed (e.g. as a /repo-health-style review).",
-        "GitHub assignees are read into Hedl's view of work-item state.",
-        "Two operators claiming the same issue is detected and surfaced.",
-        "File-level conflict across operator PRs is caught by `--streams` (verify with a test).",
-        "Gaps are either fixed or documented as separate backlog items with clear scope.",
         "am_i_done.py passes."
       ]
     },
