@@ -84,6 +84,12 @@ All PRs must use `.github/PULL_REQUEST_TEMPLATE.md`. The CI workflow
 
 The Checklist section is not CI-enforced but should still be considered.
 
+**Documentation impact:** if a change alters a count, name, or behaviour that
+docs assert (e.g. agent/command counts, tier descriptions), update the affected
+docs in the same PR. This is a convention, not a gate — a gate-enforced form was
+weighed and declined as disproportionate; the narrow, mechanical case of
+source-derived counts is instead caught by WORK-0028's drift-detector.
+
 ### Merging
 
 - Squash or merge commit — keep `main` history readable.
