@@ -88,6 +88,11 @@ The Checklist section is not CI-enforced but should still be considered.
 
 - Squash or merge commit — keep `main` history readable.
 - Branch is deleted after merge.
+- Fold the `.work/` item-state update (`active` → `completed`) into the
+  delivering PR; do not raise a separate closeout PR. (Convention adopted from
+  the 2026-05-28 dogfood learning #6; revisited at `/phase-complete`. A
+  github-issues backend would auto-close items via `Closes #N`, retiring the
+  question — see ADR-022.)
 
 ---
 
