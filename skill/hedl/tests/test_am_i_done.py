@@ -797,7 +797,8 @@ class TestDeclaredVerify(unittest.TestCase):
 
     def test_declared_lint_passes_on_exit_zero(self) -> None:
         with mock.patch.object(M, "_load_hedl_config",
-                               return_value={"verify": {"lint": "golangci-lint run"}}), \
+                               return_value={"verify": {"lint": "golangci-lint run"},
+                                             "gate": {"allowed_commands": ["golangci-lint"]}}), \
              mock.patch.object(M, "shutil") as sh, \
              mock.patch.object(M, "run", return_value=(0, "", "")):
             sh.which.return_value = "/usr/bin/golangci-lint"
@@ -808,7 +809,8 @@ class TestDeclaredVerify(unittest.TestCase):
 
     def test_declared_lint_fails_on_nonzero_exit(self) -> None:
         with mock.patch.object(M, "_load_hedl_config",
-                               return_value={"verify": {"lint": "golangci-lint run"}}), \
+                               return_value={"verify": {"lint": "golangci-lint run"},
+                                             "gate": {"allowed_commands": ["golangci-lint"]}}), \
              mock.patch.object(M, "shutil") as sh, \
              mock.patch.object(M, "run", return_value=(1, "", "lint errors")):
             sh.which.return_value = "/usr/bin/golangci-lint"
@@ -820,7 +822,8 @@ class TestDeclaredVerify(unittest.TestCase):
 
     def test_declared_types_runs_command(self) -> None:
         with mock.patch.object(M, "_load_hedl_config",
-                               return_value={"verify": {"types": "tsc --noEmit"}}), \
+                               return_value={"verify": {"types": "tsc --noEmit"},
+                                             "gate": {"allowed_commands": ["tsc"]}}), \
              mock.patch.object(M, "shutil") as sh, \
              mock.patch.object(M, "run", return_value=(0, "", "")):
             sh.which.return_value = "/usr/bin/tsc"
@@ -831,7 +834,8 @@ class TestDeclaredVerify(unittest.TestCase):
 
     def test_declared_test_runs_command(self) -> None:
         with mock.patch.object(M, "_load_hedl_config",
-                               return_value={"verify": {"test": "go test ./..."}}), \
+                               return_value={"verify": {"test": "go test ./..."},
+                                             "gate": {"allowed_commands": ["go"]}}), \
              mock.patch.object(M, "shutil") as sh, \
              mock.patch.object(M, "run", return_value=(0, "", "")):
             sh.which.return_value = "/usr/bin/go"
@@ -845,7 +849,8 @@ class TestDeclaredVerify(unittest.TestCase):
 
     def test_declared_missing_binary_fails_with_name(self) -> None:
         with mock.patch.object(M, "_load_hedl_config",
-                               return_value={"verify": {"lint": "golangci-lint run"}}), \
+                               return_value={"verify": {"lint": "golangci-lint run"},
+                                             "gate": {"allowed_commands": ["golangci-lint"]}}), \
              mock.patch.object(M, "shutil") as sh:
             sh.which.return_value = None
             res = M.check_lint()
@@ -889,7 +894,7 @@ class TestDeclaredVerify(unittest.TestCase):
         with mock.patch.object(M, "shutil") as sh, \
              mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
             sh.which.return_value = "/usr/bin/playwright"
-            M._run_declared_check("e2e", spec, 120)
+            M._run_declared_check("e2e", spec, 120, frozenset({"playwright"}))
         _, kwargs = mock_run.call_args
         self.assertEqual(kwargs.get("timeout"), 600)
 
@@ -898,7 +903,7 @@ class TestDeclaredVerify(unittest.TestCase):
         with mock.patch.object(M, "shutil") as sh, \
              mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
             sh.which.return_value = "/usr/bin/playwright"
-            M._run_declared_check("e2e", spec, 120)
+            M._run_declared_check("e2e", spec, 120, frozenset({"playwright"}))
         _, kwargs = mock_run.call_args
         self.assertTrue(kwargs.get("cwd", "").endswith("e2e"))
 
@@ -907,30 +912,120 @@ class TestDeclaredVerify(unittest.TestCase):
         with mock.patch.object(M, "shutil") as sh, \
              mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
             sh.which.return_value = "/usr/bin/some-tool"
-            M._run_declared_check("check", spec, 300)
+            M._run_declared_check("check", spec, 300, frozenset({"some-tool"}))
         _, kwargs = mock_run.call_args
         self.assertEqual(kwargs.get("timeout"), 300)
 
-    # -- shlex parsing: no shell injection --
+    # -- WORK-0021: shell metacharacters rejected outright (fail closed) --
 
-    def test_shlex_no_shell_injection(self) -> None:
-        # Shell metacharacters must NOT be interpreted — they are literal argv elements
-        malicious = "echo hello; rm -rf /"
-        with mock.patch.object(M, "shutil") as sh, \
-             mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
-            sh.which.return_value = "/bin/echo"
-            M._run_declared_check("test", malicious, 120)
-        cmd_arg = mock_run.call_args[0][0]
-        self.assertIsInstance(cmd_arg, list)  # list form, not a shell string
-        self.assertEqual(cmd_arg[0], "echo")
-        self.assertIn("hello;", cmd_arg)  # ";" is a literal argument, not shell operator
+    def test_shell_metacharacters_rejected(self) -> None:
+        # The pre-WORK-0021 behaviour split ";" into a literal argv element under
+        # shell=False. The contract now rejects shell metacharacters up front so
+        # the operator gets a clear error instead of a silently-mangled command;
+        # run() must never be reached.
+        malicious = "ruff check; rm -rf /"
+        with mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
+            res = M._run_declared_check("test", malicious, 120, frozenset({"ruff"}))
+        self.assertFalse(res.passed)
+        self.assertIn("metacharacter", res.message)
+        mock_run.assert_not_called()
 
     def test_shlex_parse_error_fails_check(self) -> None:
         broken = "cmd 'unclosed"
         with mock.patch.object(M, "shutil"):
-            res = M._run_declared_check("test", broken, 120)
+            res = M._run_declared_check("test", broken, 120, frozenset({"cmd"}))
         self.assertFalse(res.passed)
         self.assertIn("parse error", res.message)
+
+
+class TestVerifyAllowlist(unittest.TestCase):
+    """WORK-0021: [verify] executable allow-list + operator extension."""
+
+    def test_default_allowlist_blocks_interpreters(self) -> None:
+        allowed = M._verify_allowlist(None)
+        for interp in ("python", "python3", "bash", "sh", "node", "perl", "ruby"):
+            self.assertNotIn(interp, allowed, f"{interp} must not be default-allowed")
+        for tool in ("pytest", "mypy", "ruff", "npm", "pnpm", "make"):
+            self.assertIn(tool, allowed)
+
+    def test_disallowed_executable_rejected(self) -> None:
+        # cargo is neither default-allowed nor denylisted → allow-list rejection
+        # (distinct from the interpreter-denylist path tested separately).
+        res = M._run_declared_check("x", "cargo build", 120, M._verify_allowlist(None))
+        self.assertFalse(res.passed)
+        self.assertIn("allow-list", res.message)
+
+    def test_allowlist_extension_adds_command(self) -> None:
+        allowed = M._verify_allowlist({"gate": {"allowed_commands": ["cargo", "go"]}})
+        self.assertIn("cargo", allowed)
+        self.assertIn("go", allowed)
+        self.assertIn("ruff", allowed)  # additive: default still present
+
+    def test_extension_cannot_smuggle_path_or_metachars(self) -> None:
+        allowed = M._verify_allowlist(
+            {"gate": {"allowed_commands": ["/usr/bin/python", "sh;rm", "ok"]}}
+        )
+        self.assertNotIn("python", allowed)          # path separator → ignored
+        self.assertNotIn("/usr/bin/python", allowed)
+        self.assertNotIn("sh;rm", allowed)           # metacharacter → ignored
+        self.assertIn("ok", allowed)                 # clean bare name → added
+
+    def test_path_in_executable_rejected(self) -> None:
+        # cmd[0] must be a bare name. A path is rejected even when its basename
+        # is allow-listed — closes the planted-binary bypass (/attacker/ruff,
+        # ./ruff). run() must never be reached.
+        with mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
+            res = M._run_declared_check(
+                "lint", "/usr/bin/ruff check", 120, M._verify_allowlist(None)
+            )
+        self.assertFalse(res.passed)
+        self.assertIn("bare name", res.message)
+        mock_run.assert_not_called()
+
+    def test_extension_rejects_interpreters_and_forwarders(self) -> None:
+        allowed = M._verify_allowlist({"gate": {"allowed_commands": [
+            "sh", "bash", "env", "python3", "node", "xargs", "find", "go"]}})
+        for bad in ("sh", "bash", "env", "python3", "node", "xargs", "find"):
+            self.assertNotIn(bad, allowed, f"{bad} must be denied even as a bare name")
+        self.assertIn("go", allowed)  # a non-denylisted tool still adds
+
+    def test_cwd_escaping_repo_rejected(self) -> None:
+        spec = {"cmd": "ruff check", "cwd": "../../../tmp"}
+        with mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
+            res = M._run_declared_check("lint", spec, 120, M._verify_allowlist(None))
+        self.assertFalse(res.passed)
+        self.assertIn("escapes the repo", res.message)
+        mock_run.assert_not_called()
+
+    def test_tab_separator_rejected(self) -> None:
+        # A tab is whitespace to shlex but reads as one token to a human, so it
+        # is rejected as a metacharacter rather than silently splitting args.
+        with mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
+            res = M._run_declared_check(
+                "lint", "ruff\tcheck", 120, M._verify_allowlist(None)
+            )
+        self.assertFalse(res.passed)
+        self.assertIn("metacharacter", res.message)
+        mock_run.assert_not_called()
+
+    def test_denylist_enforced_even_in_handbuilt_allowset(self) -> None:
+        # Two-layer defense: a denied interpreter rejected at run time even if a
+        # caller hands in an allow-list that wrongly contains it.
+        with mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
+            res = M._run_declared_check("x", "bash run.sh", 120, frozenset({"bash"}))
+        self.assertFalse(res.passed)
+        self.assertIn("denied", res.message)
+        mock_run.assert_not_called()
+
+    def test_happy_path_allowlisted_command_runs(self) -> None:
+        with mock.patch.object(M, "shutil") as sh, \
+             mock.patch.object(M, "run", return_value=(0, "", "")) as mock_run:
+            sh.which.return_value = "/usr/bin/ruff"
+            res = M._run_declared_check(
+                "lint", "ruff check .", 120, M._verify_allowlist(None)
+            )
+        self.assertTrue(res.passed)
+        mock_run.assert_called_once()
 
 
 if __name__ == "__main__":

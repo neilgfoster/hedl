@@ -8,25 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0021",
-      "title": "fix: am_i_done.py [verify] cmd allow-list / safe execution (RCE)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #6c, security-auditor) — `am_i_done.py:169-203` runs arbitrary `[verify.<name>] cmd` strings from `hedl.toml` with no allow-list. Any PR that adds a `[verify.x] cmd = \"…\"` becomes an RCE on the next gate run (locally and in CI). Constrain execution: require `cmd` be a list (not a shell string), execute without `shell=True`, restrict the executable to a configured allow-list of binaries (e.g., `pytest`, `mypy`, `ruff`, `npm`, `pnpm`, `make`, plus an opt-in list from hedl.toml), and document the contract in docs/versioning.md and tiers.md.\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code path. am_i_done.py:169-203 (_run_declared_check) may already be safe — the prior external review noted shlex.split + list-form subprocess (shell=False) are already used, and shutil.which gates the executable, so the only real gap may be the executable allow-list (or the finding may be partially/fully wrong). If audit confirms safe behaviour, apply the WORK-0019 resolution pattern: no code change, but add a regression-guard test plus a negative meta-test that proves the test would catch the vulnerable form, plus an evidence note in .work/insights/WORK-0021-<topic>.md. If audit confirms a real vulnerability (e.g. a missing allow-list that permits an arbitrary executable), fix it with adversarial-reviewed code.",
-      "acceptance_criteria": [
-        "Audit performed before any code change: trace the actual reachable inputs to am_i_done.py's [verify] cmd execution path (am_i_done.py:169-203, _run_declared_check), document findings in .work/insights/WORK-0021-<topic>.md. Decide fix-vs-guard explicitly.",
-        "am_i_done.py rejects hedl.toml `[verify.<name>]` entries that use shell strings, shell metacharacters, or executables outside the allow-list.",
-        "subprocess invocation uses an argv list and `shell=False`.",
-        "Default allow-list is documented; operator extension path is documented and itself constrained (e.g., still no shell expansion).",
-        "Tests cover: shell metacharacter rejection, disallowed executable rejection, allow-list extension, and a happy-path verify invocation.",
-        "am_i_done.py passes.",
-        "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
-      ]
-    },
-    {
       "id": "WORK-0034",
       "title": "feat: /iterate drives end-to-end through to PR-raised",
       "phase": 1,
@@ -617,6 +598,26 @@
         "Tests cover: relative escape (`../`), absolute path injection, and symlink-based escape attempts.",
         "Behaviour on a well-formed tiers.json is unchanged.",
         "am_i_done.py passes."
+      ],
+      "completed_date": "2026-05-28"
+    },
+    {
+      "id": "WORK-0021",
+      "title": "fix: am_i_done.py [verify] cmd allow-list / safe execution (RCE)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "BLOCKING",
+      "description": "Repo-health 2026-05-28 (BLOCKING #6c, security-auditor) — `am_i_done.py:169-203` runs arbitrary `[verify.<name>] cmd` strings from `hedl.toml` with no allow-list. Any PR that adds a `[verify.x] cmd = \"…\"` becomes an RCE on the next gate run (locally and in CI). Constrain execution: require `cmd` be a list (not a shell string), execute without `shell=True`, restrict the executable to a configured allow-list of binaries (e.g., `pytest`, `mypy`, `ruff`, `npm`, `pnpm`, `make`, plus an opt-in list from hedl.toml), and document the contract in docs/versioning.md and tiers.md.\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code path. am_i_done.py:169-203 (_run_declared_check) may already be safe — the prior external review noted shlex.split + list-form subprocess (shell=False) are already used, and shutil.which gates the executable, so the only real gap may be the executable allow-list (or the finding may be partially/fully wrong). If audit confirms safe behaviour, apply the WORK-0019 resolution pattern: no code change, but add a regression-guard test plus a negative meta-test that proves the test would catch the vulnerable form, plus an evidence note in .work/insights/WORK-0021-<topic>.md. If audit confirms a real vulnerability (e.g. a missing allow-list that permits an arbitrary executable), fix it with adversarial-reviewed code.",
+      "acceptance_criteria": [
+        "Audit performed before any code change: trace the actual reachable inputs to am_i_done.py's [verify] cmd execution path (am_i_done.py:169-203, _run_declared_check), document findings in .work/insights/WORK-0021-<topic>.md. Decide fix-vs-guard explicitly.",
+        "am_i_done.py rejects hedl.toml `[verify.<name>]` entries that use shell strings, shell metacharacters, or executables outside the allow-list.",
+        "subprocess invocation uses an argv list and `shell=False`.",
+        "Default allow-list is documented; operator extension path is documented and itself constrained (e.g., still no shell expansion).",
+        "Tests cover: shell metacharacter rejection, disallowed executable rejection, allow-list extension, and a happy-path verify invocation.",
+        "am_i_done.py passes.",
+        "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
       ],
       "completed_date": "2026-05-28"
     }

@@ -107,6 +107,10 @@ the gate what to run:
 ```toml
 [gate]
 timeout = 120   # default per-command timeout (seconds)
+# A [verify] command may only invoke an allow-listed executable. Default:
+# pytest, mypy, ruff, npm, pnpm, make. Add bare names for your stack (additive,
+# and no path separators or shell metacharacters). See references/tiers.md.
+allowed_commands = ["golangci-lint", "tsc", "go", "playwright"]
 
 [verify]
 lint  = "golangci-lint run"
@@ -123,7 +127,8 @@ cwd     = "e2e"
 With no `hedl.toml`, the gate auto-detects Python projects (via `pyproject.toml`,
 `ruff.toml`, or `tests/`) and runs ruff/mypy/pytest. With `hedl.toml` present it
 runs exactly the declared checks — undeclared standard checks are skipped, not
-Python-defaulted. Commands are parsed with `shlex.split` (no shell interpretation);
+Python-defaulted. Commands run with `shell=False` (no shell interpretation; shell
+metacharacters are rejected) and the executable must be in the allow-list above;
 wrap complex pipelines in a script.
 
 ---

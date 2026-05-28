@@ -1,17 +1,19 @@
 {
   "date": "2026-05-28",
   "completed": [
-    "WORK-0017: phase-0/1 definitions + Phase 0->1 transition (PR #20, merged).",
-    "WORK-0016: .hedl-tier no longer ships a hardcoded absolute path (PR #21, merged).",
-    "WORK-0019: startup.sh printf RCE verified false positive; regression guard + evidence note (PR #22, merged).",
-    "WORK-0020: install.py now validates SKILL_ROOT/repo containment on every tiers.json projection/init source+target before any write/delete. Added _resolve_contained + _validate_tier_paths; guarded cmd_install/cmd_status/cmd_doctor. 12 containment tests."
+    "WORK-0017: phase definitions + Phase 0->1 transition (PR #20).",
+    "WORK-0016: .hedl-tier no hardcoded absolute path (PR #21).",
+    "WORK-0019: startup.sh printf RCE verified false positive; regression guard (PR #22).",
+    "WORK-0020: install.py SKILL_ROOT/repo containment on tier projections (PR #23).",
+    "WORK-0021: am_i_done.py [verify] executable allow-list. Audit confirmed a REAL vuln (no allow-list on cmd[0]); fixed with a bare-name allow-list (default pytest/mypy/ruff/npm/pnpm/make + [gate] allowed_commands), interpreter/forwarder denylist, shell-metachar rejection, and cwd containment. Two-cycle security review caught 3 bypasses in the first attempt."
   ],
   "decisions": [
-    "WORK-0020 containment uses Path.resolve(strict=False) + parents-membership (not startswith). The follow flag mirrors each sink: sources + init targets follow terminal symlinks (read/copy/move through them); projection targets do not (unlink-then-write, and symlink-mode targets legitimately link into SKILL_ROOT).",
-    "Security panel cycle 1 found 3 SIGNIFICANT terminal-symlink bypasses (source copy2, init copytree, init archive-move) + cmd_status gap — all fixed. Cycle 2 confirmed closed; its lingering MINOR (cmd_doctor read_bytes read-through) is a false positive: read_bytes is guarded by an is_symlink->DRIFT check, unreachable through a symlink, and already covered by test_doctor_detects_workflow_symlink_drift.",
-    "Out of WORK-0020 scope (noted, not done): cmd_migrate audit-trail logging; tiers.json integrity/signature check."
+    "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
+    "Default allow-list = ticket's set incl. make/npm (operator's informed choice; they run repo-committed scripts, accepted).",
+    "Key reframing from review: the allow-list is DEFENSE IN DEPTH, not a complete RCE control — pytest(conftest)/make/npm run committed content; the real untrusted-PR control is GitHub fork-approval. Documented in references/tiers.md and the code comment.",
+    "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers."
   ],
-  "next_item": "WORK-0021",
+  "next_item": "WORK-0034",
   "blockers": [],
-  "notes": "Phase 1. WORK-0020 done on branch fix/install-path-containment (not yet PR'd). Next BLOCKING: WORK-0021 (am_i_done.py [verify] cmd allow-list / safe execution). NOTE: am_i_done.py's _run_declared_check already uses shlex.split + shell=False (no shell=True) and checks shutil.which — WORK-0021's allow-list requirement may be partially satisfied already; audit before implementing."
+  "notes": "Phase 1. WORK-0021 done on branch fix/verify-cmd-allowlist (not yet PR'd). The RCE trio (0019/0020/0021) is complete. Next: WORK-0034 (/iterate drives end-to-end through PR-raised) — the flow-unification item; from WORK-0034 onward, /iterate should carry through to PR-raised in one invocation (ADR-025). Accepted residual minors on WORK-0021: unicode-lookalike path separators (caught by shutil.which), denylist non-exhaustiveness (documented), REPO_ROOT not realpath'd at module load (containment check realpaths both sides)."
 }
