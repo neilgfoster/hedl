@@ -26,7 +26,7 @@ python3 skill/hedl/scripts/install.py --tier lightweight
 | Tier | What you get | Time |
 |------|-------------|------|
 | `gate` | Deterministic gate + CI workflow + PR template | ~2 min |
-| `lightweight` | Gate + `.work/` state + 4 slash commands + 7 agents + spec templates | ~5 min |
+| `lightweight` | Gate + `.work/` state + 5 slash commands + 7 agents + spec templates | ~5 min |
 | `team` | Lightweight + Claude Code hooks + GitHub Issues guidance | ~5 min |
 
 Preview before installing:

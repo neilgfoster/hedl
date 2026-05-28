@@ -66,9 +66,9 @@ runtime dependency only, not a constraint on the consumer's stack.
 
 ## Tier 2 — Lightweight (recommended starting point)
 
-**What it is**: Gate-only + local-file state (`.work/`) + the 4 core slash commands.
+**What it is**: Gate-only + local-file state (`.work/`) + the 5 core slash commands.
 **Setup time**: under 5 minutes.
-**Files added to your repo**: `.work/` directory (state), `.claude/commands/` (4 commands).
+**Files added to your repo**: `.work/` directory (state), `.claude/commands/` (5 commands).
 
 **What you get**: everything from Tier 1, plus:
 - Phase discipline (`phase-0.json`, `work.json`)

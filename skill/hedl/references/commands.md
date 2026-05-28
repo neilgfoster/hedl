@@ -1,8 +1,9 @@
 # Command Reference Library
 
 Detailed behavior for Hedl operations accessed on demand by the skill router.
-The 4 core slash commands (`/start-session`, `/iterate`, `/adversarial-review`,
-`/phase-complete`) have their own `.claude/commands/` files. Everything else is here.
+The 5 core slash commands (`/start-session`, `/iterate`, `/adversarial-review`,
+`/pr-ready`, `/phase-complete`) have their own `.claude/commands/` files. Everything
+else is here.
 
 ---
 

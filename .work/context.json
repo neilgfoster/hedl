@@ -21,7 +21,7 @@
     ".work/phases/": "phase definitions and registry",
     ".work/decisions/": "architecture decision records (ADRs)",
     ".work/reviews/": "adversarial review verdicts",
-    ".claude/commands/": "4 core slash commands",
+    ".claude/commands/": "5 core slash commands",
     ".claude/agents/": "7 core adversarial review agents"
   },
   "decisions": [

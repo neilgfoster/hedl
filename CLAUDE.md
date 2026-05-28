@@ -8,13 +8,14 @@ install, tiered adoption from gate-only to full team workflow.
 
 ## How to work on this project
 
-Four core slash commands:
+Five core slash commands:
 
 ```text
 /start-session        # orient: phase, active item, last session
 /iterate              # autonomous work loop
 /iterate supervised   # pause before each item (use this by default)
 /adversarial-review   # convene review panel on demand
+/pr-ready             # drive a branch to an operator-ready PR
 /phase-complete       # validate DoD, write retro, transition phase
 ```
 
