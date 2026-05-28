@@ -1,0 +1,58 @@
+[
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Config duplication",
+    "finding": "Configuration files are duplicated across two directory trees: .work/config/ and skill/hedl/work-state/config/.",
+    "evidence": ".work/config/dispatch-rules.json vs skill/hedl/work-state/config/dispatch-rules.json (also markdown-schemas.json, project-registry.json)",
+    "detail": "Both trees carry identical copies. install.py should project from the skill template to .work/ on installation rather than maintaining two independent committed sets.",
+    "recommendation": "Treat skill/hedl/work-state/config/*.json as the source; have install.py copy/symlink into .work/ on tier installation. Reconsider whether .work/config/ should be committed at all in the self-hosted repo."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "State duplication",
+    "finding": "Work state is duplicated: .work/ and skill/hedl/work-state/ both contain context.json, phases/, session.json, work.json.",
+    "evidence": ".work/context.json vs skill/hedl/work-state/context.json; .work/phases/ vs skill/hedl/work-state/phases/",
+    "detail": "Two parallel trees. If the skill copy is a template it should be marked as such and copied once on install; if .work/ is canonical the skill copy should not exist.",
+    "recommendation": "Decide and document: template-only (read-only, copied by install.py) or delete the skill copy. Whichever survives, the other goes."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Overlapping reviewer scope",
+    "finding": "review-library.md prompts overlap with core agents (ambiguity-hunter vs scope-auditor; contradiction-finder vs historian).",
+    "evidence": "skill/hedl/references/review-library.md lines 48-141",
+    "detail": "Library size and core-agent remit drift toward duplication.",
+    "recommendation": "Run agent-evaluator over the library; consolidate or remove prompts with >40% overlap with a core agent. Document acceptance criteria for adding a library entry."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Prose duplication",
+    "finding": "skill/hedl/SKILL.md and CLAUDE.md restate the same principles, routing rules, and vocabulary.",
+    "evidence": "skill/hedl/SKILL.md vs CLAUDE.md (principles, blast-radius vocab, forbidden patterns)",
+    "detail": "Principle changes require updating both. Maintenance burden grows with each new principle.",
+    "recommendation": "Pick one source-of-truth (SKILL.md for distribution; CLAUDE.md for project-local layering) and reference from the other by file:section."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Derived constants exposed as config",
+    "finding": "budget_manager.py exposes reduced_at/minimal_at/deferred_at as independent config values when they are linear interpolations of session_budget.",
+    "evidence": "skill/hedl/scripts/budget_manager.py lines 60-69",
+    "detail": "If session_budget changes the three thresholds will silently drift out of proportion. Treating them as independent invites manual drift.",
+    "recommendation": "Either derive them algorithmically from session_budget or remove the 'tunable' framing and mark them as derived constants."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Single-use helper extraction",
+    "finding": "check_pr_template.py extracts section_content() and is_placeholder() helpers that are tiny wrappers used in only one or two sites.",
+    "evidence": "skill/hedl/scripts/check_pr_template.py lines 42-57",
+    "detail": "Reduces local readability without meaningful reuse.",
+    "recommendation": "Inline both into the check functions; the script grows ~15 lines and each check becomes self-contained."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Indirection without polymorphism",
+    "finding": "budget_manager.py's _locked() context manager is a single-implementation wrapper around fcntl.flock().",
+    "evidence": "skill/hedl/scripts/budget_manager.py lines 146-157",
+    "detail": "Not a true abstraction; one impl, one caller path. Keeping it is fine as named documentation but it should not be described as an interface.",
+    "recommendation": "Keep but document as a named helper, not an extension point."
+  }
+]

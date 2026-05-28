@@ -1,0 +1,50 @@
+[
+  {
+    "severity": "SIGNIFICANT",
+    "category": "agent-inventory-drift",
+    "finding": "review-library.md says 'Six core agents' and omits determinism-auditor, but seven agent files exist on disk and references/agents.md says 'Seven'.",
+    "evidence": "skill/hedl/references/review-library.md:6-8",
+    "recommendation": "Update the count and list in review-library.md to include determinism-auditor.",
+    "proposed_change": "Replace 'Six core agents ... `edge-case-hunter`. Everything else is here.' with 'Seven core agents ... `edge-case-hunter`, `determinism-auditor`. Everything else is here.'"
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "agent-inventory-drift",
+    "finding": "/repo-health flow says 'all 6 core agents + composable reviewers' so Full depth silently under-panels by skipping determinism-auditor.",
+    "evidence": "skill/hedl/references/commands.md:216",
+    "recommendation": "Change '6' to '7' so Full depth instantiates every named agent.",
+    "proposed_change": "commands.md:216 'Full (all 6 core agents...)' -> 'Full (all 7 core agents...)'"
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "stale-constant-reference",
+    "finding": "drift-detector prompt instructs detectors to check 'am_i_done.py drift (MANDATORY_AGENTS vs actual agent files)', but am_i_done.py has no MANDATORY_AGENTS constant — the dispatch floor is loaded from dispatch-rules.json.",
+    "evidence": "skill/hedl/references/review-library.md:182",
+    "recommendation": "Rewrite the instruction to reference dispatch-rules.json.",
+    "proposed_change": "review-library.md:182 -> 'dispatch-rules.json drift (.work/config/dispatch-rules.json references agents that have no file in .claude/agents/, or agent files with no rule referencing them)'"
+  },
+  {
+    "severity": "MINOR",
+    "category": "stale-constant-reference",
+    "finding": "am_i_done.py --check config help text still mentions a 'MANDATORY_AGENTS table' that no longer exists.",
+    "evidence": ".github/scripts/am_i_done.py:19",
+    "recommendation": "Update the docstring to describe what check_config actually does.",
+    "proposed_change": "am_i_done.py:19 -> 'config    - validate .work/config/dispatch-rules.json references only agents that exist in .claude/agents/'"
+  },
+  {
+    "severity": "MINOR",
+    "category": "broken-link",
+    "finding": "references/agents.md links '[review-panels.md](review-panels.md)' as sibling, but the file actually lives at docs/review-panels.md. The link works only via the docs/agents.md symlink, not from the real path.",
+    "evidence": "skill/hedl/references/agents.md:10",
+    "recommendation": "Either co-locate review-panels.md with the other reference docs or fix the link target.",
+    "proposed_change": null
+  },
+  {
+    "severity": "MINOR",
+    "category": "historical-drift-detection-unavailable",
+    "finding": "Outcome-based drift categories require >=5 historical records; .work/reviews/ has only README.md.",
+    "evidence": ".work/reviews/",
+    "recommendation": "Accumulate review history before relying on outcome-based drift detection.",
+    "proposed_change": null
+  }
+]

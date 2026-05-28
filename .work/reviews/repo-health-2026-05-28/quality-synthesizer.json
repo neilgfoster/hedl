@@ -1,0 +1,31 @@
+{
+  "strengths": [
+    {"observation": "Hash-pinned transitive dependencies generated deterministically from uv.lock as a pip fallback — supply-chain hygiene done correctly", "evidence": "skill/hedl/requirements-ci.txt:1-12"},
+    {"observation": "GitHub Actions pinned to full commit SHAs with least-privilege permissions and concurrency cancellation", "evidence": "skill/hedl/workflows/am-i-done.yml:15-44"},
+    {"observation": "Concurrency- and crash-safe state writes: fcntl flock + atomic tempfile+os.replace + corrupt-file quarantine", "evidence": "skill/hedl/scripts/budget_manager.py:116-157"},
+    {"observation": "Fail-closed defaults with explicit error propagation rather than silent skips", "evidence": "skill/hedl/scripts/am_i_done.py:282-297"},
+    {"observation": "Input validation regexes applied to all user-supplied strings before subprocess use", "evidence": "skill/hedl/scripts/budget_manager.py:275-295"},
+    {"observation": "291 deterministic tests covering gate, schema validator, installer, budget, versioning — green under ruff/mypy --strict", "evidence": "skill/hedl/tests/test_am_i_done.py:1"},
+    {"observation": "CodeQL configured for python and GitHub Actions on weekly schedule plus per-PR", "evidence": "skill/hedl/workflows/codeql.yml:8-30"}
+  ],
+  "scores": {
+    "code_quality": 7,
+    "design_quality": 6,
+    "security": 8,
+    "supply_chain": 9,
+    "utility_claude_code": 7,
+    "accuracy": 6,
+    "maintenance": 7,
+    "utility_vs_complexity": 5
+  },
+  "score_rationale": {
+    "code_quality": "Clean Python 3.11+, mypy --strict and ruff clean, 291 tests pass. Loses points for sprawl: am_i_done.py is 1265 lines doing many heterogenous things; the project preaches 'minimum code' but the flagship script is a long single file. (skill/hedl/scripts/am_i_done.py:1)",
+    "design_quality": "Tier/projection model with includes inheritance (tiers.json:21) is sound. But conceptual surface (tiers, workstreams, ADRs, dispatch rules, budget tiers, deferral queues, schema migrations) runs ahead of empirical validation; the author flags budget defaults as 'PROVISIONAL ... not measurements' (skill/hedl/scripts/budget_manager.py:56-59).",
+    "security": "Strong. No shell=True; workflow env-var pattern documented; least-priv permissions; path containment checks in hook scripts; --separator for ruff; branch-name validation before gh. (skill/hedl/integrations/claude-code/scripts/posttooluse_lint.py:9-12)",
+    "supply_chain": "Reference-quality. Hash-pinned pip fallback auto-generated from uv.lock; Dependabot for uv + pip + actions; all Actions pinned to full 40-char SHAs; CodeQL covers both languages. (skill/hedl/requirements-ci.txt; skill/hedl/workflows/codeql.yml:30)",
+    "utility_claude_code": "Meaningful integration: SessionStart / PostToolUse / Stop hooks, gate-only off-ramp for non-Claude users, generated SKILL.md metadata block. (skill/hedl/integrations/claude-code/settings.json:8-40)",
+    "accuracy": "Generated SKILL.md block is reproducible (gen_skill_metadata.py), but .work/phases/phase-0.json still contains 'EDIT ME' placeholders and .work/context.json:13 has phase_0_complete:false despite seven merged Phase-1 PRs. .hedl-tier records a machine-specific absolute path. (.work/phases/phase-0.json:7-8; .hedl-tier:1)",
+    "maintenance": "Tests extensive (test_am_i_done.py is 918 lines), CI matrix Py 3.11-3.14, schema migrations versioned, 23 ADRs document decisions. Sustainability risk: one author, sprawling core script, lots of bespoke machinery.",
+    "utility_vs_complexity": "The high-utility piece — a deterministic 'am I done' gate — is buried under a large framework whose value is asserted rather than measured. Gate-only tier mitigates this, but at v0.1.0 complexity exceeds demonstrated payoff. (skill/hedl/scripts/budget_manager.py:56-59)"
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "severity": "BLOCKING",
+    "category": "Core principle contradiction",
+    "finding": "CLAUDE.md Principle 4 contradicts ADR-018 (Accepted). CLAUDE.md says 'One work item at a time'; ADR-018 clarifies it as 'one per operator'.",
+    "evidence": "CLAUDE.md:35 vs .work/decisions/ADR-018:30-31",
+    "detail": "ADR-018 explicitly references and re-states Principle 4 but CLAUDE.md has not been updated. For multi-operator teams the current wording implies repo-wide serialisation, contradicting the accepted ADR.",
+    "recommendation": "Update CLAUDE.md Principle 4 to 'One workstream per operator at a time' (or equivalent) and link to ADR-018. WORK-0009 tracks this — confirm it is unblocked and not just deferred."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "ADR-017 enforcement deferred",
+    "finding": "ADR-017 (Accepted) names existential-challenger as a mandatory reviewer for `.work/decisions/*.md`; dispatch-rules.json only lists historian for that pattern.",
+    "evidence": ".work/config/dispatch-rules.json:49-51 vs .work/decisions/ADR-017:20-25",
+    "detail": "ADR-017 acknowledges the promotion as a follow-up (tracked by WORK-0005), so this is not a strict contradiction, but the gate is currently aspirational: new ADRs can be written without existential-challenger review.",
+    "recommendation": "Either land WORK-0005 quickly or add a temporary rule routing the library prompt for that path so the gate is not silently bypassed."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Terminology vs accepted architecture",
+    "finding": "ADR-019 (Accepted) names 'workstream' the unit of work, but CLAUDE.md, SKILL.md, references, and .work/work.json still use 'work item' / 'phase' freely.",
+    "evidence": ".work/decisions/ADR-019:14-17 vs CLAUDE.md:35,59,62,109; .work/work.json schema",
+    "detail": "Both terminologies coexist without a glossary mapping. WORK-0015 tracks the audit; the contradiction is acknowledged as deferred.",
+    "recommendation": "Acceptable as deferred work; pair WORK-0015 with WORK-0010 (recursive schema) so terminology and schema migrate together."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Count claims that will drift",
+    "finding": "agents.md says 'Seven core agents' and tiers.md says '19 additional reviewer prompts'; these counts become wrong as soon as WORK-0005 lands.",
+    "evidence": "skill/hedl/references/agents.md:2 and skill/hedl/references/tiers.md:79-80",
+    "detail": "Pre-existing valid claim; flagged so docs updates are bundled with WORK-0005.",
+    "recommendation": "Update both files when WORK-0005 merges (already in the acceptance criteria)."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Tier-contract drift known",
+    "finding": "ADR-002 makes the gate the only mandatory artefact across all tiers; budget_manager.py creates .work/ unconditionally even in gate tier.",
+    "evidence": ".work/decisions/ADR-002 vs skill/hedl/scripts/budget_manager.py (~lines 118 and 150)",
+    "detail": "Already tracked as WORK-0002; flagged as a live contradiction so it gets early phase-1 priority.",
+    "recommendation": "Prioritise WORK-0002 early in phase 1."
+  }
+]

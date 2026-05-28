@@ -1,0 +1,70 @@
+[
+  {
+    "severity": "SIGNIFICANT",
+    "category": "tier-description-vs-implementation",
+    "finding": "tiers.json says team tier is 'Lightweight + Claude Code hooks, startup script, and claudeignore'; tiers.md, README.md and team-tier.md say team tier is 'Lightweight + GitHub Issues backend + parallel worktrees with gate-enforced merge'.",
+    "evidence": "skill/hedl/tiers.json:46 + projections 48-55; skill/hedl/references/tiers.md:116-117; README.md:7; docs/team-tier.md:1-3",
+    "detail": "install.py --tier team projects only Claude Code integration files; no GitHub Issues code or worktree machinery is added.",
+    "recommendation": "Either extend the team tier projections (Issues adapter + worktree plumbing) or rewrite README/tiers.md/team-tier.md to describe team tier as 'Claude Code integration + opt-in github-issues configuration'."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "state-backend source of truth",
+    "finding": "ADR-022 names hedl.toml as where state_backend lives; code, tests, installer and docs all use .work/context.json.",
+    "evidence": ".work/decisions/ADR-022:26,80; skill/hedl/scripts/am_i_done.py:371-379; skill/hedl/references/tiers.md:132; docs/team-tier.md:17; skill/hedl/scripts/install.py:279; skill/hedl/tests/test_am_i_done.py:638",
+    "detail": "ADR-022 puts the same field in a different file from every implementation artefact.",
+    "recommendation": "Amend ADR-022 to match the shipped implementation (.work/context.json) or migrate the implementation; pick one and update the other."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "count discrepancy",
+    "finding": "tiers.md says lightweight ships 'all 15 command behaviors'; commands.md contains 18 distinct behavior sections.",
+    "evidence": "skill/hedl/references/tiers.md:78; skill/hedl/references/commands.md ## headings (excluding the new-decision ADR-template sub-headings): 18",
+    "recommendation": "Update tiers.md or generate the count programmatically from commands.md."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "agent categorisation",
+    "finding": "review-dispatcher.md lists determinism-auditor under 'reference library agents' (to be instantiated from review-library.md), but determinism-auditor is a named file in skill/hedl/agents/ and has no prompt in review-library.md.",
+    "evidence": "skill/hedl/agents/review-dispatcher.md:36-37,60; skill/hedl/agents/determinism-auditor.md; docs/agents.md:42-52; review-library.md has no '## determinism-auditor' section",
+    "detail": "A dispatcher faithfully following the table would fail to load a prompt that does not exist in the library.",
+    "recommendation": "Move determinism-auditor into the 'core agents (named files)' table in review-dispatcher.md."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "ADR vs current docs",
+    "finding": "ADR-011 requires README to open with 'Don't use Hedl if...' and that docs/alternatives.md exist; the README has no such section and docs/alternatives.md does not exist.",
+    "evidence": ".work/decisions/ADR-011:9,42-43; README.md:1-65; docs/alternatives.md absent",
+    "detail": "ADR-011 is Accepted (Phase 0). ADR-012 also depends on docs/alternatives.md.",
+    "recommendation": "Either implement the disqualifier section and create docs/alternatives.md, or move ADR-011/012 to 'Accepted (deferred)' with rationale."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "workstream double definition",
+    "finding": "standards.md defines 'workstream' as one of four fixed categories (WS-PLAN/WS-REQ/WS-TECH/WS-ARCH); ADR-019 defines 'workstream' as a recursive unit of tracked work that subsumes phase and work-item.",
+    "evidence": "skill/hedl/references/standards.md:94-108; skill/hedl/commands/iterate.md:28-31; .work/work.json:13; .work/decisions/ADR-019:9-19",
+    "detail": "The same noun denotes two incompatible things in shipped files; iterate.md branches on item.workstream as a category.",
+    "recommendation": "Resolve via the ADR-019 terminology audit before either definition is taken as authoritative (rename the categories or fold them into the recursive model)."
+  },
+  {
+    "severity": "MINOR",
+    "category": "standards vs workflows",
+    "finding": "standards.md says a CI workflow named 'PR Template Check' enforces the PR template; no such workflow exists. The check runs inside am_i_done.py.",
+    "evidence": "skill/hedl/references/standards.md:74-75; .github/workflows/ contains only am-i-done.yml and codeql.yml; .github/scripts/am_i_done.py:857 invokes check_pr_template.py",
+    "recommendation": "Reword standards.md to attribute the check to the am-i-done workflow / am_i_done gate sub-check."
+  },
+  {
+    "severity": "MINOR",
+    "category": "phase name",
+    "finding": "CLAUDE.md states 'Phase: 0 — Setup' but .work/phases/phase-0.json is byte-identical to the EDIT-ME template ('Project Phase 0', placeholder goal/started/DoD).",
+    "evidence": "CLAUDE.md:89; .work/phases/phase-0.json:1-12",
+    "recommendation": "Author a real Phase 0 in phase-0.json or correct CLAUDE.md to say Phase 0 has not been authored."
+  },
+  {
+    "severity": "MINOR",
+    "category": "principle vs ADR",
+    "finding": "CLAUDE.md Principle 4 ('One work item at a time') and ADR-018 ('clarified as one per operator') disagree; CLAUDE.md was not updated.",
+    "evidence": "CLAUDE.md:35; .work/decisions/ADR-018:30-31",
+    "recommendation": "Update CLAUDE.md Principle 4 or drop the CLAUDE.md edit claim from ADR-018. (Already tracked as WORK-0009.)"
+  }
+]

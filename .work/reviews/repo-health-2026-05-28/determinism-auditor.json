@@ -1,0 +1,50 @@
+[
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Agent Dispatch",
+    "finding": "review-dispatcher uses Sonnet to select agents based on diff content; file-pattern rules in dispatch-rules.json already handle the mandatory dispatch and could be extended to cover edge-case-hunter and simplicity-enforcer.",
+    "evidence": "skill/hedl/agents/review-dispatcher.md:25-60, .work/config/dispatch-rules.json",
+    "detail": "review-dispatcher (Sonnet) is invoked on every PR. dispatch-rules.json already routes mandatory agents deterministically. Optional-agent decisions ('logic branches, loops, error paths' => edge-case-hunter; 'abstractions' => simplicity-enforcer) are pattern-matchable on the diff and do not need inference.",
+    "recommendation": "Extend dispatch-rules.json with regex triggers for edge-case-hunter (control-flow tokens in Python diffs) and simplicity-enforcer (new class/function definitions). Only escalate to the LLM dispatcher when no rule fires."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Status Computation",
+    "finding": "phase-status assesses phase health (ON TRACK / AT RISK / BLOCKED) via LLM reasoning when the rules are deterministic thresholds.",
+    "evidence": "skill/hedl/references/commands.md:62-81",
+    "detail": "Rules are explicit: AT RISK if any item blocked >2 sessions; BLOCKED if active item stuck >3 attempts. Both are arithmetic over .work/session.json.",
+    "recommendation": "Add a small phase_health.py that reads .work/session.json and returns {status, reason, evidence}. Call it from phase-status."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Agent Evaluation",
+    "finding": "agent-evaluator's determinism check is itself an LLM call; deterministic-eligible proposal classes could be pre-rejected without inference.",
+    "evidence": "skill/hedl/references/review-library.md:12-44",
+    "detail": "Known-deterministic categories (regex matching, schema validation, counting, status lookup, known-category classification) should fail a screener before reaching the agent-evaluator prompt.",
+    "recommendation": "Pre-screen proposals against a hard-coded list; auto-REJECT with reason if a match fires. Only ambiguous proposals reach the LLM evaluator."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Template Filling",
+    "finding": "requirements flow synthesises docs/spec/prd.md from operator answers via LLM where placeholder substitution would suffice.",
+    "evidence": "skill/hedl/references/commands.md:127-146",
+    "detail": "Five structured answers are mapped into known template sections; this is string interpolation, not reasoning.",
+    "recommendation": "Convert prd-template.md to use named placeholders; add a fill_prd_template.py."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Evidence Validation",
+    "finding": "evidence-checker prompt verifies artefact existence (files, ADRs, CI results) using LLM where file/grep checks are sufficient.",
+    "evidence": "skill/hedl/references/review-library.md:191-209",
+    "detail": "All checks listed reduce to os.path.exists / grep / section-present checks per acceptance criterion.",
+    "recommendation": "Implement check_acceptance_criteria.py and surface it via am_i_done.py --check acceptance-evidence; retire the LLM agent for this path."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Slug Generation",
+    "finding": "new-decision flow uses LLM to produce ADR filename slug from operator-provided title.",
+    "evidence": "skill/hedl/references/commands.md:168-191",
+    "detail": "Lowercase + non-alnum-to-hyphen + truncate. Pure text transform.",
+    "recommendation": "Add a make_adr_slug() helper used by the new-decision flow."
+  }
+]
