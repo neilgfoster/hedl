@@ -46,7 +46,11 @@
     "ADR-020-workstream-templates",
     "ADR-021-beyond-single-repo-orchestration",
     "ADR-022-pm-system-pluggability",
-    "ADR-023-hedl-invisible-mode"
+    "ADR-023-hedl-invisible-mode",
+    "ADR-025-iterate-drives-to-pr",
+    "ADR-026-iterate-consults-insights",
+    "ADR-027-review-audit-confidence",
+    "ADR-028-external-reviews-cadence"
   ],
   "notes": "Seeded 2026-05-28 from hedl-iteration-seed.md v2. Phase 0 (Setup) authored and closed retroactively via /phase-complete (WORK-0017); Phase 1 (Discipline restoration) active. See .work/phases/ and the phase-0 retro under .work/reviews/phase-0-complete-2026-05-28/."
 }
