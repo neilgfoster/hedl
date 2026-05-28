@@ -2,8 +2,9 @@
   "meta": {
     "current_phase": 1,
     "active_item": null,
-    "last_updated": "2026-05-28",
-    "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
+    "last_updated": "2026-05-29",
+    "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale.",
+    "phase_transition_trigger": "Run /phase-complete when WORK-0011 (workstream templates) closes — the early Phase 1 -> Phase 2 trigger per the 2026-05-29 direction critique (.work/insights/critique-2026-05-29-direction-and-progress.md), not 'all Phase-1 items closed'. It evaluates the Proposed ADRs under existential pressure, applies ADR-012 to Hedl's own capabilities, computes the v0.2.0 bump, and tags. Then start the Lume bootstrap."
   },
   "active": [],
   "backlog": [
@@ -23,55 +24,6 @@
         "skill/hedl/commands/pr-ready.md updated to note 'invoked automatically as the final phase of /iterate; remains independently invokable for existing branches without a fresh implementation step'.",
         "The 'operator handoff' definition in pr-ready stays the same: PR open, gate green, CI green, adversarial review verdict resolved, zero BLOCKING findings remaining — i.e., merge-ready.",
         "One real iteration cycle has been run end-to-end under the new behaviour to verify (e.g., this work item's own delivery is the proof: the implementation + PR-raised should all happen from one /iterate invocation).",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0024",
-      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2. Promoted from later in Phase 1 for drift-cleanup batching alongside WORK-0026/0028. NOTE: unlike those two (doc/count drift in review-library.md / commands.md / tiers.json), this item reconciles ADR-022 state_backend storage (hedl.toml vs .work/context.json) and may require code + a one-shot migration, not just a doc edit — it likely warrants its own PR rather than the doc batch.",
-      "acceptance_criteria": [
-        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
-        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
-        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0026",
-      "title": "fix: tiers.json team-tier description matches actual projections",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — `tiers.json:46` describes team tier as 'Lightweight + Claude Code hooks'; README, tiers.md, and team-tier.md describe team tier as 'Lightweight + GitHub Issues backend + parallel worktrees with gate-enforced merge'; `install.py --tier team` actually only projects six Claude Code files. Three sources, three different stories. Audit what team tier actually delivers today, align tiers.json's description to that reality, and align the prose docs to the same reality (or, if the docs describe the intended end state, mark those parts explicitly as 'planned' with the work-item that delivers them). Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state.",
-      "acceptance_criteria": [
-        "tiers.json team description matches what `install.py --tier team` actually projects.",
-        "README, tiers.md, team-tier.md describe the same team tier or clearly mark forward-looking elements as planned (with a referenced work item).",
-        "Test or doctor check fails if tiers.json description diverges from actual projection counts/paths.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0028",
-      "title": "docs: fix count drift (6 vs 7 core agents; 15 vs 18 commands; panel of 8)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — three count drifts shipped today. (1) review-library.md says 'Six core agents' (misses determinism-auditor); /repo-health spec says 'all 6 core agents' so a Full run silently under-panels. (2) `tiers.md:78` says 'all 15 command behaviors'; commands.md has 18. (3) ADR-016 references 'full panel of 8'; only 7 named agents exist (and WORK-0005 will bring this to 8 by adding existential-challenger). Authoritative counts must derive from the filesystem; documentation references that name a number must either reference the same source or be updated together. Coordinate with WORK-0005 so the 7→8 update lands once and consistently. Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state. Absorbs the drift-detector half of the proposed-and-dropped ADR-030 (documentation currency): the manual existential-challenger review FAILed ADR-030 as process-accretion and recommended folding the detector here as the shared check_doc_generated_facts, with the doc-impact prompt downgraded to a standards.md convention rather than a gate-enforced PR-template section.",
-      "acceptance_criteria": [
-        "review-library.md and /repo-health spec reference the correct number of core agents (7 today, 8 after WORK-0005).",
-        "tiers.md and any other docs that name a command count reference commands.md's actual count (18).",
-        "ADR-016's 'panel of 8' is reconciled with the post-WORK-0005 state.",
-        "A deterministic drift-detector catches future count divergence (filesystem count vs docs), implemented as a reusable check_doc_generated_facts in am_i_done.py modelled on the existing skill-meta generated-section check — i.e. the standing mechanism for any source-derived doc fact (agent/command/tier counts and names), not a one-off test. No inference (ADR-003).",
         "am_i_done.py passes."
       ]
     },
@@ -128,6 +80,124 @@
       ]
     },
     {
+      "id": "WORK-0027",
+      "title": "docs: reconcile workstream double-definition (recursive container vs WS-PLAN/REQ/TECH/ARCH categories)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — `standards.md` and `iterate.md` define workstream as one of four fixed categories (WS-PLAN/WS-REQ/WS-TECH/WS-ARCH); ADR-019 redefines workstream as a recursive container subsuming phase and work-item. Both meanings are live in shipped files; the contradiction will confuse any reader. Pick one canonical meaning and rename the other. Recommended: keep ADR-019's recursive workstream as the canonical primitive, and rename the four-category taxonomy to something narrower (e.g., 'work-class' or 'workstream-class') across standards.md, iterate.md, work.json, and any code paths that read the WS-* prefix. Pair with WORK-0015 (terminology audit) if helpful, but resolve the double-definition first so the audit has a target.",
+      "acceptance_criteria": [
+        "One canonical meaning of 'workstream' across all shipped docs and code.",
+        "The other meaning is renamed consistently and the change is reflected in standards.md, iterate.md, work.json schema, and any am_i_done.py / install.py logic that touches the WS-* prefix.",
+        "ADR-019 reads as the source of truth for the recursive primitive (or, if the four-category meaning wins, ADR-019 is superseded with rationale).",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0010",
+      "title": "feat: implement recursive workstream data model + schema migration",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "MODEL",
+      "description": "Per ADR-019, `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. Depends on WORK-0027 (canonical workstream definition) being settled. Forward-compatibility (ADR-031, Proposed-deferred): design the schema so dependency-edge fields (depends_on / parallel / conflicts_with) can be added without a further migration when ADR-031 is activated — do not foreclose them, but do not build them now (ADR-031 is gated on this item landing + real demand).",
+      "acceptance_criteria": [
+        "`.work/work.json` schema supports recursive workstreams (children: [workstream...]); flat work items remain valid as leaf workstreams.",
+        "`schema_version` increments; install.py --migrate converts existing flat state to recursive shape idempotently.",
+        "Pre-migration state is archived to `.work/archive/<timestamp>/` (mirroring existing archival pattern).",
+        "Per ADR-021 forward-compatibility: workstream IDs are globally unique enough to survive future cross-repo references (UUIDs or composite keys).",
+        "Lightweight-tier solo workflow is functionally unchanged.",
+        "am_i_done.py passes including all existing tests on the new shape.",
+        "Tests cover: leaf workstream (flat), nested workstreams (epic-of-stories), tier-graded behaviour, migration round-trip."
+      ]
+    },
+    {
+      "id": "WORK-0011",
+      "title": "feat: ship existential-review and problem-statement workstream templates",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "MODEL",
+      "description": "Per ADR-020, two prose-form reference templates ship in `skill/hedl/templates/workstreams/`. existential-review: iteration 1 = identify capability + competitors; iterations 2..N = investigate each competitor; final iteration = report and culling decision (consumed by ADR-012's managed competitive lifecycle). problem-statement: iteration 1 = broad problem + objective; iterations 2..N = discovery, planning, refinement; final iteration = deliverables (may spawn child workstreams). Workstream creation flow consults the template at start; the agent follows the iteration pattern. Adopter-authored templates live alongside the shipped ones; path configurable via hedl.toml. Templates are prose-form for v0.2; executable templates deferred. The first concrete use of existential-review template is the workstream that produced the 2026-05-28 alternatives.md.",
+      "acceptance_criteria": [
+        "`skill/hedl/templates/workstreams/existential-review.md` exists with the iteration pattern described above.",
+        "`skill/hedl/templates/workstreams/problem-statement.md` exists with the iteration pattern described above.",
+        "Workstream creation flow in references/commands.md describes consulting the template at start.",
+        "hedl.toml supports a `[workstreams] templates_path` override.",
+        "First concrete use: existential-review runs on Hedl itself, producing docs/alternatives.md (already committed in PR #10 — reference it as the worked example); problem-statement is used to bootstrap Lume.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0015",
+      "title": "docs: terminology audit — workstream replaces phase/work-item where ADR-019 specifies",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "POSITIONING",
+      "description": "Per ADR-019, the flat phase + work-item model collapses to a single recursive workstream primitive. Audit all references and bring them into alignment: CLAUDE.md, SKILL.md, skill/hedl/references/*.md, prior ADRs that mention 'phase' or 'work item' in the now-deprecated sense, docs/*. Add a glossary entry mapping old→new where helpful. Where 'phase' is genuinely useful as 'a top-level workstream of release scope', the term remains; where 'work item' is genuinely useful as 'a leaf workstream', the term remains; otherwise standardise on 'workstream'. Depends on WORK-0027 (resolve the double-definition first so this audit has a single target).",
+      "acceptance_criteria": [
+        "All references to 'work item' in the deprecated singular sense are reviewed and either updated to 'workstream' or annotated with 'leaf workstream'.",
+        "All references to 'phase' in the deprecated sense are reviewed and either updated to 'top-level workstream' or left if the phase terminology is still preferable.",
+        "A glossary entry (likely in standards.md or a new terminology.md) maps the relationship for future readers.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0024",
+      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2. Promoted from later in Phase 1 for drift-cleanup batching alongside WORK-0026/0028. NOTE: unlike those two (doc/count drift in review-library.md / commands.md / tiers.json), this item reconciles ADR-022 state_backend storage (hedl.toml vs .work/context.json) and may require code + a one-shot migration, not just a doc edit — it likely warrants its own PR rather than the doc batch.",
+      "acceptance_criteria": [
+        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
+        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
+        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0026",
+      "title": "fix: tiers.json team-tier description matches actual projections",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — `tiers.json:46` describes team tier as 'Lightweight + Claude Code hooks'; README, tiers.md, and team-tier.md describe team tier as 'Lightweight + GitHub Issues backend + parallel worktrees with gate-enforced merge'; `install.py --tier team` actually only projects six Claude Code files. Three sources, three different stories. Audit what team tier actually delivers today, align tiers.json's description to that reality, and align the prose docs to the same reality (or, if the docs describe the intended end state, mark those parts explicitly as 'planned' with the work-item that delivers them). Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state.",
+      "acceptance_criteria": [
+        "tiers.json team description matches what `install.py --tier team` actually projects.",
+        "README, tiers.md, team-tier.md describe the same team tier or clearly mark forward-looking elements as planned (with a referenced work item).",
+        "Test or doctor check fails if tiers.json description diverges from actual projection counts/paths.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0028",
+      "title": "docs: fix count drift (6 vs 7 core agents; 15 vs 18 commands; panel of 8)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — three count drifts shipped today. (1) review-library.md says 'Six core agents' (misses determinism-auditor); /repo-health spec says 'all 6 core agents' so a Full run silently under-panels. (2) `tiers.md:78` says 'all 15 command behaviors'; commands.md has 18. (3) ADR-016 references 'full panel of 8'; only 7 named agents exist (and WORK-0005 will bring this to 8 by adding existential-challenger). Authoritative counts must derive from the filesystem; documentation references that name a number must either reference the same source or be updated together. Coordinate with WORK-0005 so the 7→8 update lands once and consistently. Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state. Absorbs the drift-detector half of the proposed-and-dropped ADR-030 (documentation currency): the manual existential-challenger review FAILed ADR-030 as process-accretion and recommended folding the detector here as the shared check_doc_generated_facts, with the doc-impact prompt downgraded to a standards.md convention rather than a gate-enforced PR-template section.",
+      "acceptance_criteria": [
+        "review-library.md and /repo-health spec reference the correct number of core agents (7 today, 8 after WORK-0005).",
+        "tiers.md and any other docs that name a command count reference commands.md's actual count (18).",
+        "ADR-016's 'panel of 8' is reconciled with the post-WORK-0005 state.",
+        "A deterministic drift-detector catches future count divergence (filesystem count vs docs), implemented as a reusable check_doc_generated_facts in am_i_done.py modelled on the existing skill-meta generated-section check — i.e. the standing mechanism for any source-derived doc fact (agent/command/tier counts and names), not a one-off test. No inference (ADR-003).",
+        "am_i_done.py passes."
+      ]
+    },
+    {
       "id": "WORK-0005",
       "title": "feat: promote existential-challenger to a named agent and add to dispatch-rules",
       "phase": 1,
@@ -178,18 +248,88 @@
       ]
     },
     {
-      "id": "WORK-0027",
-      "title": "docs: reconcile workstream double-definition (recursive container vs WS-PLAN/REQ/TECH/ARCH categories)",
+      "id": "WORK-0014",
+      "title": "docs: README and positioning updates (lead with gate; invisible qualifier; iteration-layer framing)",
       "phase": 1,
       "workstream": "WS-ARCH",
       "change_class": "docs",
       "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — `standards.md` and `iterate.md` define workstream as one of four fixed categories (WS-PLAN/WS-REQ/WS-TECH/WS-ARCH); ADR-019 redefines workstream as a recursive container subsuming phase and work-item. Both meanings are live in shipped files; the contradiction will confuse any reader. Pick one canonical meaning and rename the other. Recommended: keep ADR-019's recursive workstream as the canonical primitive, and rename the four-category taxonomy to something narrower (e.g., 'work-class' or 'workstream-class') across standards.md, iterate.md, work.json, and any code paths that read the WS-* prefix. Pair with WORK-0015 (terminology audit) if helpful, but resolve the double-definition first so the audit has a target.",
+      "priority_band": "POSITIONING",
+      "description": "Update README and docs/getting-started.md to reflect the architectural story established in this ADR series and confirmed by the 2026-05-28 alternatives.md draft. Three threads: (a) lead with the gate (ADR-011, corroborated by the external review and the alternatives.md disqualifier story — the deterministic completion gate is the genuine differentiator), (b) Hedl-as-iteration-layer framing per ADR-022 (Hedl plugs into PM systems; doesn't replace them), (c) explicit 'Use Hedl if...' qualifier section per ADR-023 including the invisible-mode case. Honesty-over-marketing per ADR-010: no percentage-gain claims, no comparative superlatives. The alternatives.md stub already exists (committed in PR #10); this work uses it as the source for the disqualifier wording rather than re-creating it.",
       "acceptance_criteria": [
-        "One canonical meaning of 'workstream' across all shipped docs and code.",
-        "The other meaning is renamed consistently and the change is reflected in standards.md, iterate.md, work.json schema, and any am_i_done.py / install.py logic that touches the WS-* prefix.",
-        "ADR-019 reads as the source of truth for the recursive primitive (or, if the four-category meaning wins, ADR-019 is superseded with rationale).",
+        "README opens with the gate as the headline capability (ADR-011 lead-with-gate), citing alternatives.md as the disqualifier source.",
+        "README contains a 'Use Hedl if...' qualifier section including the invisible-mode case from ADR-023.",
+        "README and getting-started.md frame Hedl as an iteration layer above PM systems, not a replacement.",
+        "Cross-link from README to docs/alternatives.md and from getting-started to the disqualifier section.",
+        "No marketing claims (no percentages, no 'X% faster', no superlatives) survive review.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0001",
+      "title": "fix: install.py path resolves in consumer repos",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "BLIND-SPOT",
+      "description": "SKILL.md routes install operations to `python3 skill/hedl/scripts/install.py`. In this (self-hosted) repo `skill/hedl/` is at the root so the path resolves. In a consumer repo, the skill is symlinked to `.claude/skills/hedl/` and `install.py` is NOT projected by any tier in `tiers.json`. An agent in an installed consumer repo following SKILL.md verbatim will hit 'file not found' for every install operation: --status, --doctor, --tier change, --migrate. Fix options (TBD at implementation time): (a) project `install.py` under one of the tiers, (b) re-route SKILL.md to the symlinked skill location, (c) ship a thin shim that resolves the skill path. This finding came from an external review with consumer context; a self-hosted /repo-health run cannot detect it because the failing condition does not exist in this repo.",
+      "acceptance_criteria": [
+        "Install management instructions in SKILL.md resolve and execute successfully in an installed consumer repo (any tier).",
+        "A test simulates the consumer layout (skill symlinked to .claude/skills/hedl/) and exercises --status, --doctor, --tier change, and --migrate without 'file not found'.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0002",
+      "title": "fix: budget_manager does not create .work/ in gate-only tier",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "BLIND-SPOT",
+      "description": "skill/hedl/scripts/budget_manager.py unconditionally calls `path.parent.mkdir(parents=True, exist_ok=True)` at lines ~118 and ~150. Gate-only adopters have no `.work/` by design — they install `--tier gate` precisely because they do not want the phase-tracking machinery. A budget operation silently creating `.work/` violates the tier contract and may confuse adopters into believing their tier is mis-configured. Invisible to a self-hosted /repo-health because this repo is team-tier and `.work/` exists from install. Fix: budget operations must detect the tier and either skip work-tracking writes on gate-only, route to a different location, or no-op cleanly. The exact resolution is part of the implementation. (Cross-link: alternatives.md flags budget_manager as a culling-candidate; if the budget tier mechanism is retired during Phase 1 the gate-only path is automatically resolved.)",
+      "acceptance_criteria": [
+        "Running any budget_manager.py operation in a gate-only installed repo does not create `.work/` (or any subdirectory of it).",
+        "Tier-aware behaviour is covered by a test that installs `--tier gate` into a temp dir, runs the relevant budget operations, and asserts `.work/` is absent.",
+        "Existing team-tier behaviour of budget_manager is unchanged.",
+        "am_i_done.py passes"
+      ]
+    },
+    {
+      "id": "WORK-0003",
+      "title": "fix: versioning.md schema_version claim matches actual code",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "BLIND-SPOT",
+      "description": "docs/versioning.md (around lines 69-70 and 108-118) claims that Hedl reads `schema_version` from `hedl.toml` under `[hedl] schema_version`. The actual code: install.py reads `schema_version` only from `.work/context.json` (see install.py:47-85); am_i_done.py reads `hedl.toml` only for `[verify]` (see am_i_done.py:151-152, 170-196). Neither reads `[hedl] schema_version` from hedl.toml. Either implement the `hedl.toml` read (treat the doc as the spec) or correct the doc to describe what the code actually does. Discovered via external review; self-hosted /repo-health cannot spot this because there is no spec-vs-code consistency check in the gate.",
+      "acceptance_criteria": [
+        "Documentation in docs/versioning.md matches code behaviour exactly — either the read is implemented or the doc is corrected.",
+        "If the read is implemented: install.py and/or am_i_done.py read `[hedl] schema_version` from hedl.toml with documented precedence relative to `.work/context.json`, covered by tests.",
+        "If the doc is corrected: `change_class` is `docs` instead of `fix`; the doc states clearly where schema_version is stored and read from.",
+        "am_i_done.py passes"
+      ]
+    },
+    {
+      "id": "WORK-0035",
+      "title": "feat: ship the external adversarial review kit (consistency + report contract)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "normal",
+      "description": "Operationalise the external adversarial review (ADR-028, Proposed) so every run is consistent and its output is reconcilable like /repo-health. Today the review depends on the operator pasting the prompt from memory and runs ad hoc. Ship the canonical prompt as a versioned skill artifact and define the output contract. Captured 2026-05-28 from the mid-Phase-1 dogfood (the operator shared the actual external-review prompt) and the WORK-0001/0002/0003 evidence that external review finds consumer-context defects a self-hosted /repo-health structurally cannot (learning #7). Independence is the point: the review runs OUTSIDE Hedl's context (separate Claude instance, sandbox clone, scripts never executed) — the in-context operator/agent must not be the reviewer. Building the kit does NOT auto-Accept ADR-028's cadence; ADR-028 stays Proposed/gated on reviews #2 and #3.",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "skill/hedl/references/external-review.md ships the canonical prompt: clone-to-sandbox + never-run-scripts protocol; the dimensions (quality, security, utility, accuracy, maintenance, supply-chain) weighed against actual Claude Code utility per the claude_code_docs CURRENT AT REVIEW TIME, with the docs version / retrieval-date recorded in the report so the assessment stays reviewable later; run by an independent Claude instance outside Hedl's context.",
+        "Output contract documented and reuses existing machinery: each adversarial lens emits .work/reviews/external-<date>/<lens>.json using the same per-finding schema as /repo-health ({severity, category, finding, evidence, recommendation} plus the optional detail field /repo-health already uses; additional optional fields allowed). A synthesised report.md (in-repo) conforms to the existing review-report markdown schema; no new validator is added (the gate's schemas check validates external reports).",
+        "Canonical artifacts are defined unambiguously: report.md (under .work/reviews/external-<date>/) is the in-repo, schema-conforming, backlog-reconcilable record; eval.md (the portable 1-page operator summary, e.g. ~/github/scratch/eval.md) is the human-facing digest derived from the same findings. The kit states both filenames and their distinct roles.",
+        "An independent alternatives/disqualifiers pass is part of the review, emitted as .work/reviews/external-<date>/alternatives.md and kept SEPARATE from docs/alternatives.md (merging into the repo's own doc is the operator's reconciliation decision, preserving independence). Feeds ADR-011 / ADR-012.",
+        "The clone/handoff seam is documented: the external instance cannot write into this repo, so it produces eval.md + report.md + the per-lens JSON in its sandbox and the operator drops report.md + JSON into .work/reviews/external-<date>/ and reconciles into the backlog (as the 2026-05-28 review was, per meta.reconciliation_note).",
+        "README/tiers/docs reference the kit and any agent/command counts stay consistent (skill-meta + docs-index checks pass).",
+        "Relationship to ADR-028 recorded: this is its implementation; ADR-028 remains Proposed until reviews #2/#3 clear its evidence gate.",
         "am_i_done.py passes."
       ]
     },
@@ -259,145 +399,6 @@
         "At least one new work item is activated, worked, and CLOSED via the new backend end-to-end (issue assigned -> branch references 'closes #N' -> PR merged -> issue auto-closes via 'Fixes #N'). Documented as the verification cycle.",
         "Existing test suite passes; gate passes with state_backend: github-issues.",
         "/finish-task is verified to close the right issue when the active item is marked complete.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0014",
-      "title": "docs: README and positioning updates (lead with gate; invisible qualifier; iteration-layer framing)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "POSITIONING",
-      "description": "Update README and docs/getting-started.md to reflect the architectural story established in this ADR series and confirmed by the 2026-05-28 alternatives.md draft. Three threads: (a) lead with the gate (ADR-011, corroborated by the external review and the alternatives.md disqualifier story — the deterministic completion gate is the genuine differentiator), (b) Hedl-as-iteration-layer framing per ADR-022 (Hedl plugs into PM systems; doesn't replace them), (c) explicit 'Use Hedl if...' qualifier section per ADR-023 including the invisible-mode case. Honesty-over-marketing per ADR-010: no percentage-gain claims, no comparative superlatives. The alternatives.md stub already exists (committed in PR #10); this work uses it as the source for the disqualifier wording rather than re-creating it.",
-      "acceptance_criteria": [
-        "README opens with the gate as the headline capability (ADR-011 lead-with-gate), citing alternatives.md as the disqualifier source.",
-        "README contains a 'Use Hedl if...' qualifier section including the invisible-mode case from ADR-023.",
-        "README and getting-started.md frame Hedl as an iteration layer above PM systems, not a replacement.",
-        "Cross-link from README to docs/alternatives.md and from getting-started to the disqualifier section.",
-        "No marketing claims (no percentages, no 'X% faster', no superlatives) survive review.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0015",
-      "title": "docs: terminology audit — workstream replaces phase/work-item where ADR-019 specifies",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "POSITIONING",
-      "description": "Per ADR-019, the flat phase + work-item model collapses to a single recursive workstream primitive. Audit all references and bring them into alignment: CLAUDE.md, SKILL.md, skill/hedl/references/*.md, prior ADRs that mention 'phase' or 'work item' in the now-deprecated sense, docs/*. Add a glossary entry mapping old→new where helpful. Where 'phase' is genuinely useful as 'a top-level workstream of release scope', the term remains; where 'work item' is genuinely useful as 'a leaf workstream', the term remains; otherwise standardise on 'workstream'. Depends on WORK-0027 (resolve the double-definition first so this audit has a single target).",
-      "acceptance_criteria": [
-        "All references to 'work item' in the deprecated singular sense are reviewed and either updated to 'workstream' or annotated with 'leaf workstream'.",
-        "All references to 'phase' in the deprecated sense are reviewed and either updated to 'top-level workstream' or left if the phase terminology is still preferable.",
-        "A glossary entry (likely in standards.md or a new terminology.md) maps the relationship for future readers.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0010",
-      "title": "feat: implement recursive workstream data model + schema migration",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "MODEL",
-      "description": "Per ADR-019, `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. Depends on WORK-0027 (canonical workstream definition) being settled. Forward-compatibility (ADR-031, Proposed-deferred): design the schema so dependency-edge fields (depends_on / parallel / conflicts_with) can be added without a further migration when ADR-031 is activated — do not foreclose them, but do not build them now (ADR-031 is gated on this item landing + real demand).",
-      "acceptance_criteria": [
-        "`.work/work.json` schema supports recursive workstreams (children: [workstream...]); flat work items remain valid as leaf workstreams.",
-        "`schema_version` increments; install.py --migrate converts existing flat state to recursive shape idempotently.",
-        "Pre-migration state is archived to `.work/archive/<timestamp>/` (mirroring existing archival pattern).",
-        "Per ADR-021 forward-compatibility: workstream IDs are globally unique enough to survive future cross-repo references (UUIDs or composite keys).",
-        "Lightweight-tier solo workflow is functionally unchanged.",
-        "am_i_done.py passes including all existing tests on the new shape.",
-        "Tests cover: leaf workstream (flat), nested workstreams (epic-of-stories), tier-graded behaviour, migration round-trip."
-      ]
-    },
-    {
-      "id": "WORK-0011",
-      "title": "feat: ship existential-review and problem-statement workstream templates",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "MODEL",
-      "description": "Per ADR-020, two prose-form reference templates ship in `skill/hedl/templates/workstreams/`. existential-review: iteration 1 = identify capability + competitors; iterations 2..N = investigate each competitor; final iteration = report and culling decision (consumed by ADR-012's managed competitive lifecycle). problem-statement: iteration 1 = broad problem + objective; iterations 2..N = discovery, planning, refinement; final iteration = deliverables (may spawn child workstreams). Workstream creation flow consults the template at start; the agent follows the iteration pattern. Adopter-authored templates live alongside the shipped ones; path configurable via hedl.toml. Templates are prose-form for v0.2; executable templates deferred. The first concrete use of existential-review template is the workstream that produced the 2026-05-28 alternatives.md.",
-      "acceptance_criteria": [
-        "`skill/hedl/templates/workstreams/existential-review.md` exists with the iteration pattern described above.",
-        "`skill/hedl/templates/workstreams/problem-statement.md` exists with the iteration pattern described above.",
-        "Workstream creation flow in references/commands.md describes consulting the template at start.",
-        "hedl.toml supports a `[workstreams] templates_path` override.",
-        "First concrete use: existential-review runs on Hedl itself, producing docs/alternatives.md (already committed in PR #10 — reference it as the worked example); problem-statement is used to bootstrap Lume.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0001",
-      "title": "fix: install.py path resolves in consumer repos",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLIND-SPOT",
-      "description": "SKILL.md routes install operations to `python3 skill/hedl/scripts/install.py`. In this (self-hosted) repo `skill/hedl/` is at the root so the path resolves. In a consumer repo, the skill is symlinked to `.claude/skills/hedl/` and `install.py` is NOT projected by any tier in `tiers.json`. An agent in an installed consumer repo following SKILL.md verbatim will hit 'file not found' for every install operation: --status, --doctor, --tier change, --migrate. Fix options (TBD at implementation time): (a) project `install.py` under one of the tiers, (b) re-route SKILL.md to the symlinked skill location, (c) ship a thin shim that resolves the skill path. This finding came from an external review with consumer context; a self-hosted /repo-health run cannot detect it because the failing condition does not exist in this repo.",
-      "acceptance_criteria": [
-        "Install management instructions in SKILL.md resolve and execute successfully in an installed consumer repo (any tier).",
-        "A test simulates the consumer layout (skill symlinked to .claude/skills/hedl/) and exercises --status, --doctor, --tier change, and --migrate without 'file not found'.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0002",
-      "title": "fix: budget_manager does not create .work/ in gate-only tier",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLIND-SPOT",
-      "description": "skill/hedl/scripts/budget_manager.py unconditionally calls `path.parent.mkdir(parents=True, exist_ok=True)` at lines ~118 and ~150. Gate-only adopters have no `.work/` by design — they install `--tier gate` precisely because they do not want the phase-tracking machinery. A budget operation silently creating `.work/` violates the tier contract and may confuse adopters into believing their tier is mis-configured. Invisible to a self-hosted /repo-health because this repo is team-tier and `.work/` exists from install. Fix: budget operations must detect the tier and either skip work-tracking writes on gate-only, route to a different location, or no-op cleanly. The exact resolution is part of the implementation. (Cross-link: alternatives.md flags budget_manager as a culling-candidate; if the budget tier mechanism is retired during Phase 1 the gate-only path is automatically resolved.)",
-      "acceptance_criteria": [
-        "Running any budget_manager.py operation in a gate-only installed repo does not create `.work/` (or any subdirectory of it).",
-        "Tier-aware behaviour is covered by a test that installs `--tier gate` into a temp dir, runs the relevant budget operations, and asserts `.work/` is absent.",
-        "Existing team-tier behaviour of budget_manager is unchanged.",
-        "am_i_done.py passes"
-      ]
-    },
-    {
-      "id": "WORK-0003",
-      "title": "fix: versioning.md schema_version claim matches actual code",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLIND-SPOT",
-      "description": "docs/versioning.md (around lines 69-70 and 108-118) claims that Hedl reads `schema_version` from `hedl.toml` under `[hedl] schema_version`. The actual code: install.py reads `schema_version` only from `.work/context.json` (see install.py:47-85); am_i_done.py reads `hedl.toml` only for `[verify]` (see am_i_done.py:151-152, 170-196). Neither reads `[hedl] schema_version` from hedl.toml. Either implement the `hedl.toml` read (treat the doc as the spec) or correct the doc to describe what the code actually does. Discovered via external review; self-hosted /repo-health cannot spot this because there is no spec-vs-code consistency check in the gate.",
-      "acceptance_criteria": [
-        "Documentation in docs/versioning.md matches code behaviour exactly — either the read is implemented or the doc is corrected.",
-        "If the read is implemented: install.py and/or am_i_done.py read `[hedl] schema_version` from hedl.toml with documented precedence relative to `.work/context.json`, covered by tests.",
-        "If the doc is corrected: `change_class` is `docs` instead of `fix`; the doc states clearly where schema_version is stored and read from.",
-        "am_i_done.py passes"
-      ]
-    },
-    {
-      "id": "WORK-0035",
-      "title": "feat: ship the external adversarial review kit (consistency + report contract)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "normal",
-      "description": "Operationalise the external adversarial review (ADR-028, Proposed) so every run is consistent and its output is reconcilable like /repo-health. Today the review depends on the operator pasting the prompt from memory and runs ad hoc. Ship the canonical prompt as a versioned skill artifact and define the output contract. Captured 2026-05-28 from the mid-Phase-1 dogfood (the operator shared the actual external-review prompt) and the WORK-0001/0002/0003 evidence that external review finds consumer-context defects a self-hosted /repo-health structurally cannot (learning #7). Independence is the point: the review runs OUTSIDE Hedl's context (separate Claude instance, sandbox clone, scripts never executed) — the in-context operator/agent must not be the reviewer. Building the kit does NOT auto-Accept ADR-028's cadence; ADR-028 stays Proposed/gated on reviews #2 and #3.",
-      "dependencies": [],
-      "acceptance_criteria": [
-        "skill/hedl/references/external-review.md ships the canonical prompt: clone-to-sandbox + never-run-scripts protocol; the dimensions (quality, security, utility, accuracy, maintenance, supply-chain) weighed against actual Claude Code utility per the claude_code_docs CURRENT AT REVIEW TIME, with the docs version / retrieval-date recorded in the report so the assessment stays reviewable later; run by an independent Claude instance outside Hedl's context.",
-        "Output contract documented and reuses existing machinery: each adversarial lens emits .work/reviews/external-<date>/<lens>.json using the same per-finding schema as /repo-health ({severity, category, finding, evidence, recommendation} plus the optional detail field /repo-health already uses; additional optional fields allowed). A synthesised report.md (in-repo) conforms to the existing review-report markdown schema; no new validator is added (the gate's schemas check validates external reports).",
-        "Canonical artifacts are defined unambiguously: report.md (under .work/reviews/external-<date>/) is the in-repo, schema-conforming, backlog-reconcilable record; eval.md (the portable 1-page operator summary, e.g. ~/github/scratch/eval.md) is the human-facing digest derived from the same findings. The kit states both filenames and their distinct roles.",
-        "An independent alternatives/disqualifiers pass is part of the review, emitted as .work/reviews/external-<date>/alternatives.md and kept SEPARATE from docs/alternatives.md (merging into the repo's own doc is the operator's reconciliation decision, preserving independence). Feeds ADR-011 / ADR-012.",
-        "The clone/handoff seam is documented: the external instance cannot write into this repo, so it produces eval.md + report.md + the per-lens JSON in its sandbox and the operator drops report.md + JSON into .work/reviews/external-<date>/ and reconciles into the backlog (as the 2026-05-28 review was, per meta.reconciliation_note).",
-        "README/tiers/docs reference the kit and any agent/command counts stay consistent (skill-meta + docs-index checks pass).",
-        "Relationship to ADR-028 recorded: this is its implementation; ADR-028 remains Proposed until reviews #2/#3 clear its evidence gate.",
         "am_i_done.py passes."
       ]
     },

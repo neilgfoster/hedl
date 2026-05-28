@@ -1,19 +1,17 @@
 {
-  "date": "2026-05-28",
+  "date": "2026-05-29",
   "completed": [
-    "WORK-0017: phase definitions + Phase 0->1 transition (PR #20).",
-    "WORK-0016: .hedl-tier no hardcoded absolute path (PR #21).",
-    "WORK-0019: startup.sh printf RCE verified false positive; regression guard (PR #22).",
-    "WORK-0020: install.py SKILL_ROOT/repo containment on tier projections (PR #23).",
-    "WORK-0021: am_i_done.py [verify] executable allow-list. Audit confirmed a REAL vuln (no allow-list on cmd[0]); fixed with a bare-name allow-list (default pytest/mypy/ruff/npm/pnpm/make + [gate] allowed_commands), interpreter/forwarder denylist, shell-metachar rejection, and cwd containment. Two-cycle security review caught 3 bypasses in the first attempt."
+    "Phase 1 arc: WORK-0017/0016/0019/0020/0021 (RCE trio + phase bootstrap + hedl-tier) merged; ADRs 025-028 + 031(deferred) + 033(gated) proposed; 029/030/032/034 caught by existential review and folded to standards.md / WORK-0036 / ADR-013; drift bundle + audit-first AC + external-review kit (WORK-0035) captured.",
+    "2026-05-29 direction critique captured (.work/insights/critique-2026-05-29-direction-and-progress.md, PR #38) — goal-displacement risk; Lume idle; ship-not-tune.",
+    "Backlog reprioritised toward Lume per the critique (this PR)."
   ],
   "decisions": [
-    "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
-    "Default allow-list = ticket's set incl. make/npm (operator's informed choice; they run repo-committed scripts, accepted).",
-    "Key reframing from review: the allow-list is DEFENSE IN DEPTH, not a complete RCE control — pytest(conftest)/make/npm run committed content; the real untrusted-PR control is GitHub fork-approval. Documented in references/tiers.md and the code comment.",
-    "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers."
+    "Operator chose ACCELERATE TO LUME (critique Part 2): pull WORK-0010/0011/0015 (workstream model/templates/terminology) above governance/drift; keep WORK-0034 first; push github-issues backend (0007/0032/0033) behind Lume.",
+    "Adjustment flagged: WORK-0027 pulled up WITH the Lume-blockers because WORK-0010 and WORK-0015 declare a dependency on it (the critique's literal 'defer 0024-0028' would have inverted that dependency).",
+    "Moratorium on new Proposed ADRs until the first /phase-complete evaluates the existing set (critique recommendation #1).",
+    "/phase-complete fires when WORK-0011 closes (early Phase 1->2 transition), not 'all Phase-1 items closed' — recorded in work.json meta.phase_transition_trigger."
   ],
   "next_item": "WORK-0034",
   "blockers": [],
-  "notes": "Phase 1. WORK-0021 done on branch fix/verify-cmd-allowlist (not yet PR'd). The RCE trio (0019/0020/0021) is complete. Next: WORK-0034 (/iterate drives end-to-end through PR-raised) — the flow-unification item; from WORK-0034 onward, /iterate should carry through to PR-raised in one invocation (ADR-025). Accepted residual minors on WORK-0021: unicode-lookalike path separators (caught by shutil.which), denylist non-exhaustiveness (documented), REPO_ROOT not realpath'd at module load (containment check realpaths both sides)."
+  "notes": "SHIP MODE. New backlog order: 0034 -> 0022 -> 0023 -> 0018 -> 0027 -> 0010 -> 0011 -> 0015 -> (governance/drift) -> (github-issues) -> Phase 2. On WORK-0011 close: run /phase-complete (evaluate Proposed ADRs under existential pressure incl. likely-superseded 031/021 per Opus 4.8; apply ADR-012 to Hedl's own capabilities e.g. budget_manager culling-candidate, review-panel watchlist; bump+tag v0.2.0), then start Lume bootstrap. NO new Proposed ADRs until then (capture ideas in scratch, not the repo)."
 }
