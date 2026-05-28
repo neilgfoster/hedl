@@ -5,9 +5,42 @@ alternatives with one of four status values: uniquely-hedl, watchlisted,
 culling-candidate, culled.
 
 Watchlisted entries carry an improvement objective and a measurement
-window. Re-evaluated at every phase boundary per ADR-013.
+window. Re-evaluated at every phase boundary per ADR-013, and on meaningful
+substrate releases per the proposed ADR-034 discipline (run manually until that
+ADR lands).
 
-Date: 2026-05-28 — Phase 0.
+Date: 2026-05-28 — Phase 1.
+
+---
+
+## Substrate impact assessments
+
+Triggered re-evaluations when the underlying substrate ships a meaningful
+release (proposed ADR-034). Each cites the release as trigger.
+
+### Opus 4.8 — native multi-agent Workflows (2026-05-28)
+
+Trigger: the Claude Code substrate shipped native multi-agent workflow
+orchestration (dynamic fan-out / pipeline / parallel / judge-panel
+"Workflows"). Impact:
+
+- **Adversarial review panel** (watchlisted) — *sharpened*. The host now
+  provides not just the subagent primitive but structured multi-agent
+  orchestration — the judge-panel / parallel-review pattern Hedl hand-rolls. The
+  panel's residual differentiator narrows to the deterministic dispatch floor +
+  gate binding + the specific roster; the orchestration itself is now native.
+- **Multi-operator coordination** (watchlisted) — *sharpened*. Native parallel
+  workflows overlap the parallel-stream ambition; Hedl's defensible edge narrows
+  to the gate-enforced `--streams` isolation (separately uniquely-hedl).
+- **Proposed/deferred ADRs (021 orchestration, 031 parallel workstreams, 032 /
+  WORK-0036 personas)** — *ratified*. With native orchestration available, the
+  ADR-012 move is to delegate orchestration to the host (or CCPM / CrewAI) and
+  wrap it with Hedl's gate + journey, not build Hedl-native equivalents. No new
+  culls; the existing deferral/drop decisions hold and are reinforced.
+
+Net: the release strengthens rather than threatens the
+"discipline-substrate-on-top-of-someone-else's-orchestrator" positioning. No
+status downgrades; two watchlist objectives sharpened.
 
 ---
 
@@ -43,12 +76,17 @@ in `skill/hedl/references/review-library.md`; dispatch model documented at
 `dispatch-rules.json` and verified by `am_i_done.py --check dispatch`.
 **Closest alternative(s)**:
 - Claude Code subagents (`.claude/agents/`) — native
+- Claude Code native Workflows — multi-agent orchestration (judge panels,
+  parallel fan-out), shipped 2026-05-28; see the substrate assessment above
 - CCPM (github.com/automazeio/ccpm) — parallel agents per issue
 **Why watchlisted**: Claude Code already supplies the subagent primitive Hedl
-uses; what Hedl adds is (a) a named opinionated roster covering orthogonal
-adversarial axes, (b) a deterministic dispatch floor enforced by the gate,
-and (c) a budget-aware deferral path. None of those primitives is unique
-on its own. The roster's value depends on whether each agent actually
+uses — and, as of the Opus 4.8 release, native multi-agent Workflow
+orchestration (the judge-panel / parallel-review shape Hedl hand-rolls). What
+Hedl adds is (a) a named opinionated roster covering orthogonal adversarial
+axes, (b) a deterministic dispatch floor enforced by the gate, and (c) a
+budget-aware deferral path. None of those primitives is unique on its own, and
+the orchestration is now native — so the roster's signal must justify itself
+even more sharply. The roster's value depends on whether each agent actually
 catches things a generic "review this diff" subagent would miss. That is
 not yet measured. CCPM ships its own multi-agent workflow and may
 converge on similar coverage with less ceremony.
@@ -191,10 +229,12 @@ file scoping at `tiers.md:163-165`.
 - CCPM (github.com/automazeio/ccpm) — already issue-driven with parallel agents
 - Linear / Jira workflows
 **Why watchlisted**: CCPM is the direct competitor: issue-driven, subagent-
-parallel, GitHub-native. Hedl's pitch above CCPM rests on the *gate-enforced
-file scoping at merge* and on tier-inheritance with the lower tiers — both of
-which need to actually be exercised to be credible. Today the team tier is
-described, not battle-tested.
+parallel, GitHub-native — and the Opus 4.8 native Workflow orchestration now
+supplies the parallel-execution primitive itself. Hedl's pitch above both rests
+on the *gate-enforced file scoping at merge* (`--streams`, separately
+uniquely-hedl) and on tier-inheritance with the lower tiers — both of which
+need to actually be exercised to be credible. Today the team tier is described,
+not battle-tested; the orchestration layer is now best treated as delegated.
 **Improvement objective**: Either run at least one multi-stream cycle on a
 real repository and document an instance where the gate's `--streams` check
 caught an overlap CCPM-style coordination would have missed, or fold the
