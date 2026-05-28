@@ -507,6 +507,29 @@ class TestGithubParsedCopies(unittest.TestCase):
         ):
             self.assertFalse(M._github_parses_directly(t), f"should not be parsed: {t}")
 
+    def test_every_github_projection_except_scripts_is_classified_parsed(self) -> None:
+        # Regression lock against _GITHUB_PARSED_NAMES silently drifting from
+        # tiers.json: every .github/ projection that is not a workflow-invoked
+        # script must be classified GitHub-parsed (and so copied, not
+        # symlinked). Adding a new GitHub-parsed projection (e.g. FUNDING.yml)
+        # without teaching the predicate about it fails here.
+        tiers = M._load_tiers()
+        for tier_name in tiers["tiers"]:
+            for proj in M._flatten_projections(tiers, tier_name):
+                t = proj["target"]
+                if not t.startswith(".github/"):
+                    continue
+                if t.startswith(".github/scripts/"):
+                    self.assertFalse(
+                        M._github_parses_directly(t),
+                        f"workflow-invoked script should stay a symlink: {t}",
+                    )
+                else:
+                    self.assertTrue(
+                        M._github_parses_directly(t),
+                        f".github projection not classified GitHub-parsed: {t}",
+                    )
+
     def test_workflow_is_copy_even_in_symlink_mode(self) -> None:
         M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
         wf = self.tmp / ".github/workflows/am-i-done.yml"

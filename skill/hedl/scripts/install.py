@@ -335,7 +335,16 @@ def cmd_status(args: argparse.Namespace) -> int:
     print("\nProjections:")
     for proj in projections:
         target = repo / proj["target"]
-        if target.is_symlink():
+        if _github_parses_directly(proj["target"]):
+            # GitHub-parsed targets must be real copies; a symlink here is the
+            # WORK-0030 defect, so flag it rather than reporting a false "ok".
+            if target.is_symlink():
+                status = "DRIFT (symlink; re-run install)"
+            elif target.exists():
+                status = "ok (copy)"
+            else:
+                status = "MISSING"
+        elif target.is_symlink():
             status = "ok" if target.resolve().exists() else "BROKEN"
         elif target.exists():
             status = "ok (copy)"
