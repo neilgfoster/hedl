@@ -51,7 +51,8 @@
     "ADR-026-iterate-consults-insights",
     "ADR-027-review-audit-confidence",
     "ADR-028-external-reviews-cadence",
-    "ADR-031-parallel-workstreams"
+    "ADR-031-parallel-workstreams",
+    "ADR-033-model-tiering"
   ],
   "notes": "Seeded 2026-05-28 from hedl-iteration-seed.md v2. Phase 0 (Setup) authored and closed retroactively via /phase-complete (WORK-0017); Phase 1 (Discipline restoration) active. See .work/phases/ and the phase-0 retro under .work/reviews/phase-0-complete-2026-05-28/."
 }
