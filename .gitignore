@@ -40,3 +40,6 @@ kubeconfig
 .work/reviews/queue.json
 .work/reviews/queue.json.lock
 .work/reviews/queue.json.corrupt-*
+
+# ADR-005: insights data is local-only; never commit
+.work/insights/*.jsonl
