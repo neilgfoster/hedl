@@ -1,11 +1,11 @@
 {
   "schema_version": "1",
   "meta": {
-    "project": "EDIT ME: your-project-name",
+    "project": "hedl",
     "work_item_prefix": "WORK",
     "phase": 0,
-    "last_updated": "EDIT ME: YYYY-MM-DD",
-    "description": "EDIT ME: one-line project description"
+    "last_updated": "2026-05-28",
+    "description": "Disciplined Claude Code workflow with a deterministic completion gate, adversarial review, and phase-based work tracking."
   },
   "project_version": "0.0.0",
   "releases": {},
@@ -24,7 +24,23 @@
     ".claude/commands/": "4 core slash commands",
     ".claude/agents/": "7 core adversarial review agents"
   },
-  "decisions": [],
-  "_edit_me": "Set meta.project to your project name, meta.last_updated to today.",
-  "notes": "Clean v0 starting state. Edit phase-0.json and work.json with your project's real content, then run /start-session."
+  "decisions": [
+    "ADR-001-distribution-as-agent-skill",
+    "ADR-002-tiered-adoption",
+    "ADR-003-deterministic-over-inference",
+    "ADR-004-two-version-axes",
+    "ADR-005-self-improvement-human-gated",
+    "ADR-006-pristine-repo-history",
+    "ADR-007-naming-convention",
+    "ADR-008-framework-vs-lume-test",
+    "ADR-009-opinionated-defaults-configurable",
+    "ADR-010-honesty-over-marketing",
+    "ADR-011-disqualifiers-first-positioning",
+    "ADR-012-managed-competitive-lifecycle",
+    "ADR-013-existential-cycle-at-phase-boundaries",
+    "ADR-014-security-quality-friction-aware",
+    "ADR-015-journey-capture-with-override",
+    "ADR-016-preserved-decisions"
+  ],
+  "notes": "Seeded 2026-05-28 from hedl-iteration-seed.md v2. Phase 0 active; phases/ untouched per seed instructions. Phase 1 is Lume bootstrap — define via /phase-complete-driven flow after maintainer confirmation."
 }

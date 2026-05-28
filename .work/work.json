@@ -1,27 +1,55 @@
 {
-  "_edit_me": "Replace the example item below with your real backlog. Set active_item to the ID you are working on.",
   "meta": {
     "current_phase": 0,
     "active_item": null,
-    "last_updated": "EDIT ME: YYYY-MM-DD"
+    "last_updated": "2026-05-28"
   },
   "active": [],
-  "backlog": [],
-  "completed": [],
-  "example": [
+  "backlog": [
     {
-      "_note": "This shows the schema. Copy to backlog and replace with real content, then delete this block.",
       "id": "WORK-0001",
-      "title": "EDIT ME: Short imperative title",
-      "phase": 0,
-      "workstream": "WS-PLAN",
-      "change_class": "chore",
+      "title": "fix: install.py path resolves in consumer repos",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
       "status": "backlog",
-      "description": "EDIT ME: What must be built and why.",
+      "description": "SKILL.md routes install operations to `python3 skill/hedl/scripts/install.py`. In this (self-hosted) repo `skill/hedl/` is at the root so the path resolves. In a consumer repo, the skill is symlinked to `.claude/skills/hedl/` and `install.py` is NOT projected by any tier in `tiers.json`. An agent in an installed consumer repo following SKILL.md verbatim will hit 'file not found' for every install operation: --status, --doctor, --tier change, --migrate. Fix options (TBD at implementation time): (a) project `install.py` under one of the tiers, (b) re-route SKILL.md to the symlinked skill location, (c) ship a thin shim that resolves the skill path. This finding came from an external review with consumer context; a self-hosted /repo-health run cannot detect it because the failing condition does not exist in this repo.",
       "acceptance_criteria": [
-        "EDIT ME: Binary criterion — true or false",
+        "Install management instructions in SKILL.md resolve and execute successfully in an installed consumer repo (any tier).",
+        "A test simulates the consumer layout (skill symlinked to .claude/skills/hedl/) and exercises --status, --doctor, --tier change, and --migrate without 'file not found'.",
+        "am_i_done.py passes"
+      ]
+    },
+    {
+      "id": "WORK-0002",
+      "title": "fix: budget_manager does not create .work/ in gate-only tier",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "description": "skill/hedl/scripts/budget_manager.py unconditionally calls `path.parent.mkdir(parents=True, exist_ok=True)` at lines ~118 and ~150. Gate-only adopters have no `.work/` by design — they install `--tier gate` precisely because they do not want the phase-tracking machinery. A budget operation silently creating `.work/` violates the tier contract and may confuse adopters into believing their tier is mis-configured. Invisible to a self-hosted /repo-health because this repo is team-tier and `.work/` exists from install. Fix: budget operations must detect the tier and either skip work-tracking writes on gate-only, route to a different location, or no-op cleanly. The exact resolution is part of the implementation.",
+      "acceptance_criteria": [
+        "Running any budget_manager.py operation in a gate-only installed repo does not create `.work/` (or any subdirectory of it).",
+        "Tier-aware behaviour is covered by a test that installs `--tier gate` into a temp dir, runs the relevant budget operations, and asserts `.work/` is absent.",
+        "Existing team-tier behaviour of budget_manager is unchanged.",
+        "am_i_done.py passes"
+      ]
+    },
+    {
+      "id": "WORK-0003",
+      "title": "fix: versioning.md schema_version claim matches actual code",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "description": "docs/versioning.md (around lines 69-70 and 108-118) claims that Hedl reads `schema_version` from `hedl.toml` under `[hedl] schema_version`. The actual code: install.py reads `schema_version` only from `.work/context.json` (see install.py:47-85); am_i_done.py reads `hedl.toml` only for `[verify]` (see am_i_done.py:151-152, 170-196). Neither reads `[hedl] schema_version` from hedl.toml. Either implement the `hedl.toml` read (treat the doc as the spec) or correct the doc to describe what the code actually does. Discovered via external review; self-hosted /repo-health cannot spot this because there is no spec-vs-code consistency check in the gate.",
+      "acceptance_criteria": [
+        "Documentation in docs/versioning.md matches code behaviour exactly — either the read is implemented or the doc is corrected.",
+        "If the read is implemented: install.py and/or am_i_done.py read `[hedl] schema_version` from hedl.toml with documented precedence relative to `.work/context.json`, covered by tests.",
+        "If the doc is corrected: `change_class` is `docs` instead of `fix`; the doc states clearly where schema_version is stored and read from.",
         "am_i_done.py passes"
       ]
     }
-  ]
+  ],
+  "completed": []
 }
