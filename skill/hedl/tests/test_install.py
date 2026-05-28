@@ -19,6 +19,7 @@ import shutil
 import tempfile
 import unittest
 from typing import Any
+from unittest import mock
 
 _SCRIPT = pathlib.Path(__file__).resolve().parent.parent / "scripts" / "install.py"
 
@@ -298,6 +299,118 @@ class TestTierMarkerContract(unittest.TestCase):
                 self.assertTrue((repo / ".hedl-tier").exists(), "marker not generated")
                 self.assertEqual(rc_status, 0, "status failed after fresh install")
                 self.assertEqual(rc_doctor, 0, "doctor failed after fresh install")
+
+
+class TestProjectionContainment(unittest.TestCase):
+    """WORK-0020: tiers.json projection paths must stay within SKILL_ROOT
+    (sources) and the consumer repo (targets). A crafted entry with `..`, an
+    absolute path, or a symlink escape must be rejected before any write."""
+
+    def setUp(self) -> None:
+        self.tmp = pathlib.Path(tempfile.mkdtemp())
+        self.skill = self.tmp / "skill"
+        self.skill.mkdir()
+        (self.skill / "scripts").mkdir()
+        self.repo = self.tmp / "repo"
+        self.repo.mkdir()
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmp)
+
+    def _tiers(self, source: str, target: str) -> dict[str, Any]:
+        return {"tiers": {"evil": {"projections": [
+            {"source": source, "target": target}]}}}
+
+    def _validate(self, source: str, target: str) -> None:
+        M._validate_tier_paths(
+            self.repo, self._tiers(source, target), "evil", skill_root=self.skill)
+
+    def test_relative_escape_target_rejected(self) -> None:
+        with self.assertRaises(M.ProjectionContainmentError):
+            self._validate("scripts/am_i_done.py", "../../../etc/evil")
+
+    def test_relative_escape_source_rejected(self) -> None:
+        with self.assertRaises(M.ProjectionContainmentError):
+            self._validate("../../../etc/passwd", "ok.txt")
+
+    def test_absolute_path_injection_rejected(self) -> None:
+        with self.assertRaises(M.ProjectionContainmentError):
+            self._validate("/etc/passwd", "/tmp/evil-target")
+
+    def test_symlink_escape_target_rejected(self) -> None:
+        # A symlink inside the repo pointing outside it; the target rel routes
+        # through it. resolve() follows the link and the check catches the escape.
+        outside = self.tmp / "outside"
+        outside.mkdir()
+        (self.repo / "link").symlink_to(outside, target_is_directory=True)
+        with self.assertRaises(M.ProjectionContainmentError):
+            self._validate("scripts/am_i_done.py", "link/evil")
+
+    def test_valid_paths_pass(self) -> None:
+        # No raise for in-bounds source and nested target.
+        self._validate("scripts/am_i_done.py", "sub/dir/file.py")
+
+    def test_terminal_symlink_at_target_is_allowed(self) -> None:
+        # A projection that REPLACES an existing terminal symlink — even one
+        # pointing outside the repo — must NOT be rejected: _project_one unlinks
+        # before writing, so it never writes through the link. Parent dir is in
+        # repo; only the terminal leaf is a symlink. Regression for the
+        # WORK-0030 symlink->copy migration false-positive.
+        outside = self.tmp / "outside"
+        outside.mkdir()
+        leafdir = self.repo / ".github" / "workflows"
+        leafdir.mkdir(parents=True)
+        (leafdir / "wf.yml").symlink_to(outside / "wf.yml")
+        self._validate("scripts/am_i_done.py", ".github/workflows/wf.yml")
+
+    def test_source_terminal_symlink_escape_rejected(self) -> None:
+        # A projection SOURCE that is a terminal symlink escaping SKILL_ROOT must
+        # be rejected: copy2/read_bytes follow it, so validation follows it too.
+        outside = self.tmp / "outside"
+        outside.mkdir()
+        (outside / "secret").write_text("x")
+        (self.skill / "evil_src").symlink_to(outside / "secret")
+        with self.assertRaises(M.ProjectionContainmentError):
+            self._validate("evil_src", "ok.txt")
+
+    def test_init_target_terminal_dir_symlink_rejected(self) -> None:
+        # An init TARGET that is a terminal directory symlink escaping the repo
+        # must be rejected: copytree/archive-move operate through it.
+        outside = self.tmp / "outside"
+        outside.mkdir()
+        (self.repo / "linkwork").symlink_to(outside, target_is_directory=True)
+        tiers = {"tiers": {"evil": {"init": [
+            {"source": "scripts", "target": "linkwork"}]}}}
+        with self.assertRaises(M.ProjectionContainmentError):
+            M._validate_tier_paths(self.repo, tiers, "evil", skill_root=self.skill)
+
+    def test_empty_rel_rejected(self) -> None:
+        with self.assertRaises(M.ProjectionContainmentError):
+            self._validate("", "ok.txt")
+
+    def test_resolve_contained_returns_resolved_path(self) -> None:
+        got = M._resolve_contained(self.repo, "a/b", kind="target", follow=False)
+        self.assertEqual(got, (self.repo / "a/b").resolve())
+
+    def test_real_tiers_all_tiers_pass(self) -> None:
+        # Behaviour on the well-formed shipped tiers.json is unchanged: every
+        # tier validates clean against the real SKILL_ROOT.
+        tiers = M._load_tiers()
+        for tier in ("gate", "lightweight", "team"):
+            with self.subTest(tier=tier):
+                M._validate_tier_paths(self.repo, tiers, tier)
+
+    def test_cmd_install_rejects_escaping_tiers_without_writing(self) -> None:
+        # End-to-end: the guard is wired into cmd_install and bails before writes.
+        malicious = {"tiers": {"team": {"projections": [
+            {"source": "scripts/am_i_done.py", "target": "../../escape-victim.txt"}]}}}
+        with mock.patch.object(M, "_load_tiers", return_value=malicious):
+            rc = M.cmd_install(_ns(tier="team", repo=str(self.repo)))
+        self.assertEqual(rc, 1)
+        self.assertFalse((self.repo / ".github").exists(),
+                         "install performed writes despite a containment violation")
+        self.assertFalse((self.repo / ".hedl-tier").exists(),
+                         "install wrote the tier marker despite bailing")
 
 
 class TestTierUpgrades(unittest.TestCase):

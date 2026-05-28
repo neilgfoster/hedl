@@ -8,23 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0020",
-      "title": "fix: install.py enforces SKILL_ROOT / repo containment on tier projections (RCE)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #6b, security-auditor) — `install.py:258-273` applies `tiers.json` source/target paths without verifying containment in SKILL_ROOT (for source) or the consumer repo (for target). A malicious or accidentally crafted tiers.json entry with `..` or an absolute path can write outside the intended directories. Resolve every source/target to an absolute, real path and reject any path that escapes the expected root before performing the projection.",
-      "acceptance_criteria": [
-        "install.py resolves and validates that every projection source lies inside SKILL_ROOT and every target lies inside the consumer repo before any filesystem write.",
-        "Containment check uses `Path.resolve(strict=False)` + prefix comparison (not string `startswith` on raw input).",
-        "Tests cover: relative escape (`../`), absolute path injection, and symlink-based escape attempts.",
-        "Behaviour on a well-formed tiers.json is unchanged.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0021",
       "title": "fix: am_i_done.py [verify] cmd allow-list / safe execution (RCE)",
       "phase": 1,
@@ -593,6 +576,24 @@
       ],
       "completed_date": "2026-05-28",
       "resolution": "Verified false positive: printf passes the project name as a %s data argument, never the format string (empirically + git history). Closed with a regression guard (test_startup_sh.py) + evidence note .work/insights/WORK-0019-printf-false-positive.md. No code fix needed."
+    },
+    {
+      "id": "WORK-0020",
+      "title": "fix: install.py enforces SKILL_ROOT / repo containment on tier projections (RCE)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "BLOCKING",
+      "description": "Repo-health 2026-05-28 (BLOCKING #6b, security-auditor) — `install.py:258-273` applies `tiers.json` source/target paths without verifying containment in SKILL_ROOT (for source) or the consumer repo (for target). A malicious or accidentally crafted tiers.json entry with `..` or an absolute path can write outside the intended directories. Resolve every source/target to an absolute, real path and reject any path that escapes the expected root before performing the projection.",
+      "acceptance_criteria": [
+        "install.py resolves and validates that every projection source lies inside SKILL_ROOT and every target lies inside the consumer repo before any filesystem write.",
+        "Containment check uses `Path.resolve(strict=False)` + prefix comparison (not string `startswith` on raw input).",
+        "Tests cover: relative escape (`../`), absolute path injection, and symlink-based escape attempts.",
+        "Behaviour on a well-formed tiers.json is unchanged.",
+        "am_i_done.py passes."
+      ],
+      "completed_date": "2026-05-28"
     }
   ]
 }

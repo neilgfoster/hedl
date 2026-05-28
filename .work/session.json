@@ -3,14 +3,15 @@
   "completed": [
     "WORK-0017: phase-0/1 definitions + Phase 0->1 transition (PR #20, merged).",
     "WORK-0016: .hedl-tier no longer ships a hardcoded absolute path (PR #21, merged).",
-    "WORK-0019: reported startup.sh printf RCE verified as a FALSE POSITIVE (name is a %s data arg, never the format string; never vulnerable in git history). Closed with a regression guard (test_startup_sh.py, incl. a negative meta-test proving it catches the vulnerable form) + evidence note. No code fix needed."
+    "WORK-0019: startup.sh printf RCE verified false positive; regression guard + evidence note (PR #22, merged).",
+    "WORK-0020: install.py now validates SKILL_ROOT/repo containment on every tiers.json projection/init source+target before any write/delete. Added _resolve_contained + _validate_tier_paths; guarded cmd_install/cmd_status/cmd_doctor. 12 containment tests."
   ],
   "decisions": [
-    "WORK-0019 (operator-approved): close as false-positive with regression guard + evidence note rather than a fabricated fix; attempt shellcheck-py else document manual audit.",
-    "shellcheck unavailable (no network for shellcheck-py wheel); manual audit documented in the insight note covers the format-string risk; the regression test covers it durably.",
-    "Adversarial panel: security-auditor CONDITIONAL (confirmed NO RCE; raised test-coverage findings, all addressed), scope-auditor PASS. Added full-field coverage + negative meta-test; acknowledged prompt-injection-via-fields as a distinct out-of-scope risk class."
+    "WORK-0020 containment uses Path.resolve(strict=False) + parents-membership (not startswith). The follow flag mirrors each sink: sources + init targets follow terminal symlinks (read/copy/move through them); projection targets do not (unlink-then-write, and symlink-mode targets legitimately link into SKILL_ROOT).",
+    "Security panel cycle 1 found 3 SIGNIFICANT terminal-symlink bypasses (source copy2, init copytree, init archive-move) + cmd_status gap — all fixed. Cycle 2 confirmed closed; its lingering MINOR (cmd_doctor read_bytes read-through) is a false positive: read_bytes is guarded by an is_symlink->DRIFT check, unreachable through a symlink, and already covered by test_doctor_detects_workflow_symlink_drift.",
+    "Out of WORK-0020 scope (noted, not done): cmd_migrate audit-trail logging; tiers.json integrity/signature check."
   ],
-  "next_item": "WORK-0020",
+  "next_item": "WORK-0021",
   "blockers": [],
-  "notes": "Phase 1. WORK-0019 done on branch chore/startup-printf-guard (not yet PR'd). Next BLOCKING: WORK-0020 (install.py SKILL_ROOT/repo containment on tier projections — RCE). Possible future tooling item surfaced: wire shellcheck into the gate for all .sh files (deferred, out of WORK-0019 scope). Prompt-injection via .work/ fields in startup output is a noted, unfiled risk class."
+  "notes": "Phase 1. WORK-0020 done on branch fix/install-path-containment (not yet PR'd). Next BLOCKING: WORK-0021 (am_i_done.py [verify] cmd allow-list / safe execution). NOTE: am_i_done.py's _run_declared_check already uses shlex.split + shell=False (no shell=True) and checks shutil.which — WORK-0021's allow-list requirement may be partially satisfied already; audit before implementing."
 }
