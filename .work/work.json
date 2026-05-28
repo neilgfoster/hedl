@@ -1,32 +1,11 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": "WORK-0031",
+    "active_item": null,
     "last_updated": "2026-05-28",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
-  "active": [
-    {
-      "id": "WORK-0031",
-      "title": "feat: promote pr-ready to a 5th slash command",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "in_progress",
-      "priority_band": "normal",
-      "description": "pr-ready is the PR-driving controller loop (local gate -> create/update PR -> Dependabot -> CI gate -> adversarial review -> fix cycle, up to 3 cycles before /stuck). It is the most substantive of the NL-routed flows but currently requires the operator to remember NL trigger phrases. Promoting it to .claude/commands/pr-ready.md exposes it as a discoverable slash command while keeping NL routing intact as an alias. Now that WORK-0030 has the CI gate actually running, this flow's --check ci step is finally meaningful.",
-      "acceptance_criteria": [
-        "skill/hedl/commands/pr-ready.md exists with content and frontmatter mirroring the format of the other 4 slash command files (start-session.md, iterate.md, adversarial-review.md, phase-complete.md). The flow definition is the same one already in skill/hedl/references/commands.md.",
-        "tiers.json projects skill/hedl/commands/pr-ready.md to .claude/commands/pr-ready.md under the lightweight tier (alongside the existing 4).",
-        "install.py --tier team produces the .claude/commands/pr-ready.md projection; install.py --doctor reports it healthy.",
-        "Every reference to \"4 core slash commands\" / \"4 commands\" updated to \"5\" across README.md, skill/hedl/references/tiers.md, docs/getting-started.md, docs/commands.md, the auto-generated SKILL.md section (via gen_skill_metadata.py), and any test fixtures or schema validators that count commands.",
-        "skill/hedl/references/commands.md retains its pr-ready section as the human-readable catalog entry — no duplication concerns; the .claude/ file is executable, the reference is documentation.",
-        "SKILL.md NL routing for \"is the PR ready\" / \"pre-PR\" / \"check PR\" / \"PR ready\" remains — these become aliases for /pr-ready, not removals.",
-        "am_i_done.py passes including the docs-index reachability check.",
-        "At least one /adversarial-review panel that includes scope-auditor reviews this promotion before merge (count references touch many files; scope creep risk is the primary concern)."
-      ]
-    }
-  ],
+  "active": [],
   "backlog": [
     {
       "id": "WORK-0016",
@@ -536,6 +515,27 @@
       ],
       "followups": [
         "After WORK-0030 lands and check_runs are confirmed via `gh api`, apply branch protection on main: required_status_checks with contexts ['am_i_done (3.11)', 'am_i_done (3.12)', 'am_i_done (3.13)', 'am_i_done (3.14)'] and strict: true."
+      ],
+      "completed_date": "2026-05-28"
+    },
+    {
+      "id": "WORK-0031",
+      "title": "feat: promote pr-ready to a 5th slash command",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "complete",
+      "priority_band": "normal",
+      "description": "pr-ready is the PR-driving controller loop (local gate -> create/update PR -> Dependabot -> CI gate -> adversarial review -> fix cycle, up to 3 cycles before /stuck). It is the most substantive of the NL-routed flows but currently requires the operator to remember NL trigger phrases. Promoting it to .claude/commands/pr-ready.md exposes it as a discoverable slash command while keeping NL routing intact as an alias. Now that WORK-0030 has the CI gate actually running, this flow's --check ci step is finally meaningful.",
+      "acceptance_criteria": [
+        "skill/hedl/commands/pr-ready.md exists with content and frontmatter mirroring the format of the other 4 slash command files (start-session.md, iterate.md, adversarial-review.md, phase-complete.md). The flow definition is the same one already in skill/hedl/references/commands.md.",
+        "tiers.json projects skill/hedl/commands/pr-ready.md to .claude/commands/pr-ready.md under the lightweight tier (alongside the existing 4).",
+        "install.py --tier team produces the .claude/commands/pr-ready.md projection; install.py --doctor reports it healthy.",
+        "Every reference to \"4 core slash commands\" / \"4 commands\" updated to \"5\" across README.md, skill/hedl/references/tiers.md, docs/getting-started.md, docs/commands.md, the auto-generated SKILL.md section (via gen_skill_metadata.py), and any test fixtures or schema validators that count commands.",
+        "skill/hedl/references/commands.md retains its pr-ready section as the human-readable catalog entry — no duplication concerns; the .claude/ file is executable, the reference is documentation.",
+        "SKILL.md NL routing for \"is the PR ready\" / \"pre-PR\" / \"check PR\" / \"PR ready\" remains — these become aliases for /pr-ready, not removals.",
+        "am_i_done.py passes including the docs-index reachability check.",
+        "At least one /adversarial-review panel that includes scope-auditor reviews this promotion before merge (count references touch many files; scope creep risk is the primary concern)."
       ],
       "completed_date": "2026-05-28"
     }
