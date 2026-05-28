@@ -476,3 +476,77 @@ class TestComputeDowngradeDelta(unittest.TestCase):
         gate_targets = {p["target"] for p in M._flatten_projections(self.tiers, "gate")}
         self.assertEqual(set(to_remove), team_targets - gate_targets)
         self.assertEqual(to_archive, [".work"])
+
+
+class TestGithubParsedCopies(unittest.TestCase):
+    """GitHub-parsed .github/ files must be real copies, not symlinks, because
+    GitHub never follows a symlink for files it parses itself (WORK-0030)."""
+
+    def setUp(self) -> None:
+        self.tmp = pathlib.Path(tempfile.mkdtemp())
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmp)
+
+    def test_predicate_true_for_github_parsed_paths(self) -> None:
+        for t in (
+            ".github/workflows/am-i-done.yml",
+            ".github/workflows/codeql.yml",
+            ".github/dependabot.yml",
+            ".github/PULL_REQUEST_TEMPLATE.md",
+            ".github/CODEOWNERS",
+        ):
+            self.assertTrue(M._github_parses_directly(t), f"should be parsed: {t}")
+
+    def test_predicate_false_for_workflow_invoked_and_other_paths(self) -> None:
+        for t in (
+            ".github/scripts/am_i_done.py",
+            ".github/scripts/release.py",
+            ".claude/commands/iterate.md",
+            "requirements-ci.txt",
+        ):
+            self.assertFalse(M._github_parses_directly(t), f"should not be parsed: {t}")
+
+    def test_workflow_is_copy_even_in_symlink_mode(self) -> None:
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        wf = self.tmp / ".github/workflows/am-i-done.yml"
+        self.assertTrue(wf.exists())
+        self.assertFalse(wf.is_symlink(), "workflow must be a real file, not a symlink")
+
+    def test_script_stays_symlink_in_symlink_mode(self) -> None:
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        script = self.tmp / ".github/scripts/am_i_done.py"
+        self.assertTrue(script.is_symlink(), "workflow-invoked script should stay a symlink")
+
+    def test_workflow_copy_content_matches_source(self) -> None:
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        wf = self.tmp / ".github/workflows/am-i-done.yml"
+        src = (M.SKILL_ROOT / "workflows/am-i-done.yml").resolve()
+        self.assertEqual(wf.read_bytes(), src.read_bytes())
+
+    def test_rerun_migrates_existing_symlink_to_copy(self) -> None:
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        wf = self.tmp / ".github/workflows/am-i-done.yml"
+        # Simulate the legacy on-disk state: a symlink into the source tree.
+        wf.unlink()
+        src = (M.SKILL_ROOT / "workflows/am-i-done.yml").resolve()
+        wf.symlink_to(src)
+        self.assertTrue(wf.is_symlink())
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        self.assertFalse(wf.is_symlink(), "re-run did not migrate symlink to copy")
+        self.assertEqual(wf.read_bytes(), src.read_bytes())
+
+    def test_doctor_detects_workflow_symlink_drift(self) -> None:
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        wf = self.tmp / ".github/workflows/am-i-done.yml"
+        wf.unlink()
+        wf.symlink_to((M.SKILL_ROOT / "workflows/am-i-done.yml").resolve())
+        rc = M.cmd_doctor(_ns(repo=str(self.tmp)))
+        self.assertEqual(rc, 1, "doctor must flag a github-parsed file left as a symlink")
+
+    def test_doctor_detects_workflow_content_drift(self) -> None:
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        wf = self.tmp / ".github/workflows/am-i-done.yml"
+        wf.write_text(wf.read_text() + "\n# local drift\n")
+        rc = M.cmd_doctor(_ns(repo=str(self.tmp)))
+        self.assertEqual(rc, 1, "doctor must flag a github-parsed copy that drifts from source")
