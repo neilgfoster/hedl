@@ -49,6 +49,36 @@
         "If the doc is corrected: `change_class` is `docs` instead of `fix`; the doc states clearly where schema_version is stored and read from.",
         "am_i_done.py passes"
       ]
+    },
+    {
+      "id": "WORK-0004",
+      "title": "docs: retrospective Prior-art audit of ADR-001 through ADR-016",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "description": "ADR-017 requires every ADR to include a `Prior art` section that names overlapping standards/practices and (if overlap exists) justifies Hedl's version. ADR-001 through ADR-016 were written before ADR-017 and do not include this section. Audit each one and add a Prior art section: name the overlapping practice (or state none), answer the three justification questions where overlap exists. Several of the early ADRs apply standard patterns (e.g. ADR-002 tiered adoption, ADR-007 naming convention, ADR-009 opinionated defaults) and should explicitly acknowledge this — being honest about not inventing is the point. ADR-017 does not block on this audit; ADR-001..016 remain Accepted but become more defensible with annotation.",
+      "acceptance_criteria": [
+        "Each of ADR-001 through ADR-016 includes a `Prior art` section that either names overlapping standards/practices or states that no relevant prior art exists.",
+        "For ADRs with overlap: the section answers (a) what is genuinely different about Hedl's version, (b) why the difference is worth the cost, (c) what would have to change for Hedl to delegate to the existing thing.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0005",
+      "title": "feat: promote existential-challenger to a named agent and add to dispatch-rules",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "ADR-017 requires `existential-challenger` to be a mandatory reviewer for any `.work/decisions/*.md` write. Currently `existential-challenger` exists only as a prompt in `skill/hedl/references/review-library.md`; the gate's config check expects mandatory agents to be named agents in `.claude/agents/`. Mirror the `determinism-auditor` promotion pattern: create `.claude/agents/existential-challenger.md` from the library prompt, remove the duplicate from review-library.md (library drops from 19 to 18 prompts), add `existential-challenger` to `.work/config/dispatch-rules.json` as mandatory for `.work/decisions/**` and `docs/alternatives.md` paths, and update all counts that reference '7 named agents' / '19 composable prompts' to '8' / '18' across README, tiers.md, docs/agents.md, and the generated SKILL.md section.",
+      "acceptance_criteria": [
+        "`.claude/agents/existential-challenger.md` exists with valid frontmatter (mirror format of determinism-auditor).",
+        "The duplicate prompt is removed from review-library.md (library count drops to 18).",
+        "`existential-challenger` is in dispatch-rules.json as mandatory for `.work/decisions/**` and `docs/alternatives.md`.",
+        "All count references updated to '8 named agents' / '18 composable prompts' across README, tiers.md, docs/agents.md, generated SKILL.md.",
+        "am_i_done.py passes including the config check."
+      ]
     }
   ],
   "completed": []
