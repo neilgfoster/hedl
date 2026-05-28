@@ -1,15 +1,29 @@
 {
-  "current_phase": 0,
+  "current_phase": 1,
   "phases": [
     {
       "phase": 0,
       "name": "Setup",
-      "status": "active",
+      "status": "complete",
       "file": ".work/phases/phase-0.json"
+    },
+    {
+      "phase": 1,
+      "name": "Discipline restoration",
+      "status": "active",
+      "file": ".work/phases/phase-1.json"
     }
   ],
 
-  "transition_log": [],
+  "transition_log": [
+    {
+      "from": 0,
+      "to": 1,
+      "date": "2026-05-28",
+      "via": "/phase-complete (WORK-0017)",
+      "note": "Phase 0 (Setup) authored and closed retroactively: its definition was the byte-identical EDIT-ME stub while seven Phase-1-scoped PRs had already merged. Phase-0 DoD verified against the seeded bootstrap (gate, skill tiers, commands, named agents + library, ADR foundation, work-tracking machinery). Phase review panel: historian + scope-auditor (dispatch floor for .work/phases/) and existential-challenger (mandatory at /phase-complete per ADR-013, run from the review library pending its WORK-0005 promotion to a named agent). Retro and panel verdicts under .work/reviews/phase-0-complete-2026-05-28/."
+    }
+  ],
 
   "direction_changes": []
 }

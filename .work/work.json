@@ -24,24 +24,6 @@
       ]
     },
     {
-      "id": "WORK-0017",
-      "title": "chore: author phase-0.json DoD retroactively and open phase-1.json",
-      "phase": 1,
-      "workstream": "WS-PLAN",
-      "change_class": "chore",
-      "status": "backlog",
-      "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #2) — `.work/phases/phase-0.json` is byte-identical to the EDIT-ME template; `.work/context.json` still says `phase_0_complete: false` despite seven merged Phase-1-scoped PRs. CLAUDE.md asserts a configured Setup phase that does not exist. Author phase-0.json with the real Setup goal/DoD/constraints that the merged PRs were actually executing against, run `/phase-complete` to transition properly (writing the retro), and open phase-1.json with a credible Phase-1 DoD anchored to the BLOCKING + governance items at the top of this backlog. Without this, Phase 1 has no defined exit criteria.",
-      "acceptance_criteria": [
-        ".work/phases/phase-0.json contains real (non-EDIT-ME) goal, DoD, constraints, learning_goals, assumptions_to_validate.",
-        ".work/phases/phase-1.json exists with a credible DoD that maps to the BLOCKING and governance items at the top of this backlog.",
-        ".work/phases/phases.json transition_log records the phase-0 → phase-1 transition.",
-        ".work/context.json state.phase_0_complete = true and the EDIT-ME stub key is removed.",
-        "Transition was performed via /phase-complete (not by direct edits to phase files); retro committed under .work/reviews/.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0019",
       "title": "fix: startup.sh printf format-string injection (RCE)",
       "phase": 1,
@@ -587,6 +569,25 @@
         "SKILL.md NL routing for \"is the PR ready\" / \"pre-PR\" / \"check PR\" / \"PR ready\" remains — these become aliases for /pr-ready, not removals.",
         "am_i_done.py passes including the docs-index reachability check.",
         "At least one /adversarial-review panel that includes scope-auditor reviews this promotion before merge (count references touch many files; scope creep risk is the primary concern)."
+      ],
+      "completed_date": "2026-05-28"
+    },
+    {
+      "id": "WORK-0017",
+      "title": "chore: author phase-0.json DoD retroactively and open phase-1.json",
+      "phase": 1,
+      "workstream": "WS-PLAN",
+      "change_class": "chore",
+      "status": "complete",
+      "priority_band": "BLOCKING",
+      "description": "Repo-health 2026-05-28 (BLOCKING #2) — `.work/phases/phase-0.json` is byte-identical to the EDIT-ME template; `.work/context.json` still says `phase_0_complete: false` despite seven merged Phase-1-scoped PRs. CLAUDE.md asserts a configured Setup phase that does not exist. Author phase-0.json with the real Setup goal/DoD/constraints that the merged PRs were actually executing against, run `/phase-complete` to transition properly (writing the retro), and open phase-1.json with a credible Phase-1 DoD anchored to the BLOCKING + governance items at the top of this backlog. Without this, Phase 1 has no defined exit criteria.",
+      "acceptance_criteria": [
+        ".work/phases/phase-0.json contains real (non-EDIT-ME) goal, DoD, constraints, learning_goals, assumptions_to_validate.",
+        ".work/phases/phase-1.json exists with a credible DoD that maps to the BLOCKING and governance items at the top of this backlog.",
+        ".work/phases/phases.json transition_log records the phase-0 → phase-1 transition.",
+        ".work/context.json state.phase_0_complete = true and the EDIT-ME stub key is removed.",
+        "Transition was performed via /phase-complete (not by direct edits to phase files); retro committed under .work/reviews/.",
+        "am_i_done.py passes."
       ],
       "completed_date": "2026-05-28"
     }

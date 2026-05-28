@@ -87,7 +87,7 @@ Applies to every operator on this project — human or agent.
 
 ## Current state
 
-- Phase: 0 — Setup (see `.work/phases/phase-0.json`)
+- Phase: 1 — Discipline restoration (see `.work/phases/phase-1.json`)
 - Active item: check `.work/work.json` → `meta.active_item`
 
 ---
