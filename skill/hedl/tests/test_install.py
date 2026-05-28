@@ -231,6 +231,75 @@ class TestStatusAndDoctor(unittest.TestCase):
         self.assertEqual(rc, 1)
 
 
+class TestTierMarkerContract(unittest.TestCase):
+    """WORK-0016: .hedl-tier records only the tier — no absolute skill path.
+
+    The marker is per-installation state (git-ignored, regenerated on each
+    install). It must never carry the installing machine's absolute layout,
+    and a fresh clone (no marker present) must install + pass the install-side
+    health checks across every tier without manual edits.
+    """
+
+    TIERS = ("gate", "lightweight", "team")
+
+    def setUp(self) -> None:
+        self.tmp = pathlib.Path(tempfile.mkdtemp())
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmp)
+
+    def test_marker_records_only_tier(self) -> None:
+        for tier in self.TIERS:
+            with self.subTest(tier=tier):
+                repo = self.tmp / tier
+                repo.mkdir()
+                M.cmd_install(_ns(tier=tier, repo=str(repo)))
+                data = json.loads((repo / ".hedl-tier").read_text())
+                self.assertEqual(data, {"tier": tier},
+                                 "marker must contain only the tier key")
+                self.assertNotIn("skill", data, "dead absolute skill path must be gone")
+
+    def test_marker_contains_no_absolute_path(self) -> None:
+        # Regression guard: the original defect committed a hardcoded developer
+        # absolute path. No marker value may be an absolute path on any OS.
+        for tier in self.TIERS:
+            with self.subTest(tier=tier):
+                repo = self.tmp / tier
+                repo.mkdir()
+                M.cmd_install(_ns(tier=tier, repo=str(repo)))
+                data = json.loads((repo / ".hedl-tier").read_text())
+                for key, value in data.items():
+                    if not isinstance(value, str):
+                        continue
+                    self.assertFalse(
+                        pathlib.PurePosixPath(value).is_absolute(),
+                        f"marker[{key!r}]={value!r} is a POSIX absolute path",
+                    )
+                    self.assertFalse(
+                        pathlib.PureWindowsPath(value).is_absolute(),
+                        f"marker[{key!r}]={value!r} is a Windows absolute path",
+                    )
+
+    def test_fresh_clone_install_status_doctor(self) -> None:
+        # Simulate a fresh clone: no .hedl-tier present. Install, then exercise
+        # the install-side health flow (status + doctor) end-to-end per tier.
+        for tier in self.TIERS:
+            with self.subTest(tier=tier):
+                repo = self.tmp / tier
+                repo.mkdir()
+                self.assertFalse((repo / ".hedl-tier").exists(),
+                                 "fresh clone must start with no marker")
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf):
+                    rc_install = M.cmd_install(_ns(tier=tier, repo=str(repo)))
+                    rc_status = M.cmd_status(_ns(repo=str(repo)))
+                    rc_doctor = M.cmd_doctor(_ns(repo=str(repo)))
+                self.assertEqual(rc_install, 0, "install failed from fresh-clone state")
+                self.assertTrue((repo / ".hedl-tier").exists(), "marker not generated")
+                self.assertEqual(rc_status, 0, "status failed after fresh install")
+                self.assertEqual(rc_doctor, 0, "doctor failed after fresh install")
+
+
 class TestTierUpgrades(unittest.TestCase):
     """Upgrade paths: gate->lightweight->team, idempotent re-run."""
 

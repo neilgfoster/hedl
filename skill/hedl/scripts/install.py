@@ -307,9 +307,11 @@ def cmd_install(args: argparse.Namespace) -> int:
             print("       https://cli.github.com/  then: gh auth login")
 
     if not args.dry_run:
-        marker.write_text(
-            json.dumps({"tier": target_tier, "skill": str(SKILL_ROOT)}) + "\n"
-        )
+        # .hedl-tier is per-installation state (git-ignored, regenerated on each
+        # install) — not repo content. Record only the tier; SKILL_ROOT is always
+        # recomputed from install.py's own location, so an absolute skill path
+        # would be dead data that leaks the installing machine's layout (WORK-0016).
+        marker.write_text(json.dumps({"tier": target_tier}) + "\n")
 
     if any_skip:
         print("\nWARN: some projections were skipped — review 'skip' lines above.")
