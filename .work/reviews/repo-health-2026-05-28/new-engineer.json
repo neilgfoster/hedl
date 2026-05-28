@@ -1,0 +1,104 @@
+[
+  {
+    "severity": "BLOCKING",
+    "category": "broken-state",
+    "finding": ".hedl-tier records a hardcoded absolute developer-specific path, not portable across clones.",
+    "evidence": ".hedl-tier",
+    "detail": "Contents: `{\"tier\": \"team\", \"skill\": \"/home/nfoster/github/scratch/hedl/skill/hedl\"}`. SKILL.md forbids hand-editing this file but the repo ships it pre-broken for any clone path.",
+    "recommendation": "Either omit .hedl-tier from the dev repo, write a relative path, or have install.py / doctor regenerate when the path does not resolve."
+  },
+  {
+    "severity": "BLOCKING",
+    "category": "duplicated-state",
+    "finding": "Two byte-identical config trees committed: .work/config/ and skill/hedl/work-state/config/, with no documented relationship.",
+    "evidence": ".work/config/, skill/hedl/work-state/config/",
+    "detail": "tiers.json projects skill/hedl/work-state/ to .work/ with on_exists:skip, so on first install they diverge — but both are committed verbatim now. Editing one silently drifts from the other.",
+    "recommendation": "Symlink, document one as template-only, or remove the duplicate."
+  },
+  {
+    "severity": "BLOCKING",
+    "category": "inconsistent-state-vs-docs",
+    "finding": "CLAUDE.md says Phase 0 is active but .work/phases/phase-0.json is the literal 'EDIT ME' template; .work/work.json has active_item=null and active=[].",
+    "evidence": "CLAUDE.md:89-90; .work/phases/phase-0.json:7-8; .work/work.json:4",
+    "detail": "getting-started.md tells the operator to edit these on first install. The hedl repo did not follow its own instructions and ships placeholders.",
+    "recommendation": "Either fill in real Phase 0 content (the repo is mid-flight per ADRs 001-023) or move the project's own .work/ outside the framework template."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "script-discoverability",
+    "finding": "Same scripts appear at two paths (.github/scripts/ as symlinks into skill/hedl/scripts/) with no upfront explanation of which to invoke.",
+    "evidence": ".github/scripts/, skill/hedl/scripts/",
+    "detail": "README, SKILL.md and getting-started.md mix both paths. Only tiers.md mentions the symlink relationship.",
+    "recommendation": "State the rule once: install.py runs from skill/hedl/scripts/; everything else from .github/scripts/."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "naming",
+    "finding": "skill/hedl/work-state/ is a template for .work/ but the name does not telegraph that.",
+    "evidence": "skill/hedl/tiers.json:41-43; skill/hedl/work-state/",
+    "recommendation": "Rename to work-state-template/ or add a README in the directory marking it template-only."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "missing-from-docs",
+    "finding": "release.py, reflect.py, contribute.py are projected by lightweight tier but README and getting-started.md don't describe their purpose or when to use them.",
+    "evidence": "skill/hedl/tiers.json:37-39",
+    "recommendation": "Add a Scripts table in README.md with purpose and the natural-language phrase that invokes each."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "broken-onboarding-path",
+    "finding": "The first gate command shown in README fails by design when run from main, but no doc warns about this; the failure message does not point back to docs.",
+    "evidence": "README.md:11; CLAUDE.md:26; docs/getting-started.md:73",
+    "recommendation": "Note 'first run from main fails by design — make a branch first' in onboarding; or have am_i_done.py print that hint when it detects main."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "tribal-knowledge",
+    "finding": "hedl.toml [verify] mechanism is presented but the recognised keys, defaults, and unknown-key behaviour are not documented.",
+    "evidence": "docs/getting-started.md:104-127; skill/hedl/SKILL.md:111-128",
+    "recommendation": "Document the recognised [verify] keys, their defaults and behaviour for unknown keys; ship an example hedl.toml."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "tribal-knowledge",
+    "finding": "budget_manager.py thresholds use undefined units ('invocations') with no explanation of what counts as one or who is supposed to call record.",
+    "evidence": "skill/hedl/SKILL.md:65-73; skill/hedl/scripts/budget_manager.py:8-26",
+    "recommendation": "Add a short docs/budget.md describing the unit of accounting, who records, and tuning guidance."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "tribal-knowledge",
+    "finding": "Argument format (comma vs repeated flag vs JSON) for --agents and --optional in budget_manager.py is not documented in SKILL.md.",
+    "evidence": "skill/hedl/SKILL.md:69-73",
+    "recommendation": "Have gen_skill_metadata.py emit the value format from CLI_SPEC or include it directly."
+  },
+  {
+    "severity": "MINOR",
+    "category": "naming",
+    "finding": "skill/hedl/workflows/ contains GitHub Actions YAML + PR template + dependabot config; the name implies Hedl flow definitions.",
+    "evidence": "skill/hedl/workflows/",
+    "recommendation": "Rename to skill/hedl/github/ or skill/hedl/ci/."
+  },
+  {
+    "severity": "MINOR",
+    "category": "scope-creep",
+    "finding": ".gitignore opens with an Obsidian section and the repo ships a .obsidian/ directory not mentioned in docs.",
+    "evidence": ".gitignore:1-6; .obsidian/",
+    "recommendation": "Either document the Obsidian workflow or remove the directory from the framework repo."
+  },
+  {
+    "severity": "MINOR",
+    "category": "doc-drift",
+    "finding": "ADR home is not unambiguously documented; docs/ and .work/decisions/ both surface ADR-shaped content.",
+    "evidence": ".work/context.json:27-51; .work/decisions/",
+    "recommendation": "Add a single line stating .work/decisions/ is canonical."
+  },
+  {
+    "severity": "MINOR",
+    "category": "naming",
+    "finding": "install.py vs am_i_done.py vs budget_manager.py — no single onboarding sentence juxtaposes the three.",
+    "evidence": "README.md; docs/getting-started.md; skill/hedl/SKILL.md",
+    "recommendation": "Add a three-row 'scripts you will run' table to README."
+  }
+]

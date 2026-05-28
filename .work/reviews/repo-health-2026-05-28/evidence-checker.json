@@ -1,0 +1,46 @@
+[
+  {
+    "severity": "SIGNIFICANT",
+    "category": "ADR-vs-implementation",
+    "finding": "ADR-017 (Accepted) requires existential-challenger as a mandatory reviewer for .work/decisions/*.md, but it is not promoted to a named agent and dispatch-rules.json routes that path to historian only.",
+    "evidence": ".work/decisions/ADR-017 status 'Accepted'; .claude/agents/ has 7 files and no existential-challenger.md; .work/config/dispatch-rules.json maps '^\\.work/decisions/' to ['historian']; existential-challenger appears only in skill/hedl/references/review-library.md",
+    "detail": "WORK-0005 tracks the promotion but the ADR is Accepted before the change has landed.",
+    "recommendation": "Either downgrade ADR-017 status to 'Accepted — pending WORK-0005' or promote existential-challenger and update dispatch-rules.json immediately."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "ADR-vs-implementation",
+    "finding": "ADR-019 (Accepted) mandates a recursive workstream tree but .work/work.json is still flat (active/backlog/completed).",
+    "evidence": ".work/decisions/ADR-019 status 'Accepted'; .work/work.json top-level keys are meta/active/backlog/completed; WORK-0010 (recursive schema migration) is in phase-2 backlog",
+    "detail": "Acceptance precedes implementation; the data model the ADR mandates is not present.",
+    "recommendation": "Annotate ADR-019 with 'pending WORK-0010' or move to 'Accepted (deferred)'."
+  },
+  {
+    "severity": "MINOR",
+    "category": "documentation-count-mismatch",
+    "finding": "tiers.md claims '15 command behaviors via natural language' but commands.md defines 18.",
+    "evidence": "skill/hedl/references/tiers.md:78; skill/hedl/references/commands.md (count of `^## ` excluding the ADR template block: 18)",
+    "recommendation": "Update the count or have gen_skill_metadata.py compute it."
+  },
+  {
+    "severity": "MINOR",
+    "category": "internal-contradiction",
+    "finding": "ADR-016 references a 'full panel of 8' agents while README and disk show 7.",
+    "evidence": ".work/decisions/ADR-016:27; .claude/agents/ has 7 files; README.md:14 says '7'",
+    "recommendation": "Update ADR-016 to '7' or footnote-link to ADR-017's planned promotion."
+  },
+  {
+    "severity": "MINOR",
+    "category": "untracked-dependency",
+    "finding": "WORK-0010 asserts PRECEDENCE relative to 'Lume bootstrap' but the dependency is prose-only and no Lume bootstrap item exists.",
+    "evidence": ".work/work.json line 155 (WORK-0010 description); no depends_on/blocked_by fields anywhere; no work item references Lume",
+    "recommendation": "Add a depends_on field once the target item exists, or remove PRECEDENCE wording if no formal tracking is intended."
+  },
+  {
+    "severity": "MINOR",
+    "category": "documentation-completeness",
+    "finding": "CLAUDE.md calls commands.md the 'Full behavior catalog', but it omits the four core slash-command flows (start-session, iterate, adversarial-review, phase-complete).",
+    "evidence": "CLAUDE.md:24; commands.md has no '## start-session/iterate/adversarial-review/phase-complete' sections; those live in .claude/commands/",
+    "recommendation": "Either include the four flows in commands.md or rephrase to 'natural-language behavior catalog; slash commands live in .claude/commands/'."
+  }
+]

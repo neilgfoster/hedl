@@ -1,0 +1,58 @@
+[
+  {
+    "severity": "BLOCKING",
+    "category": "phase-discipline",
+    "challenge": "Phase 0 (Setup) is the active phase, yet phase-0.json is still an 'EDIT ME' template and 8 of 15 backlog items already target Phase 2. ADR-018..023 design Phase 2 features (multi-operator, workstreams, templates, PM-pluggability, invisible mode) while Phase 0 has no defined DoD. This is the textbook out-of-phase work CLAUDE.md Principle 5 forbids.",
+    "evidence": ".work/phases/phase-0.json:4-15; .work/work.json (8 phase-2 items); .work/decisions/ADR-018..023",
+    "recommendation": "defer"
+  },
+  {
+    "severity": "BLOCKING",
+    "category": "goal-displacement",
+    "challenge": "Process artefacts (~4650 lines of ADRs/SKILL/agents/commands/templates) versus working code (~4145 lines Python + tests). One shipped release (v0.1.0). The product is the process; the framework is perfecting its own scaffolding rather than producing user-facing value.",
+    "evidence": "CHANGELOG.md:10; wc totals across .work/decisions, skill/hedl/agents, skill/hedl/references, skill/hedl/scripts",
+    "recommendation": "cut"
+  },
+  {
+    "severity": "BLOCKING",
+    "category": "validation-theatre",
+    "challenge": ".work/reviews/ contains only README + .gitkeep. .work/insights/ is empty. 26 reviewer personas exist; zero captured review artefacts. The 'every agent output is validated' loop has never closed with a saved finding. The gates are configured but unused.",
+    "evidence": ".work/reviews/ and .work/insights/ listings",
+    "recommendation": "consolidate"
+  },
+  {
+    "severity": "BLOCKING",
+    "category": "agent-proliferation",
+    "challenge": "7 named + 19 composable = 26 reviewer personas. ADR-017 has now added a 27th (existential-challenger) mandatory for ADR writes, plus WORK-0004 (retrofit 16 prior ADRs to ADR-017's schema). A new ADR creating work for every prior ADR is recursion, not value.",
+    "evidence": "skill/hedl/references/agents.md:46-83; .work/work.json WORK-0004/0005",
+    "recommendation": "cut"
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "bootstrap-paradox",
+    "challenge": "Self-application has produced ~10 backlog items that service the framework's own consistency demands. WORK-0001/0002/0003 explicitly note self-hosted /repo-health cannot detect the consumer-side bugs that matter, meaning the self-application is structurally blind to real failure modes.",
+    "evidence": ".work/work.json WORK-0001..0005, WORK-0009, WORK-0015",
+    "recommendation": "consolidate"
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "process-overhead",
+    "challenge": "Two parallel work-state trees (.work/ and skill/hedl/work-state/) already diverge. This duplicates the surface every operator must keep in sync and is the same shape as the bugs WORK-0001/0002 describe.",
+    "evidence": "diff .work/work.json skill/hedl/work-state/work.json (files differ)",
+    "recommendation": "consolidate"
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "phase-discipline",
+    "challenge": "phase-0.json was committed with literal 'EDIT ME' placeholders for goal, dates, and DoD, yet phases.json marks Phase 0 active. The gate (Hedl's headline capability) cannot evaluate DoD against placeholder strings — either it is being bypassed on its own repo, or it passes vacuously.",
+    "evidence": ".work/phases/phase-0.json:4-15",
+    "recommendation": "cut"
+  },
+  {
+    "severity": "MINOR",
+    "category": "process-overhead",
+    "challenge": "Templates (epic, prd, task) and the 391-line review-library shipped at v0.1.0 with no consumers — no instantiated epics/PRDs/tasks under .work/.",
+    "evidence": "skill/hedl/templates/*.md; .work/ empty of instantiated artefacts",
+    "recommendation": "defer"
+  }
+]

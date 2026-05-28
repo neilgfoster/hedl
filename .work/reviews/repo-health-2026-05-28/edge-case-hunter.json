@@ -1,0 +1,146 @@
+[
+  {
+    "severity": "BLOCKING",
+    "category": "Unguarded crash",
+    "finding": "cmd_status and cmd_doctor call json.loads(marker.read_text()) without try/except; a corrupt or empty .hedl-tier raises an unhandled exception.",
+    "evidence": "skill/hedl/scripts/install.py:303 (also ~397)",
+    "detail": "cmd_install already handles this at install.py:235; cmd_status/doctor do not.",
+    "recommendation": "Wrap both call sites in try/except (json.JSONDecodeError, AttributeError) and return a clean error."
+  },
+  {
+    "severity": "BLOCKING",
+    "category": "Infinite recursion",
+    "finding": "_flatten_projections / _flatten_inits recurse via the 'includes' list with no cycle detection; a circular tier definition causes RecursionError.",
+    "evidence": "skill/hedl/scripts/install.py:99-105",
+    "detail": "Trigger: any cycle (e.g. gate.includes=[team], team.includes=[lightweight], lightweight.includes=[gate]).",
+    "recommendation": "Pass a seen: set[str] through the recursion or flatten iteratively; raise a descriptive error on re-entry."
+  },
+  {
+    "severity": "BLOCKING",
+    "category": "Version parse",
+    "finding": "release.py next_version() raises IndexError/ValueError on non-canonical --current-version, producing malformed output that breaks callers expecting full release JSON.",
+    "evidence": "skill/hedl/scripts/release.py:94-95, 136",
+    "detail": "Inputs like '1.0', 'v1.0.0', '1.0.0.0' all bypass canonical X.Y.Z form.",
+    "recommendation": "Validate against r'^\\d+\\.\\d+\\.\\d+$' before computing the bump; return a structured error JSON if mismatch."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Negative / zero input",
+    "finding": "budget_manager.py cmd_record accepts n<=0 silently; n=0 wastes a lock cycle, n<0 decrements invocations_used below zero and flips tier backwards.",
+    "evidence": "skill/hedl/scripts/budget_manager.py:241-252",
+    "recommendation": "Reject n<=0 at argparse (positive-int type) or at the top of cmd_record."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Tier downgrade not atomic",
+    "finding": "install.py --tier downgrade removes projections and archives init dirs non-atomically; mid-loop failure leaves the install neither old nor new.",
+    "evidence": "skill/hedl/scripts/install.py:175-214",
+    "detail": ".hedl-tier marker writes after the loop, so a partial unlink leaves marker pointing to old tier with files already gone.",
+    "recommendation": "Either write the marker first, collect failures and report atomically, or require --confirm-downgrade."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Unknown tier in marker",
+    "finding": "cmd_status -> _flatten_projections raises KeyError if .hedl-tier names a tier not in tiers.json.",
+    "evidence": "skill/hedl/scripts/install.py:308",
+    "recommendation": "Guard tier_name lookup and return a structured error."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Non-atomic migration",
+    "finding": "_migrate_unversioned_to_1 copies before writing the migrated version; an interruption between copy and write leaves the source unchanged but creates duplicate archive directories on retry.",
+    "evidence": "skill/hedl/scripts/install.py:76-86",
+    "recommendation": "Atomic write (tmp + os.replace); skip archive copy if a recent archive already exists."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Dry-run UX",
+    "finding": "Dry-run install prints 'Done' but writes no marker; a follow-up --status reports 'no installation'.",
+    "evidence": "skill/hedl/scripts/install.py:284-291",
+    "recommendation": "In dry-run mode print an explicit 'no marker written; --status will show nothing' notice."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Silent exception swallow",
+    "finding": "_append_gate_insight has bare `except: pass`; disk-full / read-only / corrupt log are invisible.",
+    "evidence": "skill/hedl/scripts/am_i_done.py:1261",
+    "recommendation": "Log a stderr warning (do not hard-fail the gate) on failure."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Uninitialised work.json passes",
+    "finding": "check_commands silently passes when active=[] and active_item=null (the shipped template default).",
+    "evidence": "skill/hedl/scripts/am_i_done.py:531-535",
+    "recommendation": "Return a WARN, not a silent skip, when work.json exists but is uninitialised."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Unsynchronised JSONL appends",
+    "finding": "events.jsonl is appended from at least two writers (am_i_done.py and record_insights.py) with no flock; interleaving can produce lines reflect.py silently drops.",
+    "evidence": "skill/hedl/scripts/am_i_done.py:1258; record_insights.py _append_event",
+    "recommendation": "flock the write path (same pattern as budget_manager.py _locked)."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "schema_version coercion",
+    "finding": "_schema_ver_int silently maps non-integer schema_version values to 0 and re-runs the 0->1 migration.",
+    "evidence": "skill/hedl/scripts/install.py:59-65",
+    "recommendation": "Reject non-integer schema_version with a clear error."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "tgt_dir.exists() false positive",
+    "finding": "cmd_install treats a regular file at the target path as 'directory exists, skip'.",
+    "evidence": "skill/hedl/scripts/install.py:267-268",
+    "recommendation": "Use is_dir() and error if a file exists at the directory path."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Fork PR token scope masks skip",
+    "finding": "Dependabot check skip path (403 from fork-PR github.token) returns PASS, hiding that the check did not run.",
+    "evidence": "skill/hedl/workflows/am-i-done.yml:30; skill/hedl/scripts/am_i_done.py:747",
+    "recommendation": "Emit a distinct SKIP/WARN bucket when a check could not run due to token scope."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Empty panel",
+    "finding": "check_dispatch with empty --panel returns 'minimum panel' PASS rather than an error.",
+    "evidence": "skill/hedl/scripts/am_i_done.py:321-337",
+    "recommendation": "Treat empty parsed --panel as FAIL when --panel was explicitly provided."
+  },
+  {
+    "severity": "MINOR",
+    "category": "tier_description KeyError",
+    "finding": "tier_description does a dict lookup with no default; an unrecognised tier raises KeyError.",
+    "evidence": "skill/hedl/scripts/budget_manager.py:195-201",
+    "recommendation": "Use .get with a fallback."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Module-import env capture",
+    "finding": "check_pr_template.py reads PR_BODY at module import time; reusing the module from tests does not pick up updates.",
+    "evidence": "skill/hedl/scripts/check_pr_template.py:25",
+    "recommendation": "Resolve env inside main()."
+  },
+  {
+    "severity": "MINOR",
+    "category": "schemas check FAIL on empty stdout",
+    "finding": "check_markdown_schemas treats exit=0 + empty stdout as malformed JSON and returns FAIL.",
+    "evidence": "skill/hedl/scripts/am_i_done.py:592-595",
+    "recommendation": "Short-circuit to PASS when out.strip() is empty and code == 0."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Schema drift on upgrade",
+    "finding": "init copy of .work/config/ runs once; later changes in the skill's markdown-schemas.json never reach existing installs.",
+    "evidence": "skill/hedl/tiers.json:42-43",
+    "recommendation": "Manage .work/config/ files as projections (symlinks) or add a migration for config updates."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Transient gh errors fail closed",
+    "finding": "check_pr_threads FAILs on every non-403 gh error including 5xx/timeout; brief GitHub outages block the gate.",
+    "evidence": "skill/hedl/scripts/am_i_done.py:826",
+    "recommendation": "Distinguish transient errors and return WARN; or add bounded retries."
+  }
+]

