@@ -870,6 +870,15 @@ _GH_AUTH_HINTS = ("authentication", "authenticate", "HTTP 401", "HTTP 403", "gh 
 _GH_RATE_HINTS = ("API rate limit", "secondary rate limit", "rate limit exceeded")
 
 
+def _should_poll_ci(only: Optional[str], pr: Optional[int]) -> bool:
+    """Whether to run the ci check. It polls the PR's own check-runs, which
+    include this gate's matrix jobs — so running it as part of the gate
+    (default mode) is self-referential and can never pass. Per the documented
+    contract it runs only on an explicit ``--check ci`` and requires ``--pr``.
+    """
+    return only == "ci" and pr is not None
+
+
 def check_ci(pr_number: int) -> CheckResult:
     """Inspect PR CI checks.
 
@@ -1203,7 +1212,7 @@ def main() -> int:
         maybe_add(check_dependabot())
     if (not only or only == "threads") and args.pr:
         maybe_add(check_pr_threads(args.pr))
-    if (not only or only == "ci") and args.pr:
+    if _should_poll_ci(only, args.pr):
         maybe_add(check_ci(args.pr))
     if only == "streams" or (streams and not only):
         maybe_add(check_streams(streams))

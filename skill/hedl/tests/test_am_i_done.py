@@ -143,6 +143,25 @@ class TestCheckCiJson(unittest.TestCase):
         self.assertIn("no CI checks", res.message)
 
 
+class TestShouldPollCi(unittest.TestCase):
+    """The ci check polls the PR's own check-runs (which include this gate's
+    matrix jobs), so it must not run in the default gate pass — only on an
+    explicit --check ci. Regression guard for the self-referential CI failure
+    surfaced by WORK-0030."""
+
+    def test_default_run_does_not_poll_ci(self) -> None:
+        self.assertFalse(M._should_poll_ci(None, 16))
+
+    def test_explicit_ci_check_without_pr_does_not_poll(self) -> None:
+        self.assertFalse(M._should_poll_ci("ci", None))
+
+    def test_explicit_ci_check_with_pr_polls(self) -> None:
+        self.assertTrue(M._should_poll_ci("ci", 16))
+
+    def test_other_explicit_check_does_not_poll_ci(self) -> None:
+        self.assertFalse(M._should_poll_ci("git", 16))
+
+
 class TestBranchPattern(unittest.TestCase):
     def test_valid_feat_branch(self) -> None:
         self.assertTrue(M.BRANCH_PATTERN.match("feat/add-widget"))

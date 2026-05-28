@@ -22,7 +22,7 @@ import platform
 import shutil
 import sys
 import tomllib
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Callable
 
 SKILL_ROOT: Path = Path(__file__).resolve().parent.parent
@@ -118,6 +118,30 @@ def _flatten_inits(tiers: Any, tier_name: str) -> list[dict[str, str]]:
 
 def _use_copy(flag: bool) -> bool:
     return flag or platform.system() == "Windows"
+
+
+# Files GitHub parses itself — the Actions runner never gets a chance to follow
+# a symlink, so these must be real copies in .github/, not links into
+# skill/hedl/. Paths under .github/scripts/ are opened by the workflow at
+# runtime, where the filesystem resolves links normally, so those stay symlinks.
+_GITHUB_PARSED_NAMES: set[str] = {
+    "dependabot.yml",
+    "PULL_REQUEST_TEMPLATE.md",
+    "CODEOWNERS",
+}
+
+
+def _github_parses_directly(rel_target: str) -> bool:
+    """True if GitHub reads this projection target directly (so it must be a
+    real copy, not a symlink): anything under .github/workflows/, plus the
+    fixed set of top-level .github/ files GitHub parses."""
+    parts = PurePosixPath(rel_target).parts
+    if not parts or parts[0] != ".github":
+        return False
+    rest = parts[1:]
+    if rest and rest[0] == "workflows":
+        return True
+    return len(rest) == 1 and rest[0] in _GITHUB_PARSED_NAMES
 
 
 def _project_one(
@@ -257,7 +281,8 @@ def cmd_install(args: argparse.Namespace) -> int:
     for proj in projections:
         source = (SKILL_ROOT / proj["source"]).resolve()
         target = repo / proj["target"]
-        status = _project_one(source, target, copy=copy, dry_run=args.dry_run)
+        proj_copy = copy or _github_parses_directly(proj["target"])
+        status = _project_one(source, target, copy=proj_copy, dry_run=args.dry_run)
         print(f"  [{status}] {proj['target']}")
         if "skip" in status:
             any_skip = True
@@ -310,7 +335,16 @@ def cmd_status(args: argparse.Namespace) -> int:
     print("\nProjections:")
     for proj in projections:
         target = repo / proj["target"]
-        if target.is_symlink():
+        if _github_parses_directly(proj["target"]):
+            # GitHub-parsed targets must be real copies; a symlink here is the
+            # WORK-0030 defect, so flag it rather than reporting a false "ok".
+            if target.is_symlink():
+                status = "DRIFT (symlink; re-run install)"
+            elif target.exists():
+                status = "ok (copy)"
+            else:
+                status = "MISSING"
+        elif target.is_symlink():
             status = "ok" if target.resolve().exists() else "BROKEN"
         elif target.exists():
             status = "ok (copy)"
@@ -402,7 +436,20 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     print(f"\nTier '{tier}' projections:")
     for proj in projections:
         target = repo / proj["target"]
-        if target.is_symlink():
+        if _github_parses_directly(proj["target"]):
+            source = (SKILL_ROOT / proj["source"]).resolve()
+            if target.is_symlink():
+                status = "DRIFT (symlink; GitHub needs a real copy — re-run install)"
+                all_ok = False
+            elif not target.exists():
+                status = "MISSING"
+                all_ok = False
+            elif target.read_bytes() != source.read_bytes():
+                status = "DRIFT (copy differs from source — re-run install)"
+                all_ok = False
+            else:
+                status = "ok (copy)"
+        elif target.is_symlink():
             ok = target.resolve().exists()
             status = "ok" if ok else "BROKEN (dangling symlink)"
             if not ok:
