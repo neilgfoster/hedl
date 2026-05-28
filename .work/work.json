@@ -144,6 +144,107 @@
         "Any other reference docs that quote the principle (SKILL.md, references/) are updated consistently.",
         "am_i_done.py passes."
       ]
+    },
+    {
+      "id": "WORK-0010",
+      "title": "feat: implement recursive workstream data model + schema migration",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "Per ADR-019, `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. PRECEDENCE: this is the prerequisite for Lume bootstrap using all Hedl features (Lume's problem-statement workstream needs the recursive primitive).",
+      "acceptance_criteria": [
+        "`.work/work.json` schema supports recursive workstreams (children: [workstream...]); flat work items remain valid as leaf workstreams.",
+        "`schema_version` increments; install.py --migrate converts existing flat state to recursive shape idempotently.",
+        "Pre-migration state is archived to `.work/archive/<timestamp>/` (mirroring existing archival pattern).",
+        "Per ADR-021 forward-compatibility: workstream IDs are globally unique enough to survive future cross-repo references (UUIDs or composite keys).",
+        "Lightweight-tier solo workflow is functionally unchanged.",
+        "am_i_done.py passes including all existing tests on the new shape.",
+        "Tests cover: leaf workstream (flat), nested workstreams (epic-of-stories), tier-graded behaviour, migration round-trip."
+      ]
+    },
+    {
+      "id": "WORK-0011",
+      "title": "feat: ship existential-review and problem-statement workstream templates",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "Per ADR-020, two prose-form reference templates ship in `skill/hedl/templates/workstreams/`. existential-review: iteration 1 = identify capability + competitors; iterations 2..N = investigate each competitor; final iteration = report and culling decision (consumed by ADR-012's managed competitive lifecycle). problem-statement: iteration 1 = broad problem + objective; iterations 2..N = discovery, planning, refinement; final iteration = deliverables (may spawn child workstreams). Workstream creation flow consults the template at start; the agent follows the iteration pattern. Adopter-authored templates live alongside the shipped ones; path configurable via hedl.toml. Templates are prose-form for v0.2; executable templates deferred.",
+      "acceptance_criteria": [
+        "`skill/hedl/templates/workstreams/existential-review.md` exists with the iteration pattern described above.",
+        "`skill/hedl/templates/workstreams/problem-statement.md` exists with the iteration pattern described above.",
+        "Workstream creation flow in references/commands.md describes consulting the template at start.",
+        "hedl.toml supports a `[workstreams] templates_path` override.",
+        "First concrete use: existential-review runs on Hedl itself, producing the initial docs/alternatives.md; problem-statement is used to bootstrap Lume.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0012",
+      "title": "feat: backend adapter framework for PM-system pluggability",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "Per ADR-022, formalise the backend adapter contract that the existing state_backend = local-file | github-issues switch implies. Define the contract (read workstreams, write workstream state, list/claim/release, status transitions, comments/journey, auth handshake). Refactor the existing local-file and github-issues code paths to implement the contract. Ship one additional adapter (Jira recommended; Linear acceptable) as a real second example, with a backend-contract test suite. install.py learns backend-specific projection (auth config, custom fields where needed).",
+      "acceptance_criteria": [
+        "Backend adapter contract is documented in skill/hedl/references/ (likely a new backends.md).",
+        "Existing local-file and github-issues paths refactored to the contract; no behavioural regression.",
+        "A backend-contract test suite exists; both default adapters pass.",
+        "At least one additional adapter (Jira or Linear) ships and passes the contract suite.",
+        "hedl.toml [state_backend.<name>] supports adapter-specific configuration; install.py prompts for required fields.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0013",
+      "title": "feat: install.py --invisible / --make-visible / --skill-from flags",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "description": "Per ADR-023, implement Hedl's invisible mode. Three install.py additions. (1) --invisible <tier> flag: performs a normal tier install AND inserts a delimited Hedl block into .gitignore covering .work/, .hedl-tier, .github/ projections, .claude/ projections, hedl.toml. (2) --make-visible flag: removes the gitignore block (additive-only, never touches other rules); state of files on disk is unchanged. (3) --skill-from <path> flag: installs from a skill at an arbitrary path (e.g., ~/tools/hedl/skill/hedl/) so the operator's project doesn't need the skill source committed. The CI-gate-doesn't-run-in-invisible-mode tradeoff is surfaced in install output and docs.",
+      "acceptance_criteria": [
+        "`install.py --invisible <tier>` installs the tier AND adds a delimited `# >>> hedl >>>` ... `# <<< hedl <<<` block to .gitignore covering all Hedl artifacts.",
+        "`install.py --make-visible` removes the block (additive-only management; never touches other .gitignore rules).",
+        "`install.py --skill-from <path>` allows installation from a skill at an arbitrary path; default remains the current behaviour.",
+        "Invisible-mode install output explicitly warns that team CI gate does not run on the operator's PRs.",
+        "Tests cover: invisible install, make-visible round-trip, gitignore block idempotency, skill-from with both absolute and relative paths.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0014",
+      "title": "docs: README and positioning updates (iteration layer + invisible qualifier + lead with gate)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "description": "Update README and docs/getting-started.md to reflect the architectural story established in this ADR series. Three threads: (a) lead with the gate (ADR-011, corroborated by the external review — the deterministic completion gate is the genuine differentiator), (b) Hedl-as-iteration-layer framing per ADR-022 (Hedl plugs into PM systems; doesn't replace them), (c) explicit 'Use Hedl if...' qualifier section per ADR-023 (personal iteration discipline without forcing team adoption). Honesty-over-marketing per ADR-010: no percentage-gain claims, no comparative superlatives. Create a docs/alternatives.md stub that future existential cycles populate.",
+      "acceptance_criteria": [
+        "README opens with the gate as the headline capability (ADR-011 lead-with-gate).",
+        "README contains a 'Use Hedl if...' qualifier section including the invisible-mode case from ADR-023.",
+        "README and getting-started.md frame Hedl as an iteration layer above PM systems, not a replacement.",
+        "`docs/alternatives.md` exists as a stub with the columns described in ADR-012 (status: uniquely-hedl / watchlisted / culling-candidate / culled).",
+        "No marketing claims (no percentages, no 'X% faster', no superlatives) survive review.",
+        "am_i_done.py passes."
+      ]
+    },
+    {
+      "id": "WORK-0015",
+      "title": "docs: terminology audit — workstream replaces phase/work-item where ADR-019 specifies",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "description": "Per ADR-019, the flat phase + work-item model collapses to a single recursive workstream primitive. Audit all references and bring them into alignment: CLAUDE.md, SKILL.md, skill/hedl/references/*.md, prior ADRs that mention 'phase' or 'work item' in the now-deprecated sense, docs/*. Add a glossary entry mapping old→new where helpful. Where 'phase' is genuinely useful as 'a top-level workstream of release scope', the term remains; where 'work item' is genuinely useful as 'a leaf workstream', the term remains; otherwise standardise on 'workstream'.",
+      "acceptance_criteria": [
+        "All references to 'work item' in the deprecated singular sense are reviewed and either updated to 'workstream' or annotated with 'leaf workstream'.",
+        "All references to 'phase' in the deprecated sense are reviewed and either updated to 'top-level workstream' or left if the phase terminology is still preferable.",
+        "A glossary entry (likely in standards.md or a new terminology.md) maps the relationship for future readers.",
+        "am_i_done.py passes."
+      ]
     }
   ],
   "completed": []
