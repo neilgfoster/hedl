@@ -40,7 +40,8 @@
     "ADR-013-existential-cycle-at-phase-boundaries",
     "ADR-014-security-quality-friction-aware",
     "ADR-015-journey-capture-with-override",
-    "ADR-016-preserved-decisions"
+    "ADR-016-preserved-decisions",
+    "ADR-017-adrs-existentially-challenged"
   ],
   "notes": "Seeded 2026-05-28 from hedl-iteration-seed.md v2. Phase 0 active; phases/ untouched per seed instructions. Phase 1 is Lume bootstrap — define via /phase-complete-driven flow after maintainer confirmation."
 }
