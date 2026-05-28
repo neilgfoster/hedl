@@ -166,13 +166,73 @@ def _get_gate_timeout(config: Optional[dict[str, Any]]) -> int:
     return int(gate_section.get("timeout", 120))
 
 
-def _run_declared_check(name: str, spec: Any, gate_timeout: int) -> CheckResult:
+# WORK-0021: a [verify] command may only invoke an allow-listed executable,
+# named bare (no path), with no shell-control metacharacters. This is
+# DEFENSE IN DEPTH, not a complete RCE control: hedl.toml is repo-committed and
+# the gate runs on PR heads in CI, so a malicious PR could still achieve
+# execution through an allowed runner that executes committed repo content
+# (pytest loads conftest.py; make runs a committed Makefile; npm/pnpm run
+# package.json scripts). What the allow-list DOES close is the trivial inline
+# vector — a one-line `python -c '...'` / `bash -c '...'` / `node -e '...'`
+# straight from hedl.toml. The real control for untrusted PRs is GitHub's
+# "require approval to run workflows for outside/first-time contributors"
+# (a CI setting), not this list. See skill/hedl/references/tiers.md.
+_VERIFY_DEFAULT_ALLOWLIST: frozenset[str] = frozenset(
+    {"pytest", "mypy", "ruff", "npm", "pnpm", "make"}
+)
+# Never allowed, even if an operator lists them under [gate] allowed_commands:
+# interpreters and execution forwarders turn a one-line [verify] entry into
+# arbitrary inline code, defeating the allow-list. The set is necessarily
+# non-exhaustive (it cannot enumerate every interpreter) — it blocks the obvious
+# forwarders so the operator cannot trivially re-open the inline vector.
+_VERIFY_DENYLIST: frozenset[str] = frozenset(
+    {
+        "env", "sh", "bash", "zsh", "dash", "fish", "busybox",
+        "python", "python2", "python3", "node", "nodejs", "deno", "bun",
+        "ruby", "perl", "php", "lua", "tclsh", "pwsh", "powershell",
+        "xargs", "find", "awk", "eval", "exec",
+    }
+)
+_SHELL_METACHARS = re.compile(r"[;&|<>$`\n\r\x00\t]")
+
+
+def _verify_allowlist(config: Optional[dict[str, Any]]) -> frozenset[str]:
+    """Effective [verify] executable allow-list: the built-in default plus any
+    bare executable names operators add under hedl.toml [gate] allowed_commands.
+
+    The extension is additive (it can never narrow the default and break the
+    standard lint/types/test runners) and itself constrained: an entry is
+    ignored unless it is a bare name (no path separator), free of shell
+    metacharacters, and not in the interpreter/forwarder denylist — so the
+    operator cannot re-open the inline-code vector through config.
+    """
+    allowed = set(_VERIFY_DEFAULT_ALLOWLIST)
+    gate = (config or {}).get("gate") or {}
+    extra = gate.get("allowed_commands", [])
+    if isinstance(extra, list):
+        for name in extra:
+            if (
+                isinstance(name, str)
+                and name
+                and "/" not in name
+                and "\\" not in name
+                and not _SHELL_METACHARS.search(name)
+                and name not in _VERIFY_DENYLIST
+            ):
+                allowed.add(name)
+    return frozenset(allowed)
+
+
+def _run_declared_check(
+    name: str, spec: Any, gate_timeout: int, allowed: frozenset[str]
+) -> CheckResult:
     """Run a single check declared in hedl.toml [verify].
 
     spec is either a string (short form) or a dict with 'cmd' and optional
     'timeout'/'cwd' (long form). Commands are parsed with shlex.split and run
-    via subprocess list form — no shell=True, no pipes or globs in the argv.
-    Wrap complex pipelines in a script.
+    via subprocess list form — no shell=True. The executable (cmd[0]) must be a
+    bare name (no path) present in `allowed`; shell metacharacters are rejected;
+    a long-form 'cwd' must stay within the repo. WORK-0021.
     """
     if isinstance(spec, str):
         cmd_str, timeout, cwd = spec, gate_timeout, REPO_ROOT
@@ -180,9 +240,24 @@ def _run_declared_check(name: str, spec: Any, gate_timeout: int) -> CheckResult:
         cmd_str = str(spec.get("cmd", ""))
         timeout = int(spec.get("timeout", gate_timeout))
         rel = str(spec.get("cwd", ""))
-        cwd = os.path.join(REPO_ROOT, rel) if rel else REPO_ROOT
+        if rel:
+            cwd = os.path.realpath(os.path.join(REPO_ROOT, rel))
+            root = os.path.realpath(REPO_ROOT)
+            if cwd != root and not cwd.startswith(root + os.sep):
+                return CheckResult(
+                    name, False, f"[verify.{name}] cwd '{rel}' escapes the repo root"
+                )
+        else:
+            cwd = REPO_ROOT
     else:
         return CheckResult(name, False, f"[verify.{name}] must be a string or table")
+
+    if _SHELL_METACHARS.search(cmd_str):
+        return CheckResult(
+            name, False,
+            f"[verify.{name}] contains shell metacharacters — not allowed "
+            "(commands run with shell=False). Wrap pipelines in a script.",
+        )
 
     try:
         cmd = shlex.split(cmd_str)
@@ -192,8 +267,33 @@ def _run_declared_check(name: str, spec: Any, gate_timeout: int) -> CheckResult:
     if not cmd:
         return CheckResult(name, False, f"[verify.{name}] has no command")
 
-    if not shutil.which(cmd[0]):
-        return CheckResult(name, False, f"{cmd[0]} not found (declared in hedl.toml [verify.{name}])")
+    exe = cmd[0]
+    if "/" in exe or "\\" in exe:
+        return CheckResult(
+            name, False,
+            f"[verify.{name}] executable must be a bare name, not a path: '{exe}'. "
+            "Put the tool on PATH and reference it by name.",
+        )
+
+    # Defense in depth: reject denied interpreters/forwarders here too, so the
+    # denylist holds even if a future caller hands us an allow-list that was not
+    # built through _verify_allowlist.
+    if exe in _VERIFY_DENYLIST:
+        return CheckResult(
+            name, False,
+            f"[verify.{name}] executable '{exe}' is a denied interpreter/forwarder.",
+        )
+
+    if exe not in allowed:
+        return CheckResult(
+            name, False,
+            f"[verify.{name}] executable '{exe}' not in allow-list "
+            f"({', '.join(sorted(allowed))}). Add its name to hedl.toml "
+            "[gate] allowed_commands if intended.",
+        )
+
+    if not shutil.which(exe):
+        return CheckResult(name, False, f"{exe} not found (declared in hedl.toml [verify.{name}])")
 
     code, out, err = run(cmd, cwd=cwd, timeout=timeout)
     if code != 0:
@@ -644,7 +744,7 @@ def check_lint() -> Optional[CheckResult]:
         spec = config["verify"].get("lint")
         if spec is None:
             return None  # [verify] present but lint not declared — skip
-        return _run_declared_check("lint", spec, _get_gate_timeout(config))
+        return _run_declared_check("lint", spec, _get_gate_timeout(config), _verify_allowlist(config))
     # No [verify] — built-in Python default profile
     pyproject = os.path.join(REPO_ROOT, "pyproject.toml")
     ruff_toml = os.path.join(REPO_ROOT, "ruff.toml")
@@ -665,7 +765,7 @@ def check_types() -> Optional[CheckResult]:
         spec = config["verify"].get("types")
         if spec is None:
             return None  # [verify] present but types not declared — skip
-        return _run_declared_check("types", spec, _get_gate_timeout(config))
+        return _run_declared_check("types", spec, _get_gate_timeout(config), _verify_allowlist(config))
     # No [verify] — built-in Python default profile
     src_candidates = ["src", "lib", "app", "skill/hedl/scripts", "tests", "skill/hedl/tests"]
     # Skip dirs with no .py files (avoids mypy exit-code 2 on empty/cache-only dirs).
@@ -694,7 +794,7 @@ def check_tests() -> Optional[CheckResult]:
         spec = config["verify"].get("test")  # hedl.toml key is "test"; display name stays "tests"
         if spec is None:
             return None  # [verify] present but test not declared — skip
-        return _run_declared_check("tests", spec, _get_gate_timeout(config))
+        return _run_declared_check("tests", spec, _get_gate_timeout(config), _verify_allowlist(config))
     # No [verify] — built-in Python default profile
     tests_candidates = ["tests", "skill/hedl/tests"]
     has_tests = any(
@@ -1202,10 +1302,11 @@ def main() -> int:
         _cfg = _load_hedl_config()
         if _cfg and "verify" in _cfg:
             _gate_to = _get_gate_timeout(_cfg)
+            _allowed = _verify_allowlist(_cfg)
             _STANDARD_VERIFY_KEYS = {"lint", "types", "test"}
             for _name, _spec in _cfg["verify"].items():
                 if _name not in _STANDARD_VERIFY_KEYS:
-                    maybe_add(_run_declared_check(_name, _spec, _gate_to))
+                    maybe_add(_run_declared_check(_name, _spec, _gate_to, _allowed))
     if (not only or only == "template") and args.pr:
         maybe_add(check_template(args.pr))
     if (not only or only == "dependabot") and args.pr:

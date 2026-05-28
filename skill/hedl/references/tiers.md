@@ -46,6 +46,15 @@ automatically. With `hedl.toml` the gate runs exactly what you declare:
 [gate]
 timeout = 120   # default per-command timeout (seconds)
 
+# Security (WORK-0021): a [verify] command may only invoke an allow-listed
+# executable, named bare (no path), with no shell metacharacters. Default:
+#   pytest, mypy, ruff, npm, pnpm, make
+# Extend with bare names for your stack. allowed_commands is additive and
+# constrained: an entry is ignored if it has a path separator, a shell
+# metacharacter, or names an interpreter/forwarder (python, sh, bash, node,
+# env, xargs, find, ...) — so you cannot re-open inline code via config.
+allowed_commands = ["golangci-lint", "tsc", "go", "playwright"]
+
 [verify]
 lint  = "golangci-lint run"
 types = "tsc --noEmit"
@@ -58,9 +67,21 @@ timeout = 600
 cwd     = "e2e"
 ```
 
-Commands are parsed with `shlex.split` and run as argv — no shell interpretation.
-Wrap complex pipelines in a script. The gate's implementation being Python is a
-runtime dependency only, not a constraint on the consumer's stack.
+Commands are parsed with `shlex.split` and run as argv with `shell=False` — no
+shell interpretation, and shell metacharacters (`; | & $`, backticks, `< >`) are
+rejected outright. The executable must be a bare name in the allow-list (default
+set plus any `[gate] allowed_commands` you add); a path or a non-listed tool
+fails with a clear message. Wrap complex pipelines in a script.
+
+This allow-list is **defense in depth, not a complete RCE control.** It closes
+the trivial inline vector (a one-line `python -c '...'` straight from
+`hedl.toml`), but an allowed runner can still execute committed repo content —
+`pytest` loads `conftest.py`, `make` runs the `Makefile`, `npm`/`pnpm` run
+`package.json` scripts. For untrusted contributions the real control is the CI
+setting *"require approval to run workflows for outside / first-time
+contributors"*; the allow-list is not a substitute for it. The gate's
+implementation being Python is a runtime dependency only, not a constraint on the
+consumer's stack.
 
 ---
 
