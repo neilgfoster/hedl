@@ -26,6 +26,27 @@
   ],
   "backlog": [
     {
+      "id": "WORK-0030",
+      "title": "fix: .github/ files parsed by GitHub must be real files, not symlinks",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "BLOCKING",
+      "description": "GitHub does not follow symlinks for files it parses directly (workflows, dependabot, PR template, CODEOWNERS). install.py currently symlinks all these paths from skill/hedl/ projections, so the CI gate has never actually run in CI — all 'runs' since PR #2 are event:push fallback failures with zero check_runs created (verified via `gh api repos/:owner/:repo/commits/<sha>/check-runs` on multiple PR head SHAs: 218d3729, 452a2848, 5c6df42, 97b24a3). The UI label 'This run likely failed because of a workflow file issue' is GitHub rejecting the symlink-text as an invalid workflow file. This invalidates the 'PR-side CI gate' assumption that ADR-014 (Security/quality friction-aware) and the required-status-checks plan in WORK-0029 rest on. Discovered while investigating WORK-0029's acceptance-criterion-4 follow-up — the WORK-0029 investigation note's first hypothesis (no `required_status_checks` on main) is correct as written for the time, but is downstream of this root cause: even if `required_status_checks` had been configured, GitHub never had a context to attach because the workflow never published one.",
+      "acceptance_criteria": [
+        "install.py distinguishes 'GitHub-parsed' .github paths from 'workflow-invoked' .github paths. For GitHub-parsed paths (workflows/*, dependabot.yml, PULL_REQUEST_TEMPLATE.md, CODEOWNERS), it COPIES the file content rather than symlinks.",
+        "install.py --doctor detects drift between the projected copy and the canonical source in skill/hedl/workflows/ (and equivalents) and fails with a clear remedy.",
+        "Existing symlinked .github files in this repo are replaced by real copies via install.py re-run (or a dedicated migration step).",
+        "After the fix, `gh api repos/neilgfoster/hedl/commits/<sha>/check-runs` shows real check_runs for the matrix names (am_i_done (3.11) through am_i_done (3.14)) on at least one PR head.",
+        "A corrected investigation note in .work/insights/WORK-0030-<topic>.md supersedes the WORK-0029 note's hypothesis with the actual root cause and links back to it.",
+        "am_i_done.py passes."
+      ],
+      "followups": [
+        "After WORK-0030 lands and check_runs are confirmed via `gh api`, apply branch protection on main: required_status_checks with contexts ['am_i_done (3.11)', 'am_i_done (3.12)', 'am_i_done (3.13)', 'am_i_done (3.14)'] and strict: true."
+      ]
+    },
+    {
       "id": "WORK-0016",
       "title": "fix: .hedl-tier ships without a hardcoded developer absolute path",
       "phase": 1,
