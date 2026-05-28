@@ -116,6 +116,78 @@ def _flatten_inits(tiers: Any, tier_name: str) -> list[dict[str, str]]:
     return out
 
 
+class ProjectionContainmentError(Exception):
+    """A tiers.json projection source/target escapes its allowed root."""
+
+
+def _resolve_contained(base: Path, rel: str, *, kind: str, follow: bool) -> Path:
+    """Resolve ``base/rel`` and require the result to stay within ``base``.
+
+    Containment is a parents-membership prefix check (not a string
+    ``startswith`` on raw input), and the base is resolved first so the result
+    never depends on the current working directory. An absolute ``rel`` resets
+    the join to that absolute path, which then fails containment. Raises
+    ProjectionContainmentError on any escape (including empty ``rel``). WORK-0020.
+
+    ``follow`` must mirror how the consuming operation touches the path:
+
+    - ``follow=True`` (sources read by copy2/copytree/read_bytes, and init
+      targets walked by copytree/archive-move): resolve the full path,
+      following a terminal symlink — because those operations read/move
+      *through* it, so the real destination is what must be contained.
+    - ``follow=False`` (projection targets written by _project_one): resolve
+      only the parent and re-attach the leaf, so a terminal symlink at the
+      target is allowed. _project_one unlinks before writing (never writes
+      through the link), and in symlink mode a projection target is itself a
+      symlink that legitimately points into SKILL_ROOT, outside the repo.
+    """
+    if not rel or not str(rel).strip():
+        raise ProjectionContainmentError(f"{kind} path is empty")
+    base_r = base.resolve(strict=False)
+    target = base_r / rel
+    if follow:
+        final = target.resolve(strict=False)
+    else:
+        final = target.parent.resolve(strict=False) / target.name
+    if final != base_r and base_r not in final.parents:
+        raise ProjectionContainmentError(
+            f"{kind} {rel!r} escapes its root {base_r} (resolves to {final})"
+        )
+    return final
+
+
+def _validate_tier_paths(
+    repo: Path, tiers: Any, tier_name: str, *, skill_root: Path = SKILL_ROOT
+) -> None:
+    """Validate that every projection/init source stays within skill_root and
+    every target stays within repo, BEFORE any filesystem write or delete.
+
+    The ``follow`` flag per path mirrors how the operation touches it (see
+    _resolve_contained): sources and init targets follow terminal symlinks
+    (they are read/copied/moved through); projection targets do not (they are
+    unlinked-then-written, and are legitimately symlinks in symlink mode).
+    Collects all violations into a single raised error so the operator sees
+    every offending entry at once. WORK-0020.
+    """
+    errors: list[str] = []
+
+    def _check(base: Path, rel: str, kind: str, follow: bool) -> None:
+        try:
+            _resolve_contained(base, rel, kind=kind, follow=follow)
+        except ProjectionContainmentError as exc:
+            errors.append(str(exc))
+
+    for proj in _flatten_projections(tiers, tier_name):
+        _check(skill_root, proj["source"], "projection source", follow=True)
+        _check(repo, proj["target"], "projection target", follow=False)
+    for entry in _flatten_inits(tiers, tier_name):
+        _check(skill_root, entry["source"], "init source", follow=True)
+        _check(repo, entry["target"], "init target", follow=True)
+
+    if errors:
+        raise ProjectionContainmentError("; ".join(errors))
+
+
 def _use_copy(flag: bool) -> bool:
     return flag or platform.system() == "Windows"
 
@@ -260,6 +332,19 @@ def cmd_install(args: argparse.Namespace) -> int:
         except (json.JSONDecodeError, AttributeError):
             pass
 
+    # Security (WORK-0020): reject any tiers.json projection whose source escapes
+    # SKILL_ROOT or whose target escapes the consumer repo, BEFORE any write or
+    # delete. The downgrade path rmtree's/unlink's targets drawn from the current
+    # tier, so validate both the target tier and (if downgrading) the current one.
+    try:
+        _validate_tier_paths(repo, tiers, target_tier)
+        if current_tier and current_tier in tiers["tiers"] and current_tier != target_tier:
+            _validate_tier_paths(repo, tiers, current_tier)
+    except ProjectionContainmentError as exc:
+        print(f"Refusing to install: tiers.json path escapes containment:\n  {exc}",
+              file=sys.stderr)
+        return 1
+
     if current_tier == target_tier:
         print(f"{prefix}Tier '{target_tier}' already installed — verifying projections.")
     elif (
@@ -332,6 +417,16 @@ def cmd_status(args: argparse.Namespace) -> int:
     print(f"Installed tier: {tier}")
 
     tiers = _load_tiers()
+
+    # Security (WORK-0020): refuse to probe projection paths that escape their
+    # root, mirroring the install/doctor guard.
+    if tier in tiers["tiers"]:
+        try:
+            _validate_tier_paths(repo, tiers, tier)
+        except ProjectionContainmentError as exc:
+            print(f"tiers.json path escapes containment:\n  {exc}", file=sys.stderr)
+            return 1
+
     projections = _flatten_projections(tiers, tier)
 
     print("\nProjections:")
@@ -433,6 +528,16 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     data: Any = json.loads(marker.read_text())
     tier: str = data.get("tier", "unknown")
     tiers = _load_tiers()
+
+    # Security (WORK-0020): refuse to read projection sources/targets that escape
+    # their root, mirroring the install-time guard.
+    if tier in tiers["tiers"]:
+        try:
+            _validate_tier_paths(repo, tiers, tier)
+        except ProjectionContainmentError as exc:
+            print(f"tiers.json path escapes containment:\n  {exc}", file=sys.stderr)
+            return 1
+
     projections = _flatten_projections(tiers, tier)
 
     print(f"\nTier '{tier}' projections:")
