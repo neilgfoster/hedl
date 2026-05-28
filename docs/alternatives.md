@@ -180,7 +180,7 @@ one of these before the window closes; both options are improvements.
 
 ---
 
-## Multi-operator coordination (lightweight assignees/claims; team GitHub Issues backend)
+## Multi-operator coordination (assignees/claims, GitHub Issues backend)
 
 **Status**: watchlisted
 **Hedl evidence**: Team tier section at `skill/hedl/references/tiers.md:116-167`;

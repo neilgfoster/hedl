@@ -1,19 +1,18 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": null,
+    "active_item": "WORK-0029",
     "last_updated": "2026-05-28",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
-  "active": [],
-  "backlog": [
+  "active": [
     {
       "id": "WORK-0029",
       "title": "fix: gate-on-main is currently failing (report.md schema + alternatives.md line-length)",
       "phase": 1,
       "workstream": "WS-ARCH",
       "change_class": "fix",
-      "status": "backlog",
+      "status": "in_progress",
       "priority_band": "BLOCKING",
       "description": "Confirmed 2026-05-28 by running `python3 .github/scripts/am_i_done.py` on a clean checkout of `main`: the gate FAILs with two violations introduced by recently merged PRs. (1) `.work/reviews/repo-health-2026-05-28/report.md` (committed in PR #8) does not match the `review-report` schema enforced by the gate — it is missing the required sections `## Dimension Scores`, `## Blocking Findings`, `## Significant Findings`, `## Minor Findings`, `## Next Actions`, plus the required patterns `log line`, `session type`, `review depth`, `commit SHA`. The report uses different section names instead (`## BLOCKING findings`, `## SIGNIFICANT themes`, etc.). (2) `docs/alternatives.md:183` (committed in PR #10) is 89 chars, exceeding the configured 80-char limit. Until this is fixed, no Phase-1 PR can land green. Either rewrite the report to satisfy the schema, relax the schema to match the prose-style report, or both — and reflow the single long line in alternatives.md. This is itself another instance of validation-theatre captured by WORK-0018: the gate was bypassed (or never re-run) on the merging of PR #8 and #10. Investigate why the gate let those merges land and tighten the merge protection.",
       "acceptance_criteria": [
@@ -23,7 +22,9 @@
         "Investigation note committed to .work/insights/ explaining how PR #8 and PR #10 merged green despite producing a red main, and what (if any) merge-protection adjustment is needed.",
         "am_i_done.py passes."
       ]
-    },
+    }
+  ],
+  "backlog": [
     {
       "id": "WORK-0016",
       "title": "fix: .hedl-tier ships without a hardcoded developer absolute path",
