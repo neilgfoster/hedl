@@ -1,14 +1,16 @@
 {
   "date": "2026-05-28",
   "completed": [
-    "WORK-0017: authored phase-0/phase-1 definitions, transitioned Phase 0 -> 1 via /phase-complete (PR #20, merged).",
-    "WORK-0016: .hedl-tier no longer ships a hardcoded absolute path. Dropped the dead `skill` field (no reader consumed it), git-ignored (/.hedl-tier) and untracked the marker; install.py generates it per-install. Added TestTierMarkerContract (fresh-clone install/status/doctor across all 3 tiers + no-absolute-path guard)."
+    "WORK-0017: phase-0/1 definitions + Phase 0->1 transition (PR #20, merged).",
+    "WORK-0016: .hedl-tier no longer ships a hardcoded absolute path (PR #21, merged).",
+    "WORK-0019: reported startup.sh printf RCE verified as a FALSE POSITIVE (name is a %s data arg, never the format string; never vulnerable in git history). Closed with a regression guard (test_startup_sh.py, incl. a negative meta-test proving it catches the vulnerable form) + evidence note. No code fix needed."
   ],
   "decisions": [
-    "WORK-0016 contract (operator): option (a) gitignore+untrack, and drop the `skill` field entirely (it was dead data — never read; SKILL_ROOT is recomputed from install.py's location).",
-    "Adversarial panel: determinism PASS, scope PASS, security CONDITIONAL (5 MINOR, 0 BLOCKING). Applied 2 in-scope fixes (anchored gitignore, split path assertions). Deferred the unguarded json.loads in cmd_status/cmd_doctor to WORK-0022 (its explicit scope)."
+    "WORK-0019 (operator-approved): close as false-positive with regression guard + evidence note rather than a fabricated fix; attempt shellcheck-py else document manual audit.",
+    "shellcheck unavailable (no network for shellcheck-py wheel); manual audit documented in the insight note covers the format-string risk; the regression test covers it durably.",
+    "Adversarial panel: security-auditor CONDITIONAL (confirmed NO RCE; raised test-coverage findings, all addressed), scope-auditor PASS. Added full-field coverage + negative meta-test; acknowledged prompt-injection-via-fields as a distinct out-of-scope risk class."
   ],
-  "next_item": "WORK-0019",
+  "next_item": "WORK-0020",
   "blockers": [],
-  "notes": "Phase 1. WORK-0016 done on branch fix/hedl-tier-untracked (not yet PR'd). Next BLOCKING: WORK-0019 (startup.sh printf format-string injection). NOTE for WORK-0022: security-auditor confirmed cmd_status (install.py:~328) and cmd_doctor (~431) still call json.loads(marker) unguarded -> traceback on malformed marker; that is WORK-0022's acceptance criterion."
+  "notes": "Phase 1. WORK-0019 done on branch chore/startup-printf-guard (not yet PR'd). Next BLOCKING: WORK-0020 (install.py SKILL_ROOT/repo containment on tier projections — RCE). Possible future tooling item surfaced: wire shellcheck into the gate for all .sh files (deferred, out of WORK-0019 scope). Prompt-injection via .work/ fields in startup output is a noted, unfiled risk class."
 }
