@@ -1,6 +1,6 @@
 # Command reference
 
-Four core slash commands live in `.claude/commands/`. All other workflow operations
+Five core slash commands live in `.claude/commands/`. All other workflow operations
 are accessible via natural language through the Hedl SKILL.md router.
 
 **Full reference**: `skill/hedl/references/commands.md`
@@ -14,6 +14,7 @@ are accessible via natural language through the Hedl SKILL.md router.
 | `/start-session` | Loads context at session start: phase, active item, last session. |
 | `/iterate [supervised]` | Work loop: orient → select tool → act → validate → record. |
 | `/adversarial-review [type]` | Convenes a review panel for the current diff or target. |
+| `/pr-ready` | Drives a branch to an operator-ready PR: gate → PR → CI → review → fix cycle. |
 | `/phase-complete` | Validates the phase DoD, runs a final review, transitions to the next phase. |
 
 Without Claude Code, invoke the same behaviors in natural language — the SKILL.md router

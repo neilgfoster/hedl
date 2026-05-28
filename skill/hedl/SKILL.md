@@ -27,7 +27,7 @@ or use GitHub Issues with parallel execution.
 | "budget", "how many tokens", "review budget", "budget status" | Run `python3 .github/scripts/budget_manager.py` |
 | "repo health", "health check", "how is the project" | Run the repo-health flow |
 | "raise PR", "create PR", "open PR", "submit PR" | Run the pr-raise flow |
-| "PR ready", "check PR", "pre-PR", "is the PR ready" | Run the pr-ready flow |
+| "PR ready", "check PR", "pre-PR", "is the PR ready" | Run `/pr-ready` (the pr-ready flow) |
 | "drain queue", "process deferred reviews", "deferred reviews" | Run the drain-review-queue flow |
 | "scope check", "is this in scope", "scope drift" | Run the scope-check flow |
 | "phase status", "promote phase", "promote next phase" | Run the promote-phase flow |
@@ -89,11 +89,12 @@ installation state.
 
 ## Claude Code integration (optional)
 
-When used with Claude Code, four slash commands are available as aliases for common flows:
+When used with Claude Code, five slash commands are available as aliases for common flows:
 
 - `/start-session` — orient at session start
 - `/iterate [supervised]` — work loop (autonomous or supervised)
 - `/adversarial-review [type]` — convene review panel
+- `/pr-ready` — drive a branch to an operator-ready PR
 - `/phase-complete` — validate phase DoD and transition
 
 Without Claude Code, invoke the same behaviors by describing them in natural language
@@ -135,5 +136,5 @@ on the consumer's stack.
 ## Tiers
 
 **Gate-only** — add `.github/scripts/am_i_done.py` to any repo. Two-minute setup.
-**Lightweight** — add `.work/` state files and the 4 core slash commands.
+**Lightweight** — add `.work/` state files and the 5 core slash commands.
 **Team** — add GitHub Issues backend and worktree parallel execution (see `references/tiers.md`).

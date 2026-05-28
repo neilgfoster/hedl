@@ -3,7 +3,7 @@
 A disciplined engineering workflow distributed as an Agent Skill. Three opt-in tiers:
 
 - **Gate-only** — drop `am_i_done.py` into any repo. Two-minute setup.
-- **Lightweight** — gate + phase discipline + adversarial review + 4 slash commands.
+- **Lightweight** — gate + phase discipline + adversarial review + 5 slash commands.
 - **Team** — gate + GitHub Issues state backend + parallel worktrees with a gate-enforced merge.
 
 ## What you get
@@ -36,7 +36,7 @@ See [Getting started](docs/getting-started.md).
 
 ### Commands and agents
 
-- [Commands](docs/commands.md) -- four core slash commands and the gate
+- [Commands](docs/commands.md) -- five core slash commands and the gate
 - [Commands reference](skill/hedl/references/commands.md) -- full behavior catalog
 - [SKILL.md](skill/hedl/SKILL.md) -- natural-language routing table
 - [Agents](docs/agents.md) -- named review agent roster
