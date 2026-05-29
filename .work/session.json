@@ -1,17 +1,19 @@
 {
-  "date": "2026-05-28",
+  "date": "2026-05-29",
   "completed": [
     "WORK-0017: phase definitions + Phase 0->1 transition (PR #20).",
     "WORK-0016: .hedl-tier no hardcoded absolute path (PR #21).",
     "WORK-0019: startup.sh printf RCE verified false positive; regression guard (PR #22).",
     "WORK-0020: install.py SKILL_ROOT/repo containment on tier projections (PR #23).",
-    "WORK-0021: am_i_done.py [verify] executable allow-list. Audit confirmed a REAL vuln (no allow-list on cmd[0]); fixed with a bare-name allow-list (default pytest/mypy/ruff/npm/pnpm/make + [gate] allowed_commands), interpreter/forwarder denylist, shell-metachar rejection, and cwd containment. Two-cycle security review caught 3 bypasses in the first attempt."
+    "WORK-0021: am_i_done.py [verify] executable allow-list. Audit confirmed a REAL vuln (no allow-list on cmd[0]); fixed with a bare-name allow-list (default pytest/mypy/ruff/npm/pnpm/make + [gate] allowed_commands), interpreter/forwarder denylist, shell-metachar rejection, and cwd containment. Two-cycle security review caught 3 bypasses in the first attempt.",
+    "WORK-0037: ADOPTERS.md (root) + README links. First adopter = Hedl (dogfood). Adversarial panel: historian PASS, scope-auditor FAIL (goal-displacement); FAIL overridden by operator via /change-direction, reason recorded on the work item."
   ],
   "decisions": [
     "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
     "Default allow-list = ticket's set incl. make/npm (operator's informed choice; they run repo-committed scripts, accepted).",
     "Key reframing from review: the allow-list is DEFENSE IN DEPTH, not a complete RCE control — pytest(conftest)/make/npm run committed content; the real untrusted-PR control is GitHub fork-approval. Documented in references/tiers.md and the code comment.",
-    "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers."
+    "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
+    "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
   "next_item": "WORK-0034",
   "blockers": [],
