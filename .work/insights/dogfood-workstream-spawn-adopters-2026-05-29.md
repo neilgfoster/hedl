@@ -4,7 +4,9 @@
 **Discovered during:** bootstrapping a second adopter (Wyrd) in the same session
 that bootstrapped Lume.
 **Status:** Investigated. Decision: **C (hybrid)** — see below. Not a mid-phase
-pivot.
+pivot. **N=2 confirmed** by the per-seed comparison
+(`seed-comparison-lume-wyrd-2026-05-29.md`): the prose template held, divergence
+was healthy, and the WORK-0010/0011 case does not escalate yet.
 
 ## Observation
 
