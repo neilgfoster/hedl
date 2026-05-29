@@ -2,7 +2,7 @@
   "meta": {
     "current_phase": 1,
     "active_item": null,
-    "last_updated": "2026-05-28",
+    "last_updated": "2026-05-29",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
   "active": [],
@@ -506,6 +506,39 @@
         "If built: persona contract mirrors the .claude/agents/ frontmatter schema; deterministic change_class auto-selection (no inference, ADR-003); gate + journey applied per persona; depends on WORK-0010.",
         "am_i_done.py passes."
       ]
+    },
+    {
+      "id": "WORK-0039",
+      "title": "chore: bump ruff 0.15.14 -> 0.15.15 (Dependabot #41, pip)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "chore",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "description": "Dependabot PR #41 (pip ecosystem) bumps ruff 0.15.14->0.15.15 in pyproject.toml only. This edit is identical to and a strict subset of PR #42 (uv ecosystem, WORK-0040), which also updates uv.lock. #41 will be superseded once #42 merges (Dependabot auto-closes superseded PRs). Disposition: confirm the patch bump is safe, then close #41 as superseded by #42 (or merge whichever lands first, leaving the other to auto-close).",
+      "acceptance_criteria": [
+        "ruff 0.15.15 release notes reviewed: patch release; no new/changed lint rules that would newly fail the existing `ruff clean` gate check.",
+        "Disposition recorded: #41 closed as superseded by #42 (WORK-0040), or merged if it lands first.",
+        "am_i_done.py passes on the tracking branch."
+      ]
+    },
+    {
+      "id": "WORK-0040",
+      "title": "chore: bump ruff 0.15.14 -> 0.15.15 (Dependabot #42, uv)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "chore",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "description": "Dependabot PR #42 (uv ecosystem) bumps ruff 0.15.14->0.15.15 in pyproject.toml + uv.lock. This is the complete fix for the ruff bump (manifest + lockfile). Review the patch release, confirm the gate's lint check stays green under the new version, ensure CI passes, merge; PR #41 (WORK-0039) then auto-closes as superseded.",
+      "acceptance_criteria": [
+        "ruff 0.15.15 patch release reviewed; `ruff clean` gate check passes under the new version.",
+        "CI on PR #42 is green.",
+        "PR #42 merged to main; PR #41 superseded/closed.",
+        "am_i_done.py passes on the tracking branch."
+      ]
     }
   ],
   "completed": [
@@ -661,6 +694,56 @@
         "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
       ],
       "completed_date": "2026-05-28"
+    },
+    {
+      "id": "WORK-0037",
+      "title": "docs: add ADOPTERS.md tracking projects using hedl",
+      "phase": 1,
+      "workstream": "WS-PLAN",
+      "change_class": "docs",
+      "status": "complete",
+      "priority_band": "normal",
+      "dependencies": [],
+      "started_date": "2026-05-29",
+      "description": "Add a lightweight ADOPTERS.md at the repo root tracking projects that have adopted and are actively using Hedl. Hedl itself is the first adopter (it is built using its own workflow — the dogfood is the proof). The file is a simple human-maintained markdown list, not a generated artifact; it gives prospective adopters social proof and gives the project a place to record real-world usage as the substrate-release strategy (ADR-013) plays out and Lume comes online as the second adopter.",
+      "acceptance_criteria": [
+        "ADOPTERS.md exists at the repo root with a one-line purpose statement and a table or list of adopters.",
+        "Each entry records at minimum: project name, adoption date, and a short note (tier adopted / how it uses Hedl).",
+        "Hedl is listed as the first adopter, framed as self-hosting/dogfooding.",
+        "README.md links to ADOPTERS.md (and the file invites new adopters to add themselves via PR).",
+        "No new CI gate or generator is added — the file is hand-maintained markdown (minimum code).",
+        "am_i_done.py passes."
+      ],
+      "completed_date": "2026-05-29",
+      "review": {
+        "panel": [
+          "historian: PASS",
+          "scope-auditor: FAIL (goal-displacement; defer to Phase 2)"
+        ],
+        "verdict": "FAIL overridden by operator via /change-direction",
+        "override_reason": "Operator judges ADOPTERS.md a justified standard OSS convention (social proof for the substrate-release strategy, ADR-013) — low-cost hand-maintained markdown, no new gate or generator. The scope-auditor FAIL (anti goal-displacement, phase-1) is recorded, not hidden."
+      }
+    },
+    {
+      "id": "WORK-0038",
+      "title": "chore: bump actions/checkout 5.0.1 -> 6.0.2 (Dependabot #39)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "chore",
+      "status": "complete",
+      "priority_band": "normal",
+      "dependencies": [],
+      "started_date": "2026-05-29",
+      "description": "Dependabot PR #39 bumps actions/checkout from v5.0.1 to v6.0.2 (SHA-pinned) in .github/workflows/am-i-done.yml and codeql.yml. v5->v6 is a major bump; review breaking changes against this repo's basic checkout usage, confirm the pinned SHA actually corresponds to v6.0.2, ensure the am_i_done matrix + CodeQL CI pass on the PR, then merge.",
+      "acceptance_criteria": [
+        "The pinned commit SHA in PR #39 is verified to correspond to actions/checkout v6.0.2 (checked against the upstream tag, not assumed from the comment).",
+        "v6 major-bump breaking changes reviewed against this repo's usage (plain checkout, no reliance on inputs removed/changed in v6).",
+        "CI on PR #39 is green (am_i_done matrix + CodeQL analyze).",
+        "PR #39 merged to main.",
+        "am_i_done.py passes on the tracking branch."
+      ],
+      "completed_date": "2026-05-29",
+      "resolution": "PR #39 merged to main (squash, commit b29a558). checkout v6.0.2 pin verified against upstream tag; v6 breaking changes (Node24, cred-file) no-impact for bare checkout usage."
     }
   ]
 }
