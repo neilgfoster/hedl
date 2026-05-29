@@ -424,8 +424,10 @@
       ],
       "relates_to": [
         "ADR-005",
-        "WORK-0013"
-      ]
+        "WORK-0013",
+        "WORK-0050"
+      ],
+      "note": "Candidate sub-task of WORK-0050 (manifest projection ADR); superseded by it IF that ADR is accepted, otherwise stands alone."
     },
     {
       "id": "WORK-0043",
@@ -448,8 +450,10 @@
         "am_i_done.py passes."
       ],
       "relates_to": [
-        "ADR-009"
-      ]
+        "ADR-009",
+        "WORK-0050"
+      ],
+      "note": "Candidate sub-task of WORK-0050 (manifest projection ADR); superseded by it IF that ADR is accepted, otherwise stands alone."
     },
     {
       "id": "WORK-0044",
@@ -582,6 +586,97 @@
       ],
       "relates_to": [
         "WORK-0023"
+      ]
+    },
+    {
+      "id": "WORK-0050",
+      "title": "feat(arch): installer projection model — adopt a tracked manifest (.hedl-manifest.json) as the Hedl<->adopter contract",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "high",
+      "dependencies": [],
+      "adr_class": true,
+      "description": "ADR-CLASS (Proposed ADR before child work can be specified). MORATORIUM CAVEAT: forced by the Lume bootstrap 2026-05-29 surface — six independent findings collapse to one root cause. Operator decides whether to land the Proposed ADR now or defer the cluster to /phase-complete; if deferred, Lume hand-patches each gap as it surfaces.\n\nROOT: install.py treats projection as a one-shot copy (read tiers.json, walk projections, write/skip, exit) with NO durable record of what was projected, when, from which Hedl source. This produces a family of asymmetric failures observed live during Lume bootstrap: (1=.gitignore/WORK-0042) can't ship adopter-protection files with a recorded reason; (2=drift/WORK-0043) silently overwrites adopter edits — no last-projected state to diff; (6) workflow projections carry preconditions (pyproject.toml + uv.lock) the installer can't audit; (7=.pymarkdown.json) config the outputs depend on but the installer doesn't ship; (8) docs/spec/ files create a downstream README docs-index obligation the installer doesn't track; (9) same-tier re-install can't detect files Hedl has since removed (orphans). All six share one gap: installer state lives only in tiers.json (Hedl-side) + touched paths (adopter-side); nothing records the RELATIONSHIP across versions.\n\nPROPOSED ABSTRACTION: replace minimal .hedl-tier with a tracked-in-git .hedl-manifest.json the installer writes on every action — {schema_version, tier, hedl_version, last_installed_at, projections:{<target>:{source, source_hash, kind:projection|init|starter, ...}}}. Every install/upgrade reads the prior manifest, diffs vs current tiers.json, reconciles. Adopters commit it (multi-operator per ADR-018 sees the same state). Post-manifest each finding becomes: gitignore=append-or-create projection recorded as Hedl-managed block; drift=hash-diff vs manifest source_hash, skip-by-default + --force-overwrite-drift; pyproject/.pymarkdown=starter projections on_exists:skip; docs-index=starter README projection OR docs-index reads manifest to exempt unmodified starter files; orphans=previous_paths - current_paths, log + --remove-orphans (file-deletion blast radius => not auto).\n\nEXISTENTIAL CHALLENGE (ADR-017): prior art is mature — Homebrew install records, apt/dpkg .list, Helm releases, Terraform state, npm package-lock. Risk = over-engineering (Hedl is a workflow scaffold, not a package manager). Challenge: (1) does it already exist (yes, compare the five); (2) manifest vs fixing each finding bespoke — list the bespoke code each individual fix adds and compare; (3) replace .hedl-tier vs compose alongside; (4) migration for existing adopters (synthesize v1 manifest from tiers.json + current source hashes, idempotent, one-time); (5) does committing it leak Hedl version vs invisible-mode (ADR-023).",
+      "acceptance_criteria": [
+        "ADR phase: Proposed ADR-NNNN drafted with prior-art audit (Homebrew, apt/dpkg, Helm, Terraform, npm lockfile + any others); existential-challenger pass (now enforced via WORK-0005); operator decision recorded — ACCEPT (manifest adopted), REJECT (each child finding fixed individually as bespoke logic), or DEFER (document gaps, revisit).",
+        "If ACCEPTED: schema authored (skill/hedl/schemas/ or references/manifest-schema.md MVP); migration from .hedl-tier-only designed; all six child findings (Prompts 1/2/6/7/8/9 = WORK-0042, WORK-0043, + 6/7/8/9) re-scoped to their post-manifest form as sub-tasks.",
+        "If REJECTED: each of Prompts 1/2/6/7/8/9 becomes a standalone current-architecture-bound work item.",
+        "am_i_done.py passes (ADR PR is docs-only).",
+        "POST-ADR IMPLEMENTATION (if accepted): install.py reads prior manifest before action, computes create/update/orphan/starter sets, behaves per kind annotations; --doctor reports manifest schema version + projection health + orphan list; --status reports manifest summary; .hedl-tier->.hedl-manifest.json migration automatic on first re-install; integration test (fresh install -> remove a projection from tiers.json -> re-install detects + removes orphan under --remove-orphans); docs/upgrading.md (WORK-0044) updated to lead with manifest-based upgrade."
+      ],
+      "relates_to": [
+        "WORK-0042",
+        "WORK-0043",
+        "WORK-0044",
+        "WORK-0045",
+        "WORK-0046",
+        "WORK-0013",
+        "WORK-0001",
+        "ADR-018",
+        "ADR-022",
+        "ADR-023"
+      ],
+      "supersedes_if_accepted": [
+        "WORK-0042",
+        "WORK-0043"
+      ]
+    },
+    {
+      "id": "WORK-0051",
+      "title": "feat(arch): GitHub Projects (v2) as a presentation/organization surface alongside the github-issues state backend",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "adr_class": true,
+      "description": "ADR-CLASS (Proposed ADR before implementation). MORATORIUM CAVEAT: operator decides land-now vs defer-to-/phase-complete. Escalates because ADR-022 (PM-system pluggability) assumed GitHub Issues was the right GitHub primitive, and that assumption deserves re-examination BEFORE more github-issues-backend code lands (WORK-0007/0032/0033).\n\nROOT QUESTION: ADR-022 has Hedl iterate on top of a PM system (PM = source of truth); the github-issues backend is in flight. GitHub also offers Projects v2 (boards/tables with custom fields: status, iteration, priority, workstream) organizing Issues/PRs/drafts at higher altitude — many adopter teams already use them. Hedl has no model for them. Options: (A) Projects-as-presentation-layer over github-issues (Issue stays source-of-truth; Project provides visualization + fields Hedl reads/writes from work-item state); (B) Projects-as-separate-backend (state_backend=github-projects; project items are the store); (C) Issues+Projects hybrid (one Issue + one linked Project item, bidirectional sync — best UX, most code); (D) don't support (document why; Issues stays state-of-record, adopters maintain Project view manually).\n\nWhy ADR-class: mis-aligning Hedl's model with how adopter teams organize work in GitHub is friction; interacts with WORK-0007 audit scope, WORK-0032 migration target, ADR-018 multi-operator (Projects' assignee model differs), WORK-0012 adapter contract; hardening github-issues now without resolving this risks duplicated effort or an Issues-only abstraction Projects must retrofit around.\n\nEXISTENTIAL CHALLENGE (ADR-017): compare GitHub native Project automation (Hedl should CONSUME Project state, not recreate the issue-closed->card-moves loop), Linear/Jira board+issue models (github-projects is the GitHub-flavoured version ADR-022 anticipated), existing Projects integrations (project-actions etc., which invert direction). Challenge: (1) prior art; (2) is Issues even the right primitive or should Hedl have started with Projects (Issues are repo-tied; Projects span repos — relates ADR-021 multi-repo deferred); (3) Projects v2 is GraphQL-only — accidental complexity vs the stdlib-only contract (test_stdlib_only.py); use `gh api graphql` to avoid a new dep; (4) adopter benefit large enough for a 2nd backend; (5) effect on ADR-018 multi-operator assignee semantics.\n\nRECOMMENDATION (subject to challenge): (A) Projects-as-presentation-layer, narrow — Issues remain state-of-record (preserves WORK-0007/0032/0033 investment); hedl.toml optional [project] section (project_number + field mappings); gate writes Project field updates on Issue state change; read-direction deferred; gh GraphQL subcommand avoids stdlib violation. Defer (B)(C)(D) explicitly.",
+      "acceptance_criteria": [
+        "ADR phase: Proposed ADR-NNNN drafted with prior-art audit (GitHub native automation, Linear/Jira, existing Projects integrations + others); a concrete adopter scenario worked through ('4-person team using Projects to plan — how does Hedl interact?'); existential-challenger pass; operator decision: accept (A), accept (B/C), reject (D), or defer.",
+        "If accepted: hedl.toml [project] schema extension drafted; GraphQL query set drafted; sync model (eventual/real-time/gate-time) decided.",
+        "If deferred: docs/alternatives.md gains a 'GitHub Projects integration — considered, deferred, conditions to revisit' entry.",
+        "am_i_done.py passes (ADR PR is docs-only).",
+        "POST-ADR IMPLEMENTATION (if accepted): hedl.toml [project] parsed/validated; gh GraphQL helper (skill/hedl/scripts/github_projects.py, stdlib-only, shells to gh); install.py --doctor reports Project connectivity when configured; opt-in field-mapping migration for Issues-only adopters; integration test (fixture Project+Issue; Hedl closes Issue; Project status moves to Done within one am_i_done run); ADR-018 multi-operator race worked through; docs/upgrading.md + getting-started gain a 'Connecting a GitHub Project' section. Does NOT supersede the github-issues backend (Projects layers on)."
+      ],
+      "relates_to": [
+        "ADR-022",
+        "WORK-0007",
+        "WORK-0032",
+        "WORK-0033",
+        "WORK-0012",
+        "ADR-018",
+        "ADR-021"
+      ]
+    },
+    {
+      "id": "WORK-0052",
+      "title": "feat(arch): extend declared-schema validation to generated JSON/TOML/YAML state, config, and the tier manifest",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "adr_class": true,
+      "description": "ADR-CLASS (Proposed ADR before implementation). MORATORIUM CAVEAT: operator decides land-now vs defer-to-/phase-complete.\n\nROOT: Hedl validates markdown (agents/commands/ADRs/reviews) against markdown-schemas.json — strong determinism on LLM-authored content. But the JSON/TOML/YAML files Hedl ITSELF authors are read imperatively (json.load/tomllib.load, catch KeyError, fall back); no declared schema validates them. Asymmetry: stricter rigor on LLM output than on programmatic output — inverted from ADR-003's intent (LLMs are the looser part and should be the constrained one). Also markdown-schemas.json is not itself schema-validated (bootstrap hole); a script writing invalid state (e.g. a renamed field) crashes downstream with opaque KeyError, not 'schema violation at work.json field X required'; projected workflow YAML errors surface post-push (CI round-trip) that Hedl could catch pre-push.\n\nIN SCOPE TO DECIDE: extend declared-schema validation to (1) JSON state (context/work/session/phases*.json); (2) JSON config (dispatch-rules, project-registry, markdown-schemas — validate the schema); (3) tiers.json; (4) hedl.toml; (5) workflow YAML (GitHub Actions schema); (6) PR body (already partly check_pr_template.py). Options: (A) home-rolled JSON validator extending check_markdown_schema.py (stdlib-only, JSON-Schema-subset syntax); (B) adopt jsonschema as a dev dep (raises the stdlib-only-contract question for am_i_done.py — test_stdlib_only.py); (C) hybrid — home-rolled for Hedl-owned formats, jsonschema(dev) for YAML vs the GitHub Actions schema; (D) don't extend (argue validation-by-use; risks contradicting ADR-003); (E) defer YAML/TOML, do JSON only (lowest scope, highest-frequency failure surface).\n\nEXISTENTIAL CHALLENGE (ADR-017): prior art — jsonschema, actionlint (validates Actions YAML far better than a generic schema; Hedl could call it from the gate), taplo (TOML+schema), IDE schema stores; Hedl could VENDOR schemas from these rather than author. Challenge: (1) prior art; (2) are state files deterministic-by-construction (script is the schema) so schemas mainly catch migration drift the install.py migration registry may already cover; (3) does this push Hedl from 'workflow scaffold' toward 'config-driven framework' (maintenance cost grows with surface); (4) cost*frequency per file type (state files likely win; YAML likely loses to actionlint); (5) bootstrap — markdown-schemas.json needs its own meta-schema (land regardless).\n\nRECOMMENDATION (subject to challenge): (C)+(E) scoping — this round home-rolled JSON validator for state files + the three config files + tiers.json; defer hedl.toml; defer YAML to a follow-up adopting actionlint via the gate subprocess pattern (dev-tier); bootstrap fix: markdown-schemas.json gets a declared meta-schema.",
+      "acceptance_criteria": [
+        "ADR phase: Proposed ADR-NNNN drafted with prior-art audit (jsonschema, actionlint, taplo, IDE schema stores); existential-challenger pass; operator decision: A/B/C/D/E/other.",
+        "If accepted: schema files live in skill/hedl/schemas/ (one per declared shape); valid+invalid test fixtures per schema; the gate's `schemas` check expands to load JSON schemas.",
+        "If deferred: docs/alternatives.md gains an entry; ADR-003 docs note the partial scope honestly.",
+        "am_i_done.py passes (ADR PR is docs-only).",
+        "POST-ADR IMPLEMENTATION (if accepted): JSON schemas authored for in-scope files; check_markdown_schema.py grows a sibling check_json_schema.py (or is generalized); the gate `schemas` check covers markdown AND JSON with separate counts; per-schema test (valid passes, broken fails with line/field message); install.py --doctor reports JSON schema health; install.py --migrate flags .work/ files failing the new schema with repair steps; docs/upgrading.md gains a declared-schema section; bootstrap fix — markdown-schemas.json validates against its own meta-schema. Does NOT supersede markdown schema validation; extends it."
+      ],
+      "relates_to": [
+        "ADR-003",
+        "WORK-0050",
+        "WORK-0051",
+        "ADR-022",
+        "WORK-0007",
+        "WORK-0028",
+        "WORK-0032"
       ]
     }
   ],
