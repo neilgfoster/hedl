@@ -33,12 +33,16 @@ same steps with a different seed.
    The `.gitignore` protecting local-only insights artefacts is shipped
    automatically by the installer (WORK-0042) — no manual step.
 6. **PR#1 green.** Open the install PR; drive `am_i_done` to green (it will flag
-   the requirements above until step 5 is complete). Merge.
-7. **Operator-authored seed.** Replace the `EDIT ME` placeholders in
-   `.work/context.json`, `.work/work.json`, `.work/phases/phase-0.json` with the
-   adopter's real project name, description, and first phase. (Today this is a
-   second PR after install; WORK-0046 proposes `--project/--description` seed
-   flags to fold it into PR#1.)
+   the requirements above until step 5 is complete). Author the PR body using the
+   sections in `.github/PULL_REQUEST_TEMPLATE.md` **verbatim** — the gate's
+   template check requires them, and a first-time adopter PR commonly misses them
+   (seed-comparison 2026-05-29, C-2). Merge.
+7. **Operator-authored seed.** Replace the `EDIT ME` placeholders with the
+   adopter's real values — in **`.work/context.json`** (project name, description,
+   `work_item_prefix`), `.work/work.json`, and `.work/phases/phase-0.json`. Verify
+   no `EDIT ME` remains (the gate does not yet catch leftover placeholders —
+   seed-comparison 2026-05-29, C-1). Today this is a second PR after install;
+   WORK-0046 proposes `--project/--description` seed flags to fold it into PR#1.
 8. **First product work item.** Add the adopter's first real backlog item and
    begin `/iterate`.
 

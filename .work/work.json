@@ -685,6 +685,102 @@
         "WORK-0042",
         "WORK-0050"
       ]
+    },
+    {
+      "id": "WORK-0054",
+      "title": "fix: gate flags leftover EDIT ME placeholders in seeded .work/ state files",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "medium",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (C-1): context.json EDIT ME placeholders survived BOTH the Lume and Wyrd seeds and the gate did not catch them, so both needed in-session patching after the seed PR. am_i_done.py should detect leftover 'EDIT ME' (or equivalent placeholder tokens) in the seeded state files (.work/context.json, work.json, phases/phase-0.json) and FAIL with an actionable message, so a half-seeded adopter cannot reach green. Deterministic string/grep check (ADR-003). The bootstrap-adopter template was already strengthened to call out context.json + a 'no EDIT ME remains' verify step (PR that raised this item); this is the gate-enforcement half.",
+      "acceptance_criteria": [
+        "am_i_done.py fails (actionable message) when a tracked .work/ state file still contains an unresolved placeholder token (e.g. 'EDIT ME'); deterministic, no inference.",
+        "Skips gracefully on gate-only installs (no .work/).",
+        "Test covers a placeholder-present FAIL and a fully-seeded PASS.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0046"
+      ]
+    },
+    {
+      "id": "WORK-0055",
+      "title": "docs/feat: surface the PR-template requirement to a new adopter authoring their first PR",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "medium",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (C-2): both the Lume and Wyrd seed PRs missed Hedl's required PULL_REQUEST_TEMPLATE.md sections — the requirement isn't surfaced to a new adopter authoring their first PR. Options: state it in CLAUDE.md / SKILL.md, and/or have install.py print it as a next-step reminder after a team install. The bootstrap-adopter template now mentions using the template sections verbatim (PR that raised this item); this item covers the broader, more-discoverable surfacing (install.py reminder + CLAUDE.md/SKILL.md).",
+      "acceptance_criteria": [
+        "The PR-template requirement is surfaced where a first-time adopter will see it: an install.py post-install next-step reminder AND/OR a CLAUDE.md/SKILL.md note.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0044"
+      ]
+    },
+    {
+      "id": "WORK-0056",
+      "title": "fix: check_pr_template respects context.json work_item_prefix (not hardcoded WORK-)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "high",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (W-1), VERIFIED: check_pr_template.py:77 uses re.search(r'\\bWORK-\\d+\\b', ...) and ignores context.json.work_item_prefix. Wyrd's prefix is WYRD, so its first product PR ('WYRD-001: ...') will FAIL the gate's template check. ADOPTER-BLOCKING for any adopter not using the default WORK prefix. Fix: read work_item_prefix from context.json (default 'WORK') and build the reference regex from it; keep uppercase enforcement; downstream consumers (grep, am_i_done check_commands) must use the same prefix source.",
+      "acceptance_criteria": [
+        "check_pr_template derives the work-item reference pattern from context.json work_item_prefix (default WORK); a PR citing '<PREFIX>-NNNN' passes for that adopter.",
+        "check_commands / any other WORK-prefix consumer in am_i_done.py uses the same prefix source (no second hardcode).",
+        "Tests: WYRD-prefixed PR passes under work_item_prefix=WYRD; a WORK-prefixed PR still passes under the default; wrong-prefix fails.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0027"
+      ]
+    },
+    {
+      "id": "WORK-0057",
+      "title": "fix: branch-naming check is enforced in CI/--pr mode (currently skipped on detached HEAD)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "medium",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (W-2), VERIFIED: check_branch returns None on a detached HEAD (git branch --show-current is empty on the CI merge-ref checkout), so the branch-naming convention is enforced only on local runs, never in --pr/CI — quiet rule erosion. Fix: in --pr mode, derive the head branch name from the PR (e.g. gh pr view N --json headRefName) and validate THAT against the naming convention, rather than skipping on detached HEAD. Keep the local-run path. Preserve the legitimate skip when neither a branch nor a PR ref is available (true gate-only/standalone runs).",
+      "acceptance_criteria": [
+        "In --pr mode the branch-naming convention is validated against the PR head ref, not silently skipped.",
+        "Local (non-CI) runs keep validating the current branch; genuine no-branch/no-PR runs still skip cleanly.",
+        "Test covers a bad PR head-ref name FAILing in --pr mode.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": []
+    },
+    {
+      "id": "WORK-0058",
+      "title": "docs: decide WS-SPIKE — codify, define an adopter-extension contract, or fold into WS-TECH",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "low",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (W-3), VERIFIED: standards.md lists only WS-PLAN/REQ/TECH/ARCH (WS-TECH's description already covers 'spikes, proof-of-concept'). Wyrd introduced WS-SPIKE, not in the canonical set. Decide one of: (a) codify WS-SPIKE into standards.md; (b) define an explicit adopter-extension contract (adopters MAY add their own WS-* workstream-classes, documented how); (c) push back to the canonical four since WS-TECH already covers spikes. Pairs with WORK-0027 (workstream double-definition reconcile) — resolve the canonical-vs-extensible question once.",
+      "acceptance_criteria": [
+        "Decision recorded (codify / adopter-extension contract / fold into WS-TECH) with rationale.",
+        "standards.md reflects the decision (canonical set + whether adopters may extend).",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0027",
+        "WORK-0015"
+      ]
     }
   ],
   "completed": [
