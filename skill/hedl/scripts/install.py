@@ -439,6 +439,64 @@ def _apply_downgrade_delta(
             print(f"  [archived] {init_target}/ -> {init_target}/archive/{timestamp}/")
 
 
+# WORK-0042: ship a delimited, Hedl-managed .gitignore block so an adopter never
+# commits Hedl's local-only insights artefacts (the data written by record_insights
+# /reflect: .work/insights/*.jsonl, metrics.json, proposals/) or Python caches.
+# This applies Hedl's privacy principle (ADR-005 fail-closes /contribute against
+# leaking adopter content) to the adopter's own repo; the "insights are local-only"
+# rule is operational practice not yet formalised in its own ADR — flagged for
+# /phase-complete. The block leaves .work/insights/README.md trackable. Delimited
+# so a re-install is idempotent and the block can be located precisely. This is a
+# self-contained ensure-step, NOT a tiers.json projection — the projection-model
+# overhaul (a tracked manifest, which would also handle versioned block UPDATES and
+# uninstall removal) is WORK-0050.
+_GITIGNORE_BEGIN = "# >>> hedl-managed (local-only artefacts) >>>"
+_GITIGNORE_END = "# <<< hedl-managed <<<"
+_GITIGNORE_BODY = (
+    "# Insights data is local-only — never commit it (privacy; cf. ADR-005).\n"
+    ".work/insights/*.jsonl\n"
+    ".work/insights/metrics.json\n"
+    ".work/insights/proposals/\n"
+    "# Python caches\n"
+    ".pytest_cache/\n"
+    "__pycache__/\n"
+    "*.pyc\n"
+)
+
+
+def _gitignore_block() -> str:
+    return f"{_GITIGNORE_BEGIN}\n{_GITIGNORE_BODY}{_GITIGNORE_END}\n"
+
+
+def _ensure_gitignore_block(repo: Path, *, dry_run: bool) -> str:
+    """Ensure repo/.gitignore contains the Hedl-managed block. Idempotent:
+    creates .gitignore if absent, appends the block if absent, leaves it untouched
+    when the begin marker is already present. Returns a status word.
+
+    Marker-presence idempotency means a future change to _GITIGNORE_BODY is NOT
+    re-applied to an already-marked .gitignore — versioned block updates are
+    deferred to the WORK-0050 manifest. An unreadable .gitignore (binary, or a
+    directory) is skipped with a warning rather than crashing the install."""
+    path = repo / ".gitignore"
+    existing: str | None = None
+    if path.exists():
+        try:
+            existing = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            return "skip (.gitignore unreadable — protect insights manually)"
+    if existing is not None and _GITIGNORE_BEGIN in existing:
+        return "ok"
+    if not existing:  # absent or empty -> create cleanly (no leading blank line)
+        if not dry_run:
+            path.write_text(_gitignore_block())
+        return "would create" if dry_run else "created"
+    if dry_run:
+        return "would append"
+    sep = "" if existing.endswith("\n") else "\n"
+    path.write_text(existing + sep + "\n" + _gitignore_block())
+    return "appended"
+
+
 def cmd_install(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     tiers = _load_tiers()
@@ -513,6 +571,9 @@ def cmd_install(args: argparse.Namespace) -> int:
             src_dir = SKILL_ROOT / entry["source"]
             shutil.copytree(src_dir, tgt_dir)
             print(f"  [created] {entry['target']}/")
+
+    gi_status = _ensure_gitignore_block(repo, dry_run=args.dry_run)
+    print(f"  [{gi_status}] .gitignore (hedl-managed block, ADR-005)")
 
     if target_tier == "team":
         if shutil.which("gh"):

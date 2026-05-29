@@ -1,11 +1,39 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": null,
+    "active_item": "WORK-0042",
     "last_updated": "2026-05-29",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
-  "active": [],
+  "active": [
+    {
+      "id": "WORK-0042",
+      "title": "fix: install.py ships a baseline .gitignore protecting ADR-005 local-only artefacts",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "active",
+      "priority_band": "high",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29: a fresh `--tier team --copy` install produces NO .gitignore in the adopter repo. The installer projects .claudeignore (Claude Code visibility) but nothing for git. If the adopter enables [insights] enabled = true in hedl.toml, .work/insights/*.jsonl and events.jsonl become eligible to commit — violating ADR-005's 'insights data is local-only; never commit' contract. Hedl itself only gained the relevant .gitignore entries via PR#12 (citing ADR-005), after events.jsonl was almost committed; an adopter following the documented install path has no equivalent protection. Distinct from WORK-0013 (--invisible mode hides Hedl wholesale); this protects ADR-005 artefacts in normal (visible) installs.",
+      "acceptance_criteria": [
+        "install.py projects a .gitignore entry (idempotent: appends a delimited Hedl-managed block if .gitignore exists; creates the file otherwise).",
+        "Block protects, minimally: .work/insights/*.jsonl, events.jsonl, .pytest_cache/, __pycache__/, *.pyc.",
+        "Verify on a fresh empty repo: install.py --tier team --copy produces a .gitignore that prevents `git add .work/insights/test.jsonl` from staging the file.",
+        "ADR-005 referenced in the projection comment so adopters see the why.",
+        "Test added to test_install.py covering the gitignore projection on fresh-install AND existing-gitignore paths.",
+        "am_i_done.py passes.",
+        "Distinct from WORK-0013 (--invisible mode) — acknowledged overlap, different scope."
+      ],
+      "relates_to": [
+        "ADR-005",
+        "WORK-0013",
+        "WORK-0050"
+      ],
+      "note": "Candidate sub-task of WORK-0050 (manifest projection ADR); superseded by it IF that ADR is accepted, otherwise stands alone.",
+      "started_date": "2026-05-29"
+    }
+  ],
   "backlog": [
     {
       "id": "WORK-0018",
@@ -402,32 +430,6 @@
         "Behaviour documented where the template check is described (pr-ready.md / references/commands.md or check_pr_template docstring).",
         "am_i_done.py passes."
       ]
-    },
-    {
-      "id": "WORK-0042",
-      "title": "fix: install.py ships a baseline .gitignore protecting ADR-005 local-only artefacts",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "high",
-      "dependencies": [],
-      "description": "Lume bootstrap 2026-05-29: a fresh `--tier team --copy` install produces NO .gitignore in the adopter repo. The installer projects .claudeignore (Claude Code visibility) but nothing for git. If the adopter enables [insights] enabled = true in hedl.toml, .work/insights/*.jsonl and events.jsonl become eligible to commit — violating ADR-005's 'insights data is local-only; never commit' contract. Hedl itself only gained the relevant .gitignore entries via PR#12 (citing ADR-005), after events.jsonl was almost committed; an adopter following the documented install path has no equivalent protection. Distinct from WORK-0013 (--invisible mode hides Hedl wholesale); this protects ADR-005 artefacts in normal (visible) installs.",
-      "acceptance_criteria": [
-        "install.py projects a .gitignore entry (idempotent: appends a delimited Hedl-managed block if .gitignore exists; creates the file otherwise).",
-        "Block protects, minimally: .work/insights/*.jsonl, events.jsonl, .pytest_cache/, __pycache__/, *.pyc.",
-        "Verify on a fresh empty repo: install.py --tier team --copy produces a .gitignore that prevents `git add .work/insights/test.jsonl` from staging the file.",
-        "ADR-005 referenced in the projection comment so adopters see the why.",
-        "Test added to test_install.py covering the gitignore projection on fresh-install AND existing-gitignore paths.",
-        "am_i_done.py passes.",
-        "Distinct from WORK-0013 (--invisible mode) — acknowledged overlap, different scope."
-      ],
-      "relates_to": [
-        "ADR-005",
-        "WORK-0013",
-        "WORK-0050"
-      ],
-      "note": "Candidate sub-task of WORK-0050 (manifest projection ADR); superseded by it IF that ADR is accepted, otherwise stands alone."
     },
     {
       "id": "WORK-0043",

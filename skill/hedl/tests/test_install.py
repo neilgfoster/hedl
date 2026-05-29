@@ -1040,5 +1040,91 @@ class TestInstallGuards(unittest.TestCase):
         self.assertIn("cycle", buf.getvalue().lower())
 
 
+class TestGitignoreProjection(unittest.TestCase):
+    """WORK-0042 / ADR-005: install ships a .gitignore block protecting
+    local-only artefacts; idempotent; preserves existing content."""
+
+    def setUp(self) -> None:
+        self._td = tempfile.TemporaryDirectory()
+        self.repo = pathlib.Path(self._td.name)
+        self.gi = self.repo / ".gitignore"
+
+    def tearDown(self) -> None:
+        self._td.cleanup()
+
+    def _install(self, **kw: Any) -> None:
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            M.cmd_install(_ns(tier="team", repo=str(self.repo), copy=True, **kw))
+
+    def test_fresh_install_creates_gitignore(self) -> None:
+        self._install()
+        self.assertTrue(self.gi.exists())
+        txt = self.gi.read_text()
+        for needle in (".work/insights/*.jsonl", ".work/insights/metrics.json",
+                       ".work/insights/proposals/", ".pytest_cache/", "__pycache__/",
+                       "*.pyc", "ADR-005"):
+            self.assertIn(needle, txt)
+        # The over-broad unanchored 'events.jsonl' line must NOT be present
+        # (it is covered by the anchored .work/insights/*.jsonl glob).
+        self.assertNotIn("\nevents.jsonl\n", txt)
+
+    def test_empty_gitignore_gets_clean_block(self) -> None:
+        self.gi.write_text("")  # zero-byte existing file
+        self._install()
+        txt = self.gi.read_text()
+        self.assertTrue(txt.startswith(M._GITIGNORE_BEGIN), "no leading blank line")
+        self.assertEqual(txt.count(M._GITIGNORE_BEGIN), 1)
+
+    def test_unreadable_gitignore_skips_without_crash(self) -> None:
+        # .gitignore as a directory -> read_text raises; install must not crash.
+        (self.repo / ".gitignore").mkdir()
+        status = M._ensure_gitignore_block(self.repo, dry_run=False)
+        self.assertIn("skip", status)
+        self.assertTrue((self.repo / ".gitignore").is_dir())  # untouched
+
+    def test_existing_gitignore_appended_preserving_content(self) -> None:
+        self.gi.write_text("# my stuff\nnode_modules/\n")
+        self._install()
+        txt = self.gi.read_text()
+        self.assertIn("node_modules/", txt)            # preserved
+        self.assertIn(".work/insights/*.jsonl", txt)   # appended
+
+    def test_idempotent_no_duplicate_block(self) -> None:
+        self._install()
+        self._install()
+        self.assertEqual(self.gi.read_text().count(M._GITIGNORE_BEGIN), 1)
+
+    def test_dry_run_writes_nothing(self) -> None:
+        self._install(dry_run=True)
+        self.assertFalse(self.gi.exists())
+
+    def test_git_actually_ignores_insights(self) -> None:
+        import subprocess
+        if not shutil.which("git"):
+            self.skipTest("git not available")
+        subprocess.run(["git", "init", "-q", str(self.repo)], check=True)
+        self._install()
+        (self.repo / ".work" / "insights").mkdir(parents=True, exist_ok=True)
+        (self.repo / ".work" / "insights" / "events.jsonl").write_text("{}\n")
+        (self.repo / ".work" / "insights" / "metrics.json").write_text("{}\n")
+        (self.repo / ".work" / "insights" / "proposals").mkdir(exist_ok=True)
+        (self.repo / ".work" / "insights" / "proposals" / "p1.json").write_text("{}\n")
+        for rel in (".work/insights/events.jsonl", ".work/insights/metrics.json",
+                    ".work/insights/proposals/p1.json"):
+            r = subprocess.run(
+                ["git", "-C", str(self.repo), "check-ignore", rel],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(r.returncode, 0, f"git should ignore {rel}")
+        # README under .work/insights/ must remain trackable (NOT ignored).
+        (self.repo / ".work" / "insights" / "README.md").write_text("# notes\n")
+        r = subprocess.run(
+            ["git", "-C", str(self.repo), "check-ignore", ".work/insights/README.md"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(r.returncode, 1, ".work/insights/README.md must stay trackable")
+
+
 if __name__ == "__main__":
     unittest.main()

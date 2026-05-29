@@ -1,0 +1,32 @@
+{
+  "work_item": "WORK-0042",
+  "date": "2026-05-29",
+  "task_type": "architecture",
+  "panel": ["security-auditor", "edge-case-hunter", "historian"],
+  "cycles": 2,
+  "scope_note": "Self-contained _ensure_gitignore_block step, NOT a tiers.json projection change — the projection-model overhaul (versioned block updates + uninstall removal) is WORK-0050. Implementation verified not to pre-empt it.",
+  "cycle_1": {
+    "historian": "BLOCKING — code/comment cited ADR-005 as containing an 'insights local-only; never commit' contract; ADR-005 is actually /contribute privacy fail-close. False citation (also pre-existing in Hedl's own .gitignore from PR#12).",
+    "security-auditor": "SIGNIFICANT — metrics.json + proposals/ (reflect.py outputs) not covered; unanchored 'events.jsonl' over-broad/redundant. MINOR — read_text crash on directory/binary .gitignore.",
+    "edge-case-hunter": "BLOCKING — IsADirectoryError crash when .gitignore is a directory. SIGNIFICANT — stale-block-body never re-applied. MINOR — empty-file leading blank; uninstall doesn't remove block; test gaps."
+  },
+  "fixes": [
+    "Reworded the citation: ADR-005 is Hedl's privacy principle (fail-closes /contribute); 'insights local-only' is operational practice not yet formalised — flagged for /phase-complete. No longer claims ADR-005 contains the literal rule. Hedl's own .gitignore comment aligned.",
+    "Coverage: added .work/insights/metrics.json + .work/insights/proposals/; removed the over-broad bare 'events.jsonl' (covered by the anchored .work/insights/*.jsonl glob). .md notes + README + .gitkeep stay trackable.",
+    "Guarded read in try/except (OSError, UnicodeDecodeError) -> clean 'skip' status, no crash on a directory/binary .gitignore.",
+    "Empty-or-absent .gitignore -> clean create (no leading blank line).",
+    "Docstring documents the marker-presence idempotency limitation (versioned updates deferred to WORK-0050).",
+    "Dogfood: Hedl's own .gitignore extended to metrics.json + proposals/ (it only had *.jsonl).",
+    "Tests: metrics.json/proposals coverage, empty-file clean block, unreadable-skip, README-stays-trackable, and a git check-ignore functional test across events.jsonl/metrics.json/proposals + README."
+  ],
+  "cycle_2": {
+    "historian": "PASS — citation accurate; ACs 1-7 satisfied; scope correct (no WORK-0050 pre-emption; distinct from WORK-0013).",
+    "security-auditor": "CONDITIONAL — all cycle-1 RESOLVED; new MINORs cosmetic (status word 'created' for an empty-existing file).",
+    "edge-case-hunter": "CONDITIONAL — directory crash + empty-file RESOLVED+tested; stale-body accepted+documented; 'double-blank append' claim VERIFIED INCORRECT (both branches yield exactly one blank line); proposals/ functional-test gap CLOSED this cycle."
+  },
+  "accepted_minor": [
+    "Status word 'created' when overwriting an empty existing .gitignore (cosmetic).",
+    "Uninstall/downgrade does not remove the block (harmless additive; precise removal is WORK-0050's manifest)."
+  ],
+  "verdict": "RESOLVED — zero BLOCKING/SIGNIFICANT after 2 cycles; ADR-005 citation corrected, coverage completed, crash guarded, dogfood aligned."
+}
