@@ -851,5 +851,62 @@ class TestStateBackendMigration(unittest.TestCase):
         self.assertFalse((self.repo / "hedl.toml").exists())
 
 
+class TestTierDescriptionMatchesProjections(unittest.TestCase):
+    """WORK-0026 (AC3): a tiers.json description must not diverge from the tier's
+    actual projection counts/paths, across all three tiers. Each assertion derives
+    its expectation from M._flatten_projections (real install.py behaviour), so the
+    test cannot pass by editing a hardcoded copy — changing a projection without
+    reconciling the description fails the relevant check."""
+
+    def setUp(self) -> None:
+        self.tiers: Any = M._load_tiers()
+
+    def _targets(self, tier: str) -> list[str]:
+        return [p["target"] for p in M._flatten_projections(self.tiers, tier)]
+
+    def test_gate_description_matches_projections(self) -> None:
+        desc = self.tiers["tiers"]["gate"]["description"].lower()
+        targets = self._targets("gate")
+        # The description names CI workflow + PR template + scripts, and no Claude Code.
+        self.assertTrue(any(t.startswith(".github/workflows/") for t in targets))
+        self.assertIn(".github/PULL_REQUEST_TEMPLATE.md", targets)
+        self.assertTrue(any(t.startswith(".github/scripts/") for t in targets))
+        self.assertFalse(any(t.startswith(".claude/") for t in targets),
+                         "gate must project no Claude Code files (its description says so)")
+        self.assertIn("no claude code", desc)
+
+    def test_lightweight_description_counts_match_projections(self) -> None:
+        targets = self._targets("lightweight")
+        n_cmds = sum(1 for t in targets if t.startswith(".claude/commands/"))
+        n_agents = sum(1 for t in targets if t.startswith(".claude/agents/"))
+        desc = self.tiers["tiers"]["lightweight"]["description"].lower()
+        # The stated counts must equal the actual projected counts.
+        self.assertIn(f"{n_cmds} slash command", desc,
+                      f"lightweight projects {n_cmds} commands; reconcile its description (WORK-0026)")
+        self.assertIn(f"{n_agents} adversarial agent", desc,
+                      f"lightweight projects {n_agents} agents; reconcile its description (WORK-0026)")
+
+    def test_team_projects_only_claude_code_integration(self) -> None:
+        # Intentionally checks the team-OWN delta (not the flattened/inherited set):
+        # the description claims "Lightweight + Claude Code integration", so the delta
+        # is what must be Claude Code files. Inheritance consistency (team superset of
+        # lightweight) is covered separately in TestTiersJson.
+        own = {p["target"] for p in self.tiers["tiers"]["team"]["projections"]}
+        self.assertTrue(
+            all(t.startswith(".claude/") or t == ".claudeignore" for t in own),
+            f"team projects a non-Claude-Code file; reconcile its description (WORK-0026): {own}",
+        )
+        desc = self.tiers["tiers"]["team"]["description"].lower()
+        self.assertIn("claude code", desc)
+        # github-issues / worktrees are config/workflow capabilities, not projected
+        # files; if named, they must be qualified so the tier is not implied to install
+        # them. Guards against re-introducing the WORK-0026 drift.
+        if "github issues" in desc:
+            self.assertTrue(
+                any(w in desc for w in ("config", "planned", "read")),
+                "team description names GitHub Issues without marking it config/read/planned (WORK-0026)",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

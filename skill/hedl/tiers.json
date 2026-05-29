@@ -44,7 +44,7 @@
       ]
     },
     "team": {
-      "description": "Lightweight + Claude Code hooks, startup script, and claudeignore.",
+      "description": "Lightweight + Claude Code integration: post-edit lint, stop-reminder and insight hooks, settings.json, session startup script, and .claudeignore. This tier also unlocks the parallel-worktree gate workflow (am_i_done.py --streams) and the GitHub Issues read backend (enabled via hedl.toml config, not a projected file); full GitHub Issues write-back is planned (WORK-0012).",
       "includes": ["lightweight"],
       "projections": [
         { "source": "integrations/claude-code/scripts/posttooluse_lint.py", "target": ".claude/scripts/posttooluse_lint.py" },

@@ -8,22 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0026",
-      "title": "fix: tiers.json team-tier description matches actual projections",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — `tiers.json:46` describes team tier as 'Lightweight + Claude Code hooks'; README, tiers.md, and team-tier.md describe team tier as 'Lightweight + GitHub Issues backend + parallel worktrees with gate-enforced merge'; `install.py --tier team` actually only projects six Claude Code files. Three sources, three different stories. Audit what team tier actually delivers today, align tiers.json's description to that reality, and align the prose docs to the same reality (or, if the docs describe the intended end state, mark those parts explicitly as 'planned' with the work-item that delivers them). Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state.",
-      "acceptance_criteria": [
-        "tiers.json team description matches what `install.py --tier team` actually projects.",
-        "README, tiers.md, team-tier.md describe the same team tier or clearly mark forward-looking elements as planned (with a referenced work item).",
-        "Test or doctor check fails if tiers.json description diverges from actual projection counts/paths.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0028",
       "title": "docs: fix count drift (6 vs 7 core agents; 15 vs 18 commands; panel of 8)",
       "phase": 1,
@@ -773,6 +757,25 @@
       "started_date": "2026-05-29",
       "completed_date": "2026-05-29",
       "resolution": "Implemented ADR-022 (operator decision): state_backend reads from hedl.toml [state] backend; install.py state schema 1->2 migration relocates any context.json value with a hardened crash-safe writer. ADR-022 kept Accepted + implementation note. WORK-0032/0033 ACs reconciled. This repo migrated to schema 2. Adversarial review 2 cycles, zero BLOCKING."
+    },
+    {
+      "id": "WORK-0026",
+      "title": "fix: tiers.json team-tier description matches actual projections",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — `tiers.json:46` describes team tier as 'Lightweight + Claude Code hooks'; README, tiers.md, and team-tier.md describe team tier as 'Lightweight + GitHub Issues backend + parallel worktrees with gate-enforced merge'; `install.py --tier team` actually only projects six Claude Code files. Three sources, three different stories. Audit what team tier actually delivers today, align tiers.json's description to that reality, and align the prose docs to the same reality (or, if the docs describe the intended end state, mark those parts explicitly as 'planned' with the work-item that delivers them). Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state.",
+      "acceptance_criteria": [
+        "tiers.json team description matches what `install.py --tier team` actually projects.",
+        "README, tiers.md, team-tier.md describe the same team tier or clearly mark forward-looking elements as planned (with a referenced work item).",
+        "Test or doctor check fails if tiers.json description diverges from actual projection counts/paths.",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-29",
+      "completed_date": "2026-05-29",
+      "resolution": "Reconciled the team-tier description across tiers.json, README, tiers.md, team-tier.md, getting-started.md to one story (Claude Code integration projected; GH Issues read backend + worktree workflow unlocked; write-back planned WORK-0012). Added AC3 guard test across all 3 tiers, derived from real projections. Adversarial review 2 cycles, zero BLOCKING."
     }
   ]
 }

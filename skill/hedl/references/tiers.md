@@ -1,8 +1,8 @@
 # Hedl Adoption Tiers
 
-Three tiers — drop in just the gate, add lightweight specs, or use GitHub Issues with
-parallel execution. Each tier is a superset of the previous. Users opt up only when
-the work warrants it.
+Three tiers — drop in just the gate, add lightweight specs, or add Claude Code
+integration with the GitHub Issues read backend and parallel-worktree workflow. Each
+tier is a superset of the previous. Users opt up only when the work warrants it.
 
 ---
 
@@ -134,13 +134,22 @@ docs/spec/                    # adopter's spec files (templates symlinked from s
 
 ---
 
-## Tier 3 — Team (GitHub Issues backend + parallel execution)
+## Tier 3 — Team (Claude Code integration + GitHub Issues + parallel execution)
 
-**What it is**: Tier 2 + GitHub Issues as the authoritative state source + parallel worktrees.
+**What it is**: Tier 2 + Claude Code integration — post-edit lint, stop-reminder and
+insight hooks, `settings.json`, a session startup script, and `.claudeignore` (these
+are what `install.py --tier team` projects). The tier also unlocks two capabilities:
+the GitHub Issues read backend (config; full write-back planned in WORK-0012) and the
+parallel-worktree gate workflow.
 
 ### GitHub Issues backend
 
-Replaces `.work/work.json` as the source of truth for work items. Benefits:
+**Today**: the gate (`am_i_done.py`) reads open GitHub Issues titled `WORK-NNNN: ...`
+as the live work-item set for its stale-ID check, when enabled via `hedl.toml`.
+**Planned (WORK-0012)**: a full backend adapter that makes GitHub Issues the
+authoritative state source — write-back of status/journey, claim/release, and a
+migration off `.work/work.json`. Until that lands, `.work/work.json` stays the source
+of truth even with the read backend enabled. What the full adapter targets:
 - Recoverable state (no local JSON corruption risk)
 - Audit trail (issue events, comments, assignment history)
 - Handoff between agents and humans
@@ -177,13 +186,17 @@ git worktree add .worktrees/stream-B feat/stream-B
 # Each stream runs am_i_done.py before merging
 python3 .github/scripts/am_i_done.py  # from within .worktrees/stream-A
 
+# Check no two streams touch the same file before merging
+python3 .github/scripts/am_i_done.py --streams feat/stream-A,feat/stream-B
+
 # Merge only on clean gate exit
 git merge feat/stream-A  # only if gate passed
 ```
 
-**Correctness guarantee**: strict per-stream file scoping enforced by the gate, not by
-"check git status and wait." The gate validates that each stream's diff does not overlap
-with parallel streams. Parallel writes to the same file are a gate violation, not a warning.
+**Correctness guarantee**: strict per-stream file scoping enforced by the gate
+(`--streams`), not by "check git status and wait." The gate validates that each stream's
+diff does not overlap with parallel streams. Parallel writes to the same file are a gate
+violation, not a warning.
 
 **Economics**: gate runs at merge, not per commit. The dispatcher's Haiku-by-default economics
 apply to stream-level reviews — one review panel per stream merge, not per commit.
