@@ -1,29 +1,11 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": "WORK-0024",
+    "active_item": null,
     "last_updated": "2026-05-29",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
-  "active": [
-    {
-      "id": "WORK-0024",
-      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "active",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2. Promoted from later in Phase 1 for drift-cleanup batching alongside WORK-0026/0028. NOTE: unlike those two (doc/count drift in review-library.md / commands.md / tiers.json), this item reconciles ADR-022 state_backend storage (hedl.toml vs .work/context.json) and may require code + a one-shot migration, not just a doc edit — it likely warrants its own PR rather than the doc batch.",
-      "acceptance_criteria": [
-        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
-        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
-        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
-        "am_i_done.py passes."
-      ],
-      "started_date": "2026-05-29"
-    }
-  ],
+  "active": [],
   "backlog": [
     {
       "id": "WORK-0026",
@@ -754,6 +736,25 @@
       "started_date": "2026-05-29",
       "completed_date": "2026-05-29",
       "resolution": "iterate.md extended through the /pr-ready loop; stop-point moved to PR-open/merge-ready (ADR-025). Branch-protection assertion + /stuck recovery added per cycle-1 adversarial review. Delivered end-to-end from one /iterate invocation (AC6 proof)."
+    },
+    {
+      "id": "WORK-0024",
+      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2. Promoted from later in Phase 1 for drift-cleanup batching alongside WORK-0026/0028. NOTE: unlike those two (doc/count drift in review-library.md / commands.md / tiers.json), this item reconciles ADR-022 state_backend storage (hedl.toml vs .work/context.json) and may require code + a one-shot migration, not just a doc edit — it likely warrants its own PR rather than the doc batch.",
+      "acceptance_criteria": [
+        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
+        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
+        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-29",
+      "completed_date": "2026-05-29",
+      "resolution": "Implemented ADR-022 (operator decision): state_backend reads from hedl.toml [state] backend; install.py state schema 1->2 migration relocates any context.json value with a hardened crash-safe writer. ADR-022 kept Accepted + implementation note. WORK-0032/0033 ACs reconciled. This repo migrated to schema 2. Adversarial review 2 cycles, zero BLOCKING."
     }
   ]
 }
