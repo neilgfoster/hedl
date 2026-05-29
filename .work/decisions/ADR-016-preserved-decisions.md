@@ -24,7 +24,8 @@ is progressive enhancement, not duplication.
 ### 2. "Seven-subagent reviews cost ~$0.20"
 
 **Overstated.** The dispatcher (`dispatch-rules.json`) targets 3–4 agents
-for typical diffs and caps at 5. The full panel of 8 only runs on
+for typical diffs and caps at 5. The full panel of 8 (7 named agents today;
+the 8th, `existential-challenger`, lands via WORK-0005) only runs on
 `/repo-health`. Citing the cap as the typical case misrepresents the
 common-path cost.
 
