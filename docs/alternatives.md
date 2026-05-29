@@ -70,7 +70,7 @@ not any single check — is the differentiator.
 ## Adversarial review panel (named agents + library prompts + dispatcher)
 
 **Status**: watchlisted
-**Hedl evidence**: 7 core agents in `.claude/agents/` and 19 reference prompts
+**Hedl evidence**: 8 core agents in `.claude/agents/` and 18 reference prompts
 in `skill/hedl/references/review-library.md`; dispatch model documented at
 `skill/hedl/references/agents.md:17-39`; pattern-mandatory floor enforced via
 `dispatch-rules.json` and verified by `am_i_done.py --check dispatch`.

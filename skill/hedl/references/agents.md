@@ -1,6 +1,6 @@
 # Review personas
 
-Seven core agents live as named files in `.claude/agents/`. Nineteen additional reviewer
+Eight core agents live as named files in `.claude/agents/`. Eighteen additional reviewer
 prompts are available as composable reference prompts in
 `skill/hedl/references/review-library.md`. The dispatcher reads the reference
 library on demand to instantiate non-core reviewers.
@@ -34,7 +34,7 @@ Three selection mechanisms — all deliberate:
 It is not itself reviewed; it reviews.
 
 Reference library agents (see table below) are instantiated on demand by the
-dispatcher from `skill/hedl/references/review-library.md`. None duplicate the 7
+dispatcher from `skill/hedl/references/review-library.md`. None duplicate the 8
 core agents — they cover orthogonal risk categories.
 
 ---
@@ -50,6 +50,7 @@ core agents — they cover orthogonal risk categories.
 | `simplicity-enforcer` | Haiku | Over-engineering, premature abstraction, needless code |
 | `edge-case-hunter` | Sonnet | Inputs, states, and sequences that break assumptions |
 | `determinism-auditor` | Haiku | LLM inference replacing deterministic functions (Principle 1) |
+| `existential-challenger` | Sonnet | Process-over-product, goal displacement, validation theatre (ADR-017) |
 
 ---
 
@@ -70,7 +71,6 @@ passes the relevant prompt + scope context to a sub-agent call.
 | `devil-advocate` | Sonnet | Significant architectural decision |
 | `drift-detector` | Haiku | Self-review when `.work/reviews/` has 5+ records |
 | `evidence-checker` | Haiku | Phase completion review |
-| `existential-challenger` | Sonnet | Self-review or phase transition |
 | `future-engineer` | Haiku | Interfaces, schemas, or data formats external systems consume |
 | `model-optimizer` | Haiku | Any agent definition or model routing config changed |
 | `new-engineer` | Haiku | New public APIs, commands, or comprehensibility review |

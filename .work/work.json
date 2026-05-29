@@ -24,24 +24,6 @@
       ]
     },
     {
-      "id": "WORK-0005",
-      "title": "feat: promote existential-challenger to a named agent and add to dispatch-rules",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "ADR-017 requires `existential-challenger` to be a mandatory reviewer for any `.work/decisions/*.md` write. Currently `existential-challenger` exists only as a prompt in `skill/hedl/references/review-library.md`; the gate's config check expects mandatory agents to be named agents in `.claude/agents/`. Repo-health 2026-05-28 reaffirms this: `dispatch-rules.json` maps `^\\.work/decisions/` to `historian` only. Mirror the `determinism-auditor` promotion pattern: create `.claude/agents/existential-challenger.md` from the library prompt, remove the duplicate from review-library.md (library drops from 19 to 18 prompts), add `existential-challenger` to `.work/config/dispatch-rules.json` as mandatory for `.work/decisions/**` and `docs/alternatives.md` paths, and update all counts that reference '7 named agents' / '19 composable prompts' to '8' / '18' across README, tiers.md, docs/agents.md, and the generated SKILL.md section. AUDIT/ENFORCEMENT GAP (mid-Phase-1 dogfood learning #5, 2026-05-28): ADR-017 makes existential-challenger a mandatory reviewer for every .work/decisions/*.md write, but the rule exists ahead of its enforcement mechanism — ADRs 025-028 (PR #26) landed without a gate-enforced existential-challenger review because it is not yet a named agent. Until this item promotes it, the discipline must be upheld manually.",
-      "acceptance_criteria": [
-        "Stopgap until promotion lands: existential-challenger is invoked manually (from the review library) on every .work/decisions/*.md write, and that invocation is recorded in the PR body. Document this operator responsibility so the ADR-017 discipline holds before the named-agent promotion.",
-        "`.claude/agents/existential-challenger.md` exists with valid frontmatter (mirror format of determinism-auditor).",
-        "The duplicate prompt is removed from review-library.md (library count drops to 18).",
-        "`existential-challenger` is in dispatch-rules.json as mandatory for `.work/decisions/**` and `docs/alternatives.md`.",
-        "All count references updated to '8 named agents' / '18 composable prompts' across README, tiers.md, docs/agents.md, generated SKILL.md.",
-        "am_i_done.py passes including the config check."
-      ]
-    },
-    {
       "id": "WORK-0009",
       "title": "docs: update Principle 4 in CLAUDE.md from 'one work item at a time' to 'one per operator'",
       "phase": 1,
@@ -966,6 +948,27 @@
       "started_date": "2026-05-29",
       "completed_date": "2026-05-29",
       "resolution": "Audit-first: real crash -> FIX. _parse_version validates --current-version against a canonical X.Y.Z regex (\\Z end-anchor, no leading zeros, re.ASCII); main() emits a JSON error envelope + non-zero exit instead of a traceback. Adversarial review caught a BLOCKING trailing-newline bypass + leading-zero coercion; both fixed. 2 cycles."
+    },
+    {
+      "id": "WORK-0005",
+      "title": "feat: promote existential-challenger to a named agent and add to dispatch-rules",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "ADR-017 requires `existential-challenger` to be a mandatory reviewer for any `.work/decisions/*.md` write. Currently `existential-challenger` exists only as a prompt in `skill/hedl/references/review-library.md`; the gate's config check expects mandatory agents to be named agents in `.claude/agents/`. Repo-health 2026-05-28 reaffirms this: `dispatch-rules.json` maps `^\\.work/decisions/` to `historian` only. Mirror the `determinism-auditor` promotion pattern: create `.claude/agents/existential-challenger.md` from the library prompt, remove the duplicate from review-library.md (library drops from 19 to 18 prompts), add `existential-challenger` to `.work/config/dispatch-rules.json` as mandatory for `.work/decisions/**` and `docs/alternatives.md` paths, and update all counts that reference '7 named agents' / '19 composable prompts' to '8' / '18' across README, tiers.md, docs/agents.md, and the generated SKILL.md section. AUDIT/ENFORCEMENT GAP (mid-Phase-1 dogfood learning #5, 2026-05-28): ADR-017 makes existential-challenger a mandatory reviewer for every .work/decisions/*.md write, but the rule exists ahead of its enforcement mechanism — ADRs 025-028 (PR #26) landed without a gate-enforced existential-challenger review because it is not yet a named agent. Until this item promotes it, the discipline must be upheld manually.",
+      "acceptance_criteria": [
+        "Stopgap until promotion lands: existential-challenger is invoked manually (from the review library) on every .work/decisions/*.md write, and that invocation is recorded in the PR body. Document this operator responsibility so the ADR-017 discipline holds before the named-agent promotion.",
+        "`.claude/agents/existential-challenger.md` exists with valid frontmatter (mirror format of determinism-auditor).",
+        "The duplicate prompt is removed from review-library.md (library count drops to 18).",
+        "`existential-challenger` is in dispatch-rules.json as mandatory for `.work/decisions/**` and `docs/alternatives.md`.",
+        "All count references updated to '8 named agents' / '18 composable prompts' across README, tiers.md, docs/agents.md, generated SKILL.md.",
+        "am_i_done.py passes including the config check."
+      ],
+      "started_date": "2026-05-29",
+      "completed_date": "2026-05-29",
+      "resolution": "Promoted existential-challenger to the 8th named agent + symlink; wired into dispatch-rules (live AND work-state template) for .work/decisions/** and docs/alternatives.md; projected via tiers.json (fresh install ships it); added to phase-complete panel (ADR-013); removed the duplicate library prompt; updated all 8/18 counts. Adversarial review (2 cycles) caught two adopter-breaking source/template misses; both fixed and fresh-install-verified."
     }
   ]
 }

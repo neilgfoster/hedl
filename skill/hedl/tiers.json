@@ -17,7 +17,7 @@
       ]
     },
     "lightweight": {
-      "description": "Gate + .work/ state + 5 slash commands + 7 adversarial agents + spec templates.",
+      "description": "Gate + .work/ state + 5 slash commands + 8 adversarial agents + spec templates.",
       "includes": ["gate"],
       "projections": [
         { "source": "commands/adversarial-review.md",  "target": ".claude/commands/adversarial-review.md" },
@@ -27,6 +27,7 @@
         { "source": "commands/start-session.md",       "target": ".claude/commands/start-session.md" },
         { "source": "agents/determinism-auditor.md",   "target": ".claude/agents/determinism-auditor.md" },
         { "source": "agents/edge-case-hunter.md",      "target": ".claude/agents/edge-case-hunter.md" },
+        { "source": "agents/existential-challenger.md", "target": ".claude/agents/existential-challenger.md" },
         { "source": "agents/historian.md",             "target": ".claude/agents/historian.md" },
         { "source": "agents/review-dispatcher.md",     "target": ".claude/agents/review-dispatcher.md" },
         { "source": "agents/scope-auditor.md",         "target": ".claude/agents/scope-auditor.md" },

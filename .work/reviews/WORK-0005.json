@@ -1,0 +1,31 @@
+{
+  "work_item": "WORK-0005",
+  "date": "2026-05-29",
+  "task_type": "architecture",
+  "panel": ["historian", "edge-case-hunter", "simplicity-enforcer"],
+  "cycles": 2,
+  "note": "ADR-017 mandates existential-challenger; this item implements that decision, so the agent's existence was not re-litigated. existential-challenger is not a spawnable subagent_type in this harness; per AC1's stopgap the existential lens was applied manually to the ADR-016/alternatives.md edits (factual count corrections, no decision change).",
+  "cycle_1": {
+    "historian": "Count drift: agents.md Core table missing the row + Reference-library table still listing existential-challenger + 'None duplicate the 7 core agents'; docs/alternatives.md and ADR-016 stale.",
+    "edge-case-hunter": "BLOCKING: tiers.json lightweight projections omitted existential-challenger.md -> fresh install would project dispatch-rules requiring it without the agent file -> check_config breaks for adopters. SIGNIFICANT: getting-started.md '7 agents'; phase-complete.md missing existential-challenger (ADR-013); no dispatch-rule tests.",
+    "simplicity-enforcer": "Same agents.md table issues; otherwise minimal."
+  },
+  "cycle_1_fixes": [
+    "tiers.json: added agents/existential-challenger.md to lightweight projections + description 7->8.",
+    "agents.md: added existential-challenger to Core table, removed from Reference-library table, fixed 'None duplicate the N core agents'.",
+    "docs/alternatives.md 7/19->8/18; ADR-016 stale '7 today/via WORK-0005' parenthetical removed (it landed).",
+    "getting-started.md 7->8; phase-complete.md wires existential-challenger (ADR-013 mandate).",
+    "Added dispatch-rule tests (.work/decisions/ + docs/alternatives.md, anchored)."
+  ],
+  "cycle_2": {
+    "edge-case-hunter": "NEW BLOCKING: skill/hedl/work-state/config/dispatch-rules.json (the adopter-projected template) was not updated alongside the live .work/ copy -> fresh adopters get the agent with no dispatch wiring. All cycle-1 findings RESOLVED.",
+    "historian": "Stale '7 core adversarial review agents' in .work/context.json AND skill/hedl/work-state/context.json structure blocks. All other counts RESOLVED."
+  },
+  "cycle_2_fixes": [
+    "work-state/config/dispatch-rules.json: synced the two existential-challenger rules (live == template verified).",
+    "Both context.json files: '7 core adversarial review agents' -> '8'.",
+    "Verified via fresh `install.py --tier team --copy` sim: adopter dispatch-rules wires existential-challenger (4 refs), agent file projected, doctor ok."
+  ],
+  "left_as_is": "WORK-0028's completed-item AC text '(7 today, 8 after WORK-0005)' is a historical record accurate at its completion; now simply realized, not edited. The live/template duplication itself is tracked by WORK-0025.",
+  "verdict": "RESOLVED — zero BLOCKING/SIGNIFICANT after 2 cycles; both adopter-breaking source/template misses fixed and fresh-install-verified."
+}

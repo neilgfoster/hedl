@@ -15,7 +15,8 @@
     "WORK-0026: team-tier description reconciled across 5 sources (tiers.json/README/tiers.md/team-tier.md/getting-started.md) to one truth; GH Issues backend correctly framed as read-only-today (write-back planned WORK-0012). AC3 guard test added across all 3 tiers, derived from real projections. Review caught a 4th drift source (getting-started.md) + 3 test-coverage gaps; all fixed.",
     "WORK-0028: count-drift fix + check_doc_generated_facts gate detector (deterministic, fence-aware). Review caught a 4th stale count (commands.md '(core 6)') the first regex missed + a fragile ADR-template denylist; fixed via parenthetical pattern + code-fence-aware counting. 354 tests.",
     "WORK-0022: install.py guards — malformed .hedl-tier (status/doctor no longer traceback; install WARNs) + tiers.json includes cycle/unknown-tier/depth detection under TiersConfigError. Audit-first; both bugs real. Review caught 3 more crash paths (empty/unknown tier) + the deep-recursion 'no stack overflow' AC; all fixed. 372 tests.",
-    "WORK-0023: release.py --current-version validation. Non-canonical input now yields a JSON error envelope + exit 1, not a traceback. Review caught a BLOCKING `$`-trailing-newline bypass and silent leading-zero coercion; fixed with \\Z + canonical no-leading-zero regex. 376 tests."
+    "WORK-0023: release.py --current-version validation. Non-canonical input now yields a JSON error envelope + exit 1, not a traceback. Review caught a BLOCKING `$`-trailing-newline bypass and silent leading-zero coercion; fixed with \\Z + canonical no-leading-zero regex. 376 tests.",
+    "WORK-0005: existential-challenger promoted to the 8th named agent + dispatch wiring (live+template) + tiers.json projection + phase-complete (ADR-013) + 8/18 counts. The WORK-0028 doc-facts detector forced the agent-count doc updates (dogfood). Review caught two adopter-breaking source/template divergences (tiers.json projection, work-state dispatch-rules template); both fixed, fresh-install-verified. 379 tests."
   ],
   "decisions": [
     "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
@@ -24,7 +25,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0018",
+  "next_item": "WORK-0009",
   "blockers": [],
-  "notes": "WORK-0023 (BLOCKING) delivered via /iterate. active_item null. Both BLOCKING-band fix items (0022/0023) now done. Follow-ups surfaced (not yet backlogged): _load_tiers() raw-traceback on corrupt tiers.json (WORK-0022 review); release.py --phase empty-list/unknown change_class minor gaps (WORK-0023 review). Next per priority: WORK-0018 (Phase-1 tracker, WS-PLAN) then WORK-0005."
+  "notes": "WORK-0005 (GOVERNANCE) delivered via /iterate. active_item null. Source/template duplication (tiers.json, work-state/) bit twice this item — WORK-0025 (reconcile .work/ vs work-state/ duplication) is the standing fix. Next per priority: WORK-0009 (Principle 4 in CLAUDE.md)."
 }

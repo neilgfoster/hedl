@@ -11,8 +11,8 @@ A disciplined engineering workflow distributed as an Agent Skill. Three opt-in t
 - **Deterministic completion gate** — `.github/scripts/am_i_done.py` runs the same checks
   locally and in CI: clean tree, branch naming, PR-template validity, stale work-item IDs,
   lint, types, tests, unresolved review threads, Dependabot alerts. No inference; pass or fail.
-- **Multi-agent adversarial review** — 7 named reviewer agents, a dispatcher that selects
-  the minimal panel for a diff, and 19 composable reviewer prompts in the reference library.
+- **Multi-agent adversarial review** — 8 named reviewer agents, a dispatcher that selects
+  the minimal panel for a diff, and 18 composable reviewer prompts in the reference library.
 - **Phase and work-item tracking** — `.work/` state files keep work to one item at a time,
   within the current phase.
 - **Budget-aware reviews** — `budget_manager.py` tracks model-invocation budget per session

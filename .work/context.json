@@ -21,7 +21,7 @@
     ".work/decisions/": "architecture decision records (ADRs)",
     ".work/reviews/": "adversarial review verdicts",
     ".claude/commands/": "5 core slash commands",
-    ".claude/agents/": "7 core adversarial review agents"
+    ".claude/agents/": "8 core adversarial review agents"
   },
   "decisions": [
     "ADR-001-distribution-as-agent-skill",
