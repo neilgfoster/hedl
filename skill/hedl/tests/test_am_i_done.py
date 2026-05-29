@@ -1052,16 +1052,21 @@ class TestDocGeneratedFacts(unittest.TestCase):
                tiers_md: str, tiers_json_n: int = 3) -> None:
         import json as _json
         import os as _os
+
+        def _write(path: str, content: str) -> None:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+
         sh = _os.path.join(tmp, "skill", "hedl")
         _os.makedirs(_os.path.join(sh, "agents"))
         _os.makedirs(_os.path.join(sh, "references"))
         for a in agents:
-            open(_os.path.join(sh, "agents", a + ".md"), "w").write("# " + a + "\n")
-        with open(_os.path.join(sh, "tiers.json"), "w") as f:
-            _json.dump({"tiers": {f"t{i}": {} for i in range(tiers_json_n)}}, f)
-        open(_os.path.join(sh, "references", "review-library.md"), "w").write(review_lib)
-        open(_os.path.join(sh, "references", "commands.md"), "w").write(commands_md)
-        open(_os.path.join(sh, "references", "tiers.md"), "w").write(tiers_md)
+            _write(_os.path.join(sh, "agents", a + ".md"), "# " + a + "\n")
+        _write(_os.path.join(sh, "tiers.json"),
+               _json.dumps({"tiers": {f"t{i}": {} for i in range(tiers_json_n)}}))
+        _write(_os.path.join(sh, "references", "review-library.md"), review_lib)
+        _write(_os.path.join(sh, "references", "commands.md"), commands_md)
+        _write(_os.path.join(sh, "references", "tiers.md"), tiers_md)
 
     def _run(self, tmp: str) -> Any:
         original = M.REPO_ROOT
@@ -1141,6 +1146,27 @@ class TestDocGeneratedFacts(unittest.TestCase):
             result = self._run(tmp)
             self.assertFalse(result.passed)
             self.assertIn("tier count", result.detail)
+
+    def test_fails_on_corrupt_tiers_json(self) -> None:
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self._build(tmp, **self._consistent_kwargs())
+            with open(_os.path.join(tmp, "skill", "hedl", "tiers.json"), "w", encoding="utf-8") as f:
+                f.write("{ not valid json")
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("tiers.json", result.detail)
+
+    def test_fails_on_missing_commands_md(self) -> None:
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self._build(tmp, **self._consistent_kwargs())
+            _os.remove(_os.path.join(tmp, "skill", "hedl", "references", "commands.md"))
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("commands.md", result.detail)
 
     def test_skips_outside_source_tree(self) -> None:
         import tempfile

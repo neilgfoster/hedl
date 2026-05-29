@@ -1287,25 +1287,32 @@ def check_doc_generated_facts() -> Optional[CheckResult]:
     agent_names = sorted(f[:-3] for f in os.listdir(agents_dir) if f.endswith(".md"))
     n_agents = len(agent_names)
 
+    failures: list[str] = []
+
+    # Inside the source tree (agents/ present) the sibling sources must exist and
+    # parse — a missing or corrupt source is a FAIL, not a silent skip, so the
+    # detector can never report PASS without the authority it checks against.
     n_tiers: Optional[int] = None
     tiers_path = os.path.join(REPO_ROOT, "skill", "hedl", "tiers.json")
-    if os.path.exists(tiers_path):
+    if not os.path.exists(tiers_path):
+        failures.append("  skill/hedl/tiers.json: missing (expected in source tree)")
+    else:
         try:
             with open(tiers_path, encoding="utf-8") as fh:
                 n_tiers = len(json.load(fh).get("tiers", {}))
-        except (json.JSONDecodeError, OSError):
-            n_tiers = None
+        except (json.JSONDecodeError, OSError) as exc:
+            failures.append(f"  skill/hedl/tiers.json: unreadable/invalid ({exc})")
 
     n_behaviours: Optional[int] = None
     commands_md = os.path.join(REPO_ROOT, "skill", "hedl", "references", "commands.md")
-    if os.path.exists(commands_md):
+    if not os.path.exists(commands_md):
+        failures.append("  skill/hedl/references/commands.md: missing (expected in source tree)")
+    else:
         try:
             with open(commands_md, encoding="utf-8") as fh:
                 n_behaviours = _count_command_behaviours(fh.read())
-        except OSError:
-            n_behaviours = None
-
-    failures: list[str] = []
+        except OSError as exc:
+            failures.append(f"  skill/hedl/references/commands.md: unreadable ({exc})")
 
     def _check_number(relpath: str, pattern: str, expected: int, what: str) -> None:
         path = os.path.join(REPO_ROOT, relpath)
