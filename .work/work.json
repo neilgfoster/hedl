@@ -487,6 +487,24 @@
         "If built: persona contract mirrors the .claude/agents/ frontmatter schema; deterministic change_class auto-selection (no inference, ADR-003); gate + journey applied per persona; depends on WORK-0010.",
         "am_i_done.py passes."
       ]
+    },
+    {
+      "id": "WORK-0041",
+      "title": "fix: gate PR-template check exempts bot-authored (Dependabot) PRs",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "description": "Observed 2026-05-29 while triaging Dependabot PRs #39/#41/#42: am_i_done's --pr template check (check_pr_template.py) fails on every Dependabot PR because the bot's body does not match PULL_REQUEST_TEMPLATE.md. The operator had to hand-rewrite each PR body to satisfy Summary/Work item/Type/Changes/Validation and then `gh pr update-branch` to re-run the gate before the bot PR could go green and merge — three times in one session. Remove the friction: the template check should exempt (or minimally auto-satisfy) PRs authored by the Dependabot app. Security note (this is gate code, ADR-003 / RCE-area discipline): the exemption MUST key off the verified PR author login being the Dependabot bot (e.g. `gh pr view --json author`), never a body marker or branch-name string, both of which a malicious PR could spoof to skip template enforcement.",
+      "acceptance_criteria": [
+        "am_i_done.py --pr N template check skips (or auto-passes) when the PR author is the Dependabot app, verified via the GitHub author login (gh pr view --json author), not body text or branch name.",
+        "Human-authored PRs remain fully enforced: an incomplete human PR body still FAILs the template check.",
+        "Regression test: a Dependabot-authored PR context passes the template check with an unmodified bot body; a human PR with a placeholder/empty body still fails. Test fails before the fix, passes after.",
+        "Behaviour documented where the template check is described (pr-ready.md / references/commands.md or check_pr_template docstring).",
+        "am_i_done.py passes."
+      ]
     }
   ],
   "completed": [
