@@ -23,7 +23,8 @@ A disciplined engineering workflow distributed as an Agent Skill. Three opt-in t
 
 ## Adopt it
 
-See [Getting started](docs/getting-started.md).
+See [Getting started](docs/getting-started.md). Already using Hedl? Add yourself to
+[ADOPTERS.md](ADOPTERS.md).
 
 ## Documentation
 
@@ -32,6 +33,7 @@ See [Getting started](docs/getting-started.md).
 - [Getting started](docs/getting-started.md) -- installation, first use, adopter checklist
 - [Tiers](skill/hedl/references/tiers.md) -- gate-only, lightweight, and team tier detail
 - [Name and origin](docs/name.md) -- why "Hedl"
+- [Adopters](ADOPTERS.md) -- projects using Hedl
 - [Changelog](CHANGELOG.md)
 
 ### Commands and agents
