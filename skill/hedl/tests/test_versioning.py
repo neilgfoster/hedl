@@ -283,6 +283,18 @@ class TestNextVersion(unittest.TestCase):
     def test_minor_resets_patch(self) -> None:
         self.assertEqual(R.next_version("3.7.9", "minor"), "3.8.0")
 
+    def test_raises_on_non_canonical(self) -> None:
+        bad_versions = ["1.2", "v1.2.3", "1.2.3-rc1", "", "1.2.3.4", "a.b.c",
+                        "-1.2.3", "1.2.3\n", " 1.2.3", "01.2.3", "1.02.3", "1.2.03"]
+        for bad in bad_versions:
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError):
+                    R.next_version(bad, "patch")
+
+    def test_raises_on_unknown_bump(self) -> None:
+        with self.assertRaises(ValueError):
+            R.next_version("1.2.3", "breaking")
+
 
 class TestGroupByClass(unittest.TestCase):
     def test_groups_correctly(self) -> None:
@@ -327,3 +339,41 @@ class TestChangeClassValidation(unittest.TestCase):
     def test_invalid_class_not_in_set(self) -> None:
         self.assertNotIn("refactor", R.CHANGE_CLASSES)
         self.assertNotIn("test", R.CHANGE_CLASSES)
+
+
+class TestReleaseCurrentVersionValidation(unittest.TestCase):
+    """WORK-0023: a non-canonical --current-version yields a parseable JSON error
+    envelope and a non-zero exit from main(), never a Python traceback."""
+
+    def setUp(self) -> None:
+        self._td = tempfile.TemporaryDirectory()
+        self.work_json = pathlib.Path(self._td.name) / "work.json"
+        self.work_json.write_text(json.dumps({"completed": []}), encoding="utf-8")
+
+    def tearDown(self) -> None:
+        self._td.cleanup()
+
+    def _run_main(self, current: str) -> tuple[int, str]:
+        import sys as _sys
+        from unittest import mock
+        argv = ["release.py", "--work-json", str(self.work_json),
+                "--phase", "1", "--current-version", current]
+        buf = io.StringIO()
+        with mock.patch.object(_sys, "argv", argv), contextlib.redirect_stdout(buf):
+            rc = R.main()
+        return rc, buf.getvalue()
+
+    def test_non_canonical_yields_json_error_and_nonzero(self) -> None:
+        for bad in ["1.2", "v1.2.3", "1.2.3-rc1", "", "1.2.3.4", "a.b.c", "1.2.3\n", "01.2.3"]:
+            with self.subTest(bad=bad):
+                rc, out = self._run_main(bad)
+                self.assertEqual(rc, 1)
+                payload = json.loads(out)  # parseable JSON, not a traceback
+                self.assertIn("error", payload)
+
+    def test_canonical_version_succeeds(self) -> None:
+        rc, out = self._run_main("1.2.3")
+        self.assertEqual(rc, 0)
+        payload = json.loads(out)
+        self.assertEqual(payload["current_version"], "1.2.3")
+        self.assertIn("proposed_version", payload)

@@ -1,19 +1,18 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": null,
+    "active_item": "WORK-0023",
     "last_updated": "2026-05-29",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
-  "active": [],
-  "backlog": [
+  "active": [
     {
       "id": "WORK-0023",
       "title": "fix: release.py next_version handles non-canonical --current-version",
       "phase": 1,
       "workstream": "WS-ARCH",
       "change_class": "fix",
-      "status": "backlog",
+      "status": "active",
       "priority_band": "BLOCKING",
       "description": "Repo-health 2026-05-28 (BLOCKING #8, edge-case-hunter) — `release.py:94-95,136` `next_version()` raises IndexError/ValueError on non-canonical `--current-version` (e.g., `1.2`, `v1.2.3`, `1.2.3-rc1`), and the traceback ends up inside what callers expect to be machine-readable JSON output. Validate input against an explicit semver-ish regex, return a structured error response (non-zero exit, parseable error JSON) for non-canonical input, and document the supported version grammar.\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code path. Confirm release.py:94-95,136 (next_version) actually raises IndexError/ValueError on non-canonical --current-version and that the traceback reaches the machine-readable JSON output as described — verify against the current code (line numbers may have drifted). Trace the real reachable inputs and document findings in .work/insights/WORK-0023-<topic>.md. If the input is already validated/handled, apply the WORK-0019 resolution pattern (regression-guard test + negative meta-test + insights note, change_class chore); if it genuinely produces an unhandled exception in JSON output, fix with adversarial-reviewed code.",
       "acceptance_criteria": [
@@ -23,8 +22,11 @@
         "Tests cover representative invalid inputs (`1.2`, `v1.2.3`, `1.2.3-rc1`, empty string) and confirm canonical inputs still behave.",
         "am_i_done.py passes.",
         "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
-      ]
-    },
+      ],
+      "started_date": "2026-05-29"
+    }
+  ],
+  "backlog": [
     {
       "id": "WORK-0018",
       "title": "chore: Phase 1 = discipline-restoration (tracker)",

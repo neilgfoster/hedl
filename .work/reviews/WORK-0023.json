@@ -1,0 +1,27 @@
+{
+  "work_item": "WORK-0023",
+  "date": "2026-05-29",
+  "task_type": "architecture",
+  "panel": ["edge-case-hunter", "historian", "simplicity-enforcer"],
+  "cycles": 2,
+  "audit": ".work/insights/WORK-0023-release-version-validation-audit.md — next_version called outside main()'s try/except; non-canonical --current-version -> unhandled IndexError/ValueError, no JSON. REAL -> FIX.",
+  "cycle_1": {
+    "historian": "PASS — audit pattern followed; plain ValueError appropriate for this simpler surface; envelope shape consistent.",
+    "edge-case-hunter": "CONDITIONAL — BLOCKING: `^...$` allowed a trailing newline (\"1.2.3\\n\" passed). SIGNIFICANT: leading zeros coerced silently. MINOR: unknown-bump fallthrough; TypeError on {\"completed\": null}.",
+    "simplicity-enforcer": "CONDITIONAL — claimed re.ASCII unnecessary (incorrect: \\d matches Unicode digits without it; kept). Redundant validation in main+next_version (kept as defense-in-depth). Verbose message (kept)."
+  },
+  "fixes": [
+    "Regex now `^(0|[1-9]\\d*)\\.(...)\\.(...)\\Z` with re.ASCII: `\\Z` rejects trailing newline/whitespace (BLOCKING); no-leading-zero identifiers reject 01.2.3 (SIGNIFICANT).",
+    "next_version raises ValueError on an unknown bump (was a silent patch fallthrough).",
+    "main()'s work-json except now includes TypeError so {\"completed\": null} yields a JSON envelope, not a traceback.",
+    "Tests extended: \"1.2.3\\n\", leading zeros, unknown bump."
+  ],
+  "cycle_2": {
+    "edge-case-hunter": "PASS — all 3 prior findings RESOLVED; \\Z rejects \\n/\\r\\n/trailing-space; (0|[1-9]\\d*) rejects leading zeros, accepts 0.0.0. New findings MINOR only."
+  },
+  "accepted_minor": [
+    "_NUM capturing-group positional indices (group 1/2/3) — works; fragility hypothetical, documented by the _NUM comment.",
+    "Empty completed list -> patch (mis-typed --phase) and group_by_class dropping an unknown change_class from output: pre-existing, about --phase / change_class, not --current-version (WORK-0023 scope)."
+  ],
+  "verdict": "RESOLVED — zero BLOCKING/SIGNIFICANT after 2 cycles."
+}
