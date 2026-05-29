@@ -72,6 +72,17 @@ class TestDispatchRulesRegex(unittest.TestCase):
     def test_work_decisions_triggers_historian(self) -> None:
         self.assertIn("historian", _matches(".work/decisions/ADR-001-example.md"))
 
+    def test_work_decisions_triggers_existential_challenger(self) -> None:
+        # WORK-0005 / ADR-017: existential-challenger is mandatory for ADR writes.
+        self.assertIn("existential-challenger", _matches(".work/decisions/ADR-001-example.md"))
+
+    def test_alternatives_triggers_existential_challenger(self) -> None:
+        self.assertIn("existential-challenger", _matches("docs/alternatives.md"))
+
+    def test_alternatives_rule_is_anchored(self) -> None:
+        self.assertNotIn("existential-challenger", _matches("docs/not-alternatives.md"))
+        self.assertNotIn("existential-challenger", _matches("vendor/docs/alternatives.md"))
+
     def test_nested_work_decisions_does_not_trigger(self) -> None:
         self.assertNotIn("historian", _matches("backup/.work/decisions/foo.md"))
 

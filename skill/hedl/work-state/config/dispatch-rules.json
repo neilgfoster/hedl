@@ -47,8 +47,13 @@
     },
     {
       "pattern": "^\\.work/decisions/",
-      "agents": ["historian"],
-      "note": "ADRs — root .work/ only, not nested copies"
+      "agents": ["historian", "existential-challenger"],
+      "note": "ADRs — root .work/ only, not nested copies. existential-challenger is mandatory per ADR-017 (WORK-0005)"
+    },
+    {
+      "pattern": "^docs/alternatives\\.md$",
+      "agents": ["existential-challenger"],
+      "note": "Competitive/alternatives doc feeding ADR-011/012 — existential-challenger mandatory (ADR-017, WORK-0005)"
     },
     {
       "pattern": "^docs/standards\\.md$",

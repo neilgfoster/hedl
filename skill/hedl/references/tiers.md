@@ -97,8 +97,8 @@ consumer's stack.
 - Adversarial review gate (`/adversarial-review`)
 - Phase transition (`/phase-complete`)
 - All 18 command behaviors via natural language (from `skill/hedl/references/commands.md`)
-- 7 core adversarial reviewers as named agents
-- 19 additional reviewer prompts via `skill/hedl/references/review-library.md`
+- 8 core adversarial reviewers as named agents
+- 18 additional reviewer prompts via `skill/hedl/references/review-library.md`
 
 **How to install**:
 Copy `skill/hedl/` into your project's `.claude/skills/Hedl/` (or symlink it).

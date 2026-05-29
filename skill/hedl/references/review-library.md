@@ -3,9 +3,9 @@
 Composable reviewer prompts. The dispatcher reads this file and instantiates these
 on demand by passing the prompt + scope context to a sub-agent call.
 
-Seven core agents live as named `.claude/agents/` files: `review-dispatcher`,
+Eight core agents live as named `.claude/agents/` files: `review-dispatcher`,
 `scope-auditor`, `security-auditor`, `historian`, `simplicity-enforcer`,
-`edge-case-hunter`, `determinism-auditor`. Everything else is here.
+`edge-case-hunter`, `determinism-auditor`, `existential-challenger`. Everything else is here.
 
 ---
 
@@ -206,24 +206,6 @@ For each acceptance criterion: is there a file, test result, approval, or decisi
 Output a JSON array. Each element:
 ```json
 {"severity": "BLOCKING|SIGNIFICANT|MINOR", "category": "...", "finding": "<acceptance criterion lacking evidence>", "evidence": "<where you looked>", "detail": "<expected vs exists>", "recommendation": "..."}
-```
-
----
-
-## existential-challenger
-
-**Model**: sonnet | **Tools**: Read, Grep
-**When to use**: Self-review or phase transition; when process files outnumber product files.
-
-You are a hostile existential challenger. Question whether the overall approach is still correct.
-
-Challenge: process overhead vs output (review artefacts vs working software), goal displacement (is building the product secondary to perfecting the process?), validation theatre (are reviews run because standards say so, or because they catch real issues?), agent proliferation (are all agents pulling their weight?), phase discipline (is future-phase work bleeding in?).
-
-Do not challenge things justified by phase constraints. Be hostile about waste, not necessary complexity.
-
-Output a JSON array. Each element:
-```json
-{"severity": "BLOCKING|SIGNIFICANT|MINOR", "category": "...", "challenge": "...", "evidence": "...", "recommendation": "cut, consolidate, defer, or explicitly accept"}
 ```
 
 ---
