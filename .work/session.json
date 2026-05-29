@@ -13,7 +13,8 @@
     "WORK-0034: /iterate now drives end-to-end through to an operator-ready PR (ADR-025). Adversarial review caught the ADR-025 branch-protection-assertion requirement + a premature-completion/stuck-recovery BLOCKING; both fixed. Delivered end-to-end from one /iterate (AC6).",
     "WORK-0024: state_backend moved to hedl.toml (ADR-022 implemented, operator chose hedl.toml over superseding). install.py schema 1->2 migration + hardened TOML writer (injection guard, raise-on-corrupt, crash-safe ordering). Adversarial review caught 2 BLOCKING ordering/atomicity bugs + a TOML-injection gap; all fixed over 2 cycles. WORK-0032/0033 ACs reconciled.",
     "WORK-0026: team-tier description reconciled across 5 sources (tiers.json/README/tiers.md/team-tier.md/getting-started.md) to one truth; GH Issues backend correctly framed as read-only-today (write-back planned WORK-0012). AC3 guard test added across all 3 tiers, derived from real projections. Review caught a 4th drift source (getting-started.md) + 3 test-coverage gaps; all fixed.",
-    "WORK-0028: count-drift fix + check_doc_generated_facts gate detector (deterministic, fence-aware). Review caught a 4th stale count (commands.md '(core 6)') the first regex missed + a fragile ADR-template denylist; fixed via parenthetical pattern + code-fence-aware counting. 354 tests."
+    "WORK-0028: count-drift fix + check_doc_generated_facts gate detector (deterministic, fence-aware). Review caught a 4th stale count (commands.md '(core 6)') the first regex missed + a fragile ADR-template denylist; fixed via parenthetical pattern + code-fence-aware counting. 354 tests.",
+    "WORK-0022: install.py guards — malformed .hedl-tier (status/doctor no longer traceback; install WARNs) + tiers.json includes cycle/unknown-tier/depth detection under TiersConfigError. Audit-first; both bugs real. Review caught 3 more crash paths (empty/unknown tier) + the deep-recursion 'no stack overflow' AC; all fixed. 372 tests."
   ],
   "decisions": [
     "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
@@ -22,7 +23,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0022",
+  "next_item": "WORK-0023",
   "blockers": [],
-  "notes": "WORK-0028 delivered via /iterate. active_item null. GOVERNANCE drift-cleanup batch (0024/0026/0028) done. Next per priority: WORK-0022 (install.py guards .hedl-tier parsing + include cycles) [BLOCKING band]."
+  "notes": "WORK-0022 (BLOCKING) delivered via /iterate. active_item null. Possible follow-up surfaced: _load_tiers() raises a raw traceback on corrupt tiers.json (out of WORK-0022 scope). Next per priority: WORK-0023 (release.py next_version handles non-canonical --current-version)."
 }

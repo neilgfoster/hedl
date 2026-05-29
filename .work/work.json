@@ -1,31 +1,11 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": "WORK-0022",
+    "active_item": null,
     "last_updated": "2026-05-29",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
-  "active": [
-    {
-      "id": "WORK-0022",
-      "title": "fix: install.py guards .hedl-tier parsing and detects include cycles",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "active",
-      "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #7, edge-case-hunter) — `cmd_status` / `cmd_doctor` (install.py:303, ~397) call `json.loads(.hedl-tier)` with no try/except: a hand-edited or partial file crashes the CLI with a traceback instead of a useful message. Separately, `_flatten_projections` / `_flatten_inits` recurse via `includes` (install.py:99-105) with no cycle detection: a tiers.json cycle hangs or stack-overflows. Add a single corruption-aware reader for `.hedl-tier` (returning a structured error / hint) and add cycle detection to the `includes` flattening (visited-set, clear error naming the cycle).\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code paths. Confirm the malformed-.hedl-tier crash (json.loads with no try/except in cmd_status/cmd_doctor) and the includes-cycle in _flatten_projections/_flatten_inits are still reachable as described — line numbers have drifted (WORK-0016 changed cmd_install's marker read, which is already guarded; WORK-0020 added validation calls to cmd_status/cmd_doctor but left their json.loads unguarded). Trace the real reachable inputs and document findings in .work/insights/WORK-0022-<topic>.md. For any path already guarded, apply the WORK-0019 resolution pattern (regression-guard test + negative meta-test + insights note, change_class chore); for paths that genuinely crash or loop, fix with adversarial-reviewed code.",
-      "acceptance_criteria": [
-        "Audit performed before any code change: trace the actual reachable inputs to install.py's .hedl-tier parsing (the json.loads calls in cmd_status/cmd_doctor) and the includes-flattening cycle paths (_flatten_projections/_flatten_inits), document findings in .work/insights/WORK-0022-<topic>.md. Decide fix-vs-guard explicitly. Note: line numbers in this item predate WORK-0016/WORK-0020, which edited install.py — verify against current code.",
-        "Malformed `.hedl-tier` (truncated JSON, missing keys, wrong types) produces an actionable error message — no Python traceback.",
-        "A cycle in tiers.json `includes` is detected, names the cycle path, and exits non-zero — no hang, no stack overflow.",
-        "Tests cover both malformed-marker and includes-cycle cases.",
-        "am_i_done.py passes.",
-        "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
-      ],
-      "started_date": "2026-05-29"
-    }
-  ],
+  "active": [],
   "backlog": [
     {
       "id": "WORK-0023",
@@ -781,6 +761,27 @@
       "started_date": "2026-05-29",
       "completed_date": "2026-05-29",
       "resolution": "Fixed three count drifts (6->7 agents incl. missed commands.md \"(core 6)\"; 15->18 command behaviours; ADR-016 panel-of-8 annotated). Added deterministic check_doc_generated_facts (fence-aware behaviour count, multi-form agent-count patterns, guards review-library/agents/commands/tiers). Adversarial review 2 cycles, zero BLOCKING."
+    },
+    {
+      "id": "WORK-0022",
+      "title": "fix: install.py guards .hedl-tier parsing and detects include cycles",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "BLOCKING",
+      "description": "Repo-health 2026-05-28 (BLOCKING #7, edge-case-hunter) — `cmd_status` / `cmd_doctor` (install.py:303, ~397) call `json.loads(.hedl-tier)` with no try/except: a hand-edited or partial file crashes the CLI with a traceback instead of a useful message. Separately, `_flatten_projections` / `_flatten_inits` recurse via `includes` (install.py:99-105) with no cycle detection: a tiers.json cycle hangs or stack-overflows. Add a single corruption-aware reader for `.hedl-tier` (returning a structured error / hint) and add cycle detection to the `includes` flattening (visited-set, clear error naming the cycle).\n\nAUDIT-FIRST per WORK-0019 precedent: before fixing, audit the actual code paths. Confirm the malformed-.hedl-tier crash (json.loads with no try/except in cmd_status/cmd_doctor) and the includes-cycle in _flatten_projections/_flatten_inits are still reachable as described — line numbers have drifted (WORK-0016 changed cmd_install's marker read, which is already guarded; WORK-0020 added validation calls to cmd_status/cmd_doctor but left their json.loads unguarded). Trace the real reachable inputs and document findings in .work/insights/WORK-0022-<topic>.md. For any path already guarded, apply the WORK-0019 resolution pattern (regression-guard test + negative meta-test + insights note, change_class chore); for paths that genuinely crash or loop, fix with adversarial-reviewed code.",
+      "acceptance_criteria": [
+        "Audit performed before any code change: trace the actual reachable inputs to install.py's .hedl-tier parsing (the json.loads calls in cmd_status/cmd_doctor) and the includes-flattening cycle paths (_flatten_projections/_flatten_inits), document findings in .work/insights/WORK-0022-<topic>.md. Decide fix-vs-guard explicitly. Note: line numbers in this item predate WORK-0016/WORK-0020, which edited install.py — verify against current code.",
+        "Malformed `.hedl-tier` (truncated JSON, missing keys, wrong types) produces an actionable error message — no Python traceback.",
+        "A cycle in tiers.json `includes` is detected, names the cycle path, and exits non-zero — no hang, no stack overflow.",
+        "Tests cover both malformed-marker and includes-cycle cases.",
+        "am_i_done.py passes.",
+        "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
+      ],
+      "started_date": "2026-05-29",
+      "completed_date": "2026-05-29",
+      "resolution": "Audit-first: both crashes real (FIX). _read_tier_marker guards malformed .hedl-tier (status/doctor exit 1 with message; install WARNs); _flatten_tier_key adds cycle + unknown-tier + depth guards under TiersConfigError, caught in main() for clean exit. Adversarial review 2 cycles caught 3 more crash paths (empty/unknown tier); all fixed. _load_tiers corruption noted as out-of-scope follow-up."
     }
   ]
 }
