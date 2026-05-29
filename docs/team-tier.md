@@ -1,6 +1,10 @@
 # Team Tier
 
-GitHub Issues backend + parallel worktree execution, layered on top of lightweight.
+Claude Code integration (post-edit/stop/insight hooks, settings, session startup
+script, `.claudeignore`) layered on top of lightweight — that is what `install.py
+--tier team` projects. It also unlocks two capabilities: the GitHub Issues backend
+(config; read-only for the gate today, full write-back planned in WORK-0012) and the
+parallel-worktree gate workflow.
 
 **Full reference**: `skill/hedl/references/tiers.md`
 

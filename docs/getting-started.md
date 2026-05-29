@@ -1,7 +1,8 @@
 # Getting started
 
-Three tiers — gate-only in 2 minutes, full lightweight in 5, team with GitHub Issues when
-you need shared state. The installer is a single Python script; no network access, no sudo.
+Three tiers — gate-only in 2 minutes, full lightweight in 5, team adds Claude Code
+integration when you want the hooks, worktree gate workflow, and GitHub Issues read
+backend. The installer is a single Python script; no network access, no sudo.
 
 **Prerequisites**: Python 3.11+, git. Claude Code for slash commands and named agents (optional).
 
@@ -27,7 +28,7 @@ python3 skill/hedl/scripts/install.py --tier lightweight
 |------|-------------|------|
 | `gate` | Deterministic gate + CI workflow + PR template | ~2 min |
 | `lightweight` | Gate + `.work/` state + 5 slash commands + 7 agents + spec templates | ~5 min |
-| `team` | Lightweight + Claude Code hooks + GitHub Issues guidance | ~5 min |
+| `team` | Lightweight + Claude Code integration; unlocks worktree gate workflow + GitHub Issues read backend | ~5 min |
 
 Preview before installing:
 
@@ -88,7 +89,8 @@ python3 skill/hedl/scripts/install.py --doctor     # projection health
 
 ## Team tier
 
-For GitHub Issues backend and parallel worktrees:
+Projects Claude Code integration; also unlocks the parallel-worktree gate workflow and
+the GitHub Issues read backend (full write-back planned, WORK-0012):
 
 ```bash
 python3 skill/hedl/scripts/install.py --tier team

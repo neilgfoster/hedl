@@ -1,0 +1,26 @@
+{
+  "work_item": "WORK-0026",
+  "date": "2026-05-29",
+  "task_type": "architecture",
+  "panel": ["historian", "scope-auditor", "edge-case-hunter"],
+  "cycles": 2,
+  "cycle_1": {
+    "historian": "CONDITIONAL (MINOR) — tiers.md summary + Tier-3 heading omitted the 'read-only' qualifier present in the other sources; all facts accurate.",
+    "scope-auditor": "CONDITIONAL (MINOR) — flagged docs/getting-started.md as a 4th team-tier description that may also drift.",
+    "edge-case-hunter": "CONDITIONAL (3 SIGNIFICANT) — AC3 test used a hardcoded snapshot (not derived), keyword check bypassable, and only covered team (not gate/lightweight)."
+  },
+  "fixes": [
+    "Added 'read-only' qualifier to tiers.md summary + Tier-3 heading.",
+    "Reconciled docs/getting-started.md (lines 3, table row, Team-tier section) to the same single story.",
+    "Reworked the AC3 test: covers gate + lightweight + team, derives expectations from M._flatten_projections (lightweight asserts the description's stated command/agent counts equal actual projection counts; gate asserts named artifacts present + no .claude/ files; team asserts own-delta is .claude/ only + description qualifies github-issues).",
+    "Documented the team test's delta-vs-superset intent inline."
+  ],
+  "cycle_2": {
+    "edge-case-hunter": "CONDITIONAL PASS — all 3 prior RESOLVED; remaining MINORs + one self-downgraded 'documentation gap' (addressed with the clarifying comment).",
+    "historian": "CONDITIONAL — summaries say 'read backend' rather than literally 'read-only'."
+  },
+  "accepted_conditional": [
+    "Summaries (README, tiers.md summary, getting-started) say 'GitHub Issues read backend' — accurate and consistent; the explicit 'read-only / full write-back planned (WORK-0012)' lives in the detailed sources (tiers.json, tiers.md Tier-3 subsection, team-tier.md). Doc layering, not drift. Adding '-only' to README:7 would also breach the 120-char markdown gate."
+  ],
+  "verdict": "RESOLVED — zero BLOCKING; cycle-1 SIGNIFICANTs (test coverage/derivation) fixed; residual items stylistic/doc-layering, noted."
+}

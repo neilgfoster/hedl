@@ -4,7 +4,7 @@ A disciplined engineering workflow distributed as an Agent Skill. Three opt-in t
 
 - **Gate-only** — drop `am_i_done.py` into any repo. Two-minute setup.
 - **Lightweight** — gate + phase discipline + adversarial review + 5 slash commands.
-- **Team** — gate + GitHub Issues state backend + parallel worktrees with a gate-enforced merge.
+- **Team** — lightweight + Claude Code integration, the parallel-worktree gate check, and a GitHub Issues read backend.
 
 ## What you get
 
@@ -49,7 +49,7 @@ See [Getting started](docs/getting-started.md). Already using Hedl? Add yourself
 
 - [Standards](docs/standards.md) -- branch, commit, and PR conventions
 - [Spec pipeline](docs/spec-pipeline.md) -- epic/PRD/task workflow
-- [Team tier](docs/team-tier.md) -- GitHub Issues backend and parallel worktrees
+- [Team tier](docs/team-tier.md) -- Claude Code integration, worktree gate workflow, GitHub Issues backend
 - [Self-improvement](docs/self-improvement.md) -- /reflect and /contribute flows
 - [Versioning](docs/versioning.md) -- release and version policy
 - [Alternatives](docs/alternatives.md) -- competitive landscape per ADR-012
