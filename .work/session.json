@@ -16,7 +16,8 @@
     "WORK-0028: count-drift fix + check_doc_generated_facts gate detector (deterministic, fence-aware). Review caught a 4th stale count (commands.md '(core 6)') the first regex missed + a fragile ADR-template denylist; fixed via parenthetical pattern + code-fence-aware counting. 354 tests.",
     "WORK-0022: install.py guards — malformed .hedl-tier (status/doctor no longer traceback; install WARNs) + tiers.json includes cycle/unknown-tier/depth detection under TiersConfigError. Audit-first; both bugs real. Review caught 3 more crash paths (empty/unknown tier) + the deep-recursion 'no stack overflow' AC; all fixed. 372 tests.",
     "WORK-0023: release.py --current-version validation. Non-canonical input now yields a JSON error envelope + exit 1, not a traceback. Review caught a BLOCKING `$`-trailing-newline bypass and silent leading-zero coercion; fixed with \\Z + canonical no-leading-zero regex. 376 tests.",
-    "WORK-0005: existential-challenger promoted to the 8th named agent + dispatch wiring (live+template) + tiers.json projection + phase-complete (ADR-013) + 8/18 counts. The WORK-0028 doc-facts detector forced the agent-count doc updates (dogfood). Review caught two adopter-breaking source/template divergences (tiers.json projection, work-state dispatch-rules template); both fixed, fresh-install-verified. 379 tests."
+    "WORK-0005: existential-challenger promoted to the 8th named agent + dispatch wiring (live+template) + tiers.json projection + phase-complete (ADR-013) + 8/18 counts. The WORK-0028 doc-facts detector forced the agent-count doc updates (dogfood). Review caught two adopter-breaking source/template divergences (tiers.json projection, work-state dispatch-rules template); both fixed, fresh-install-verified. 379 tests.",
+    "WORK-0042: install.py ships a .gitignore block protecting ADR-005 local-only insights artefacts. Review corrected a false ADR-005 citation (ADR-005 is /contribute privacy, not insights-never-commit), completed coverage (metrics.json/proposals), guarded a directory-read crash, and dogfood-aligned Hedl own .gitignore. 386 tests."
   ],
   "decisions": [
     "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
@@ -27,5 +28,5 @@
   ],
   "next_item": "WORK-0009",
   "blockers": [],
-  "notes": "WORK-0005 (GOVERNANCE) delivered via /iterate. active_item null. Source/template duplication (tiers.json, work-state/) bit twice this item — WORK-0025 (reconcile .work/ vs work-state/ duplication) is the standing fix. Next per priority: WORK-0009 (Principle 4 in CLAUDE.md)."
+  "notes": "WORK-0042 (high) delivered via /iterate. active_item null. Flagged for /phase-complete: 'insights are local-only' lacks its own ADR (ADR-005 is /contribute privacy); whether to formalise. Source/template divergence theme continues (WORK-0025). Next per priority: WORK-0009 (Principle 4 in CLAUDE.md) or WORK-0025."
 }
