@@ -12,7 +12,8 @@
     "WORK-0039: ruff pip #41 closed as superseded by #42 (identical pyproject edit; auto-closed on merge).",
     "WORK-0034: /iterate now drives end-to-end through to an operator-ready PR (ADR-025). Adversarial review caught the ADR-025 branch-protection-assertion requirement + a premature-completion/stuck-recovery BLOCKING; both fixed. Delivered end-to-end from one /iterate (AC6).",
     "WORK-0024: state_backend moved to hedl.toml (ADR-022 implemented, operator chose hedl.toml over superseding). install.py schema 1->2 migration + hardened TOML writer (injection guard, raise-on-corrupt, crash-safe ordering). Adversarial review caught 2 BLOCKING ordering/atomicity bugs + a TOML-injection gap; all fixed over 2 cycles. WORK-0032/0033 ACs reconciled.",
-    "WORK-0026: team-tier description reconciled across 5 sources (tiers.json/README/tiers.md/team-tier.md/getting-started.md) to one truth; GH Issues backend correctly framed as read-only-today (write-back planned WORK-0012). AC3 guard test added across all 3 tiers, derived from real projections. Review caught a 4th drift source (getting-started.md) + 3 test-coverage gaps; all fixed."
+    "WORK-0026: team-tier description reconciled across 5 sources (tiers.json/README/tiers.md/team-tier.md/getting-started.md) to one truth; GH Issues backend correctly framed as read-only-today (write-back planned WORK-0012). AC3 guard test added across all 3 tiers, derived from real projections. Review caught a 4th drift source (getting-started.md) + 3 test-coverage gaps; all fixed.",
+    "WORK-0028: count-drift fix + check_doc_generated_facts gate detector (deterministic, fence-aware). Review caught a 4th stale count (commands.md '(core 6)') the first regex missed + a fragile ADR-template denylist; fixed via parenthetical pattern + code-fence-aware counting. 354 tests."
   ],
   "decisions": [
     "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
@@ -21,7 +22,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0028",
+  "next_item": "WORK-0022",
   "blockers": [],
-  "notes": "WORK-0026 delivered via /iterate (new flow). active_item null. Next per priority: WORK-0028 (count drift: 6 vs 7 agents / 15 vs 18 commands / panel sizes)."
+  "notes": "WORK-0028 delivered via /iterate. active_item null. GOVERNANCE drift-cleanup batch (0024/0026/0028) done. Next per priority: WORK-0022 (install.py guards .hedl-tier parsing + include cycles) [BLOCKING band]."
 }

@@ -8,23 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0028",
-      "title": "docs: fix count drift (6 vs 7 core agents; 15 vs 18 commands; panel of 8)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — three count drifts shipped today. (1) review-library.md says 'Six core agents' (misses determinism-auditor); /repo-health spec says 'all 6 core agents' so a Full run silently under-panels. (2) `tiers.md:78` says 'all 15 command behaviors'; commands.md has 18. (3) ADR-016 references 'full panel of 8'; only 7 named agents exist (and WORK-0005 will bring this to 8 by adding existential-challenger). Authoritative counts must derive from the filesystem; documentation references that name a number must either reference the same source or be updated together. Coordinate with WORK-0005 so the 7→8 update lands once and consistently. Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state. Absorbs the drift-detector half of the proposed-and-dropped ADR-030 (documentation currency): the manual existential-challenger review FAILed ADR-030 as process-accretion and recommended folding the detector here as the shared check_doc_generated_facts, with the doc-impact prompt downgraded to a standards.md convention rather than a gate-enforced PR-template section.",
-      "acceptance_criteria": [
-        "review-library.md and /repo-health spec reference the correct number of core agents (7 today, 8 after WORK-0005).",
-        "tiers.md and any other docs that name a command count reference commands.md's actual count (18).",
-        "ADR-016's 'panel of 8' is reconciled with the post-WORK-0005 state.",
-        "A deterministic drift-detector catches future count divergence (filesystem count vs docs), implemented as a reusable check_doc_generated_facts in am_i_done.py modelled on the existing skill-meta generated-section check — i.e. the standing mechanism for any source-derived doc fact (agent/command/tier counts and names), not a one-off test. No inference (ADR-003).",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0022",
       "title": "fix: install.py guards .hedl-tier parsing and detects include cycles",
       "phase": 1,
@@ -776,6 +759,26 @@
       "started_date": "2026-05-29",
       "completed_date": "2026-05-29",
       "resolution": "Reconciled the team-tier description across tiers.json, README, tiers.md, team-tier.md, getting-started.md to one story (Claude Code integration projected; GH Issues read backend + worktree workflow unlocked; write-back planned WORK-0012). Added AC3 guard test across all 3 tiers, derived from real projections. Adversarial review 2 cycles, zero BLOCKING."
+    },
+    {
+      "id": "WORK-0028",
+      "title": "docs: fix count drift (6 vs 7 core agents; 15 vs 18 commands; panel of 8)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — three count drifts shipped today. (1) review-library.md says 'Six core agents' (misses determinism-auditor); /repo-health spec says 'all 6 core agents' so a Full run silently under-panels. (2) `tiers.md:78` says 'all 15 command behaviors'; commands.md has 18. (3) ADR-016 references 'full panel of 8'; only 7 named agents exist (and WORK-0005 will bring this to 8 by adding existential-challenger). Authoritative counts must derive from the filesystem; documentation references that name a number must either reference the same source or be updated together. Coordinate with WORK-0005 so the 7→8 update lands once and consistently. Promoted from later in Phase 1 for drift-cleanup batching — the runtime-consulted files (review-library.md, commands.md, tiers.json) drift from reality of the current 7-agent / 5-command / pr-ready-promoted state. Absorbs the drift-detector half of the proposed-and-dropped ADR-030 (documentation currency): the manual existential-challenger review FAILed ADR-030 as process-accretion and recommended folding the detector here as the shared check_doc_generated_facts, with the doc-impact prompt downgraded to a standards.md convention rather than a gate-enforced PR-template section.",
+      "acceptance_criteria": [
+        "review-library.md and /repo-health spec reference the correct number of core agents (7 today, 8 after WORK-0005).",
+        "tiers.md and any other docs that name a command count reference commands.md's actual count (18).",
+        "ADR-016's 'panel of 8' is reconciled with the post-WORK-0005 state.",
+        "A deterministic drift-detector catches future count divergence (filesystem count vs docs), implemented as a reusable check_doc_generated_facts in am_i_done.py modelled on the existing skill-meta generated-section check — i.e. the standing mechanism for any source-derived doc fact (agent/command/tier counts and names), not a one-off test. No inference (ADR-003).",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-29",
+      "completed_date": "2026-05-29",
+      "resolution": "Fixed three count drifts (6->7 agents incl. missed commands.md \"(core 6)\"; 15->18 command behaviours; ADR-016 panel-of-8 annotated). Added deterministic check_doc_generated_facts (fence-aware behaviour count, multi-form agent-count patterns, guards review-library/agents/commands/tiers). Adversarial review 2 cycles, zero BLOCKING."
     }
   ]
 }

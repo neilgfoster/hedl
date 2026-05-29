@@ -96,7 +96,7 @@ consumer's stack.
 - Session context (`/start-session`, `/iterate`)
 - Adversarial review gate (`/adversarial-review`)
 - Phase transition (`/phase-complete`)
-- All 15 command behaviors via natural language (from `skill/hedl/references/commands.md`)
+- All 18 command behaviors via natural language (from `skill/hedl/references/commands.md`)
 - 7 core adversarial reviewers as named agents
 - 19 additional reviewer prompts via `skill/hedl/references/review-library.md`
 

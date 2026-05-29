@@ -1044,5 +1044,135 @@ class TestVerifyAllowlist(unittest.TestCase):
         mock_run.assert_called_once()
 
 
+class TestDocGeneratedFacts(unittest.TestCase):
+    """WORK-0028: check_doc_generated_facts catches doc count/name drift from
+    the filesystem source, and skips outside the Hedl source tree."""
+
+    def _build(self, tmp: str, *, agents: list[str], review_lib: str, commands_md: str,
+               tiers_md: str, tiers_json_n: int = 3) -> None:
+        import json as _json
+        import os as _os
+
+        def _write(path: str, content: str) -> None:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+
+        sh = _os.path.join(tmp, "skill", "hedl")
+        _os.makedirs(_os.path.join(sh, "agents"))
+        _os.makedirs(_os.path.join(sh, "references"))
+        for a in agents:
+            _write(_os.path.join(sh, "agents", a + ".md"), "# " + a + "\n")
+        _write(_os.path.join(sh, "tiers.json"),
+               _json.dumps({"tiers": {f"t{i}": {} for i in range(tiers_json_n)}}))
+        _write(_os.path.join(sh, "references", "review-library.md"), review_lib)
+        _write(_os.path.join(sh, "references", "commands.md"), commands_md)
+        _write(_os.path.join(sh, "references", "tiers.md"), tiers_md)
+
+    def _run(self, tmp: str) -> Any:
+        original = M.REPO_ROOT
+        M.REPO_ROOT = tmp
+        try:
+            return M.check_doc_generated_facts()
+        finally:
+            M.REPO_ROOT = original
+
+    def _consistent_kwargs(self) -> dict[str, Any]:
+        agents = ["alpha", "beta"]  # 2 agents
+        review_lib = ("Two core agents live as named `.claude/agents/` files: "
+                      "`alpha`, `beta`.\n")
+        commands_md = "## one\n## two\n## three\n"  # 3 behaviours, no ADR template
+        tiers_md = ("# Tiers\n\nThree tiers — drop in just the gate, lightweight, team.\n\n"
+                    "All 3 command behaviors here.\n")
+        return dict(agents=agents, review_lib=review_lib, commands_md=commands_md, tiers_md=tiers_md)
+
+    def test_passes_when_docs_match_source(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self._build(tmp, **self._consistent_kwargs())
+            result = self._run(tmp)
+            self.assertIsNotNone(result)
+            self.assertTrue(result.passed, result.detail)
+
+    def test_fails_on_wrong_agent_count(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            kw = self._consistent_kwargs()
+            kw["review_lib"] = ("Five core agents live as named `.claude/agents/` files: "
+                                "`alpha`, `beta`.\n")
+            self._build(tmp, **kw)
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("core-agent count", result.detail)
+
+    def test_fails_on_missing_agent_name(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            kw = self._consistent_kwargs()
+            kw["review_lib"] = "Two core agents live as named `.claude/agents/` files: `alpha`.\n"
+            self._build(tmp, **kw)
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("beta", result.detail)
+
+    def test_fails_on_wrong_command_behaviour_count(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            kw = self._consistent_kwargs()
+            kw["tiers_md"] = "# Tiers\n\nThree tiers — x.\n\nAll 9 command behaviors here.\n"
+            self._build(tmp, **kw)
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("command-behaviour count", result.detail)
+
+    def test_fenced_headings_excluded_from_behaviour_count(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            kw = self._consistent_kwargs()
+            # 3 real behaviours + 4 headings inside a code fence (the ADR template
+            # example) = 7 `##` lines, but the count must stay 3.
+            kw["commands_md"] = ("## one\n## two\n## three\n"
+                                 "```markdown\n## Decision\n## Context\n"
+                                 "## Options considered\n## Consequences\n```\n")
+            self._build(tmp, **kw)
+            result = self._run(tmp)
+            self.assertTrue(result.passed, result.detail)
+
+    def test_fails_on_wrong_tier_count(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            kw = self._consistent_kwargs()  # tiers_json_n=3, but doc will say "Five"
+            kw["tiers_md"] = "# Tiers\n\nFive tiers — drop in just the gate.\n\nAll 3 command behaviors.\n"
+            self._build(tmp, **kw)
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("tier count", result.detail)
+
+    def test_fails_on_corrupt_tiers_json(self) -> None:
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self._build(tmp, **self._consistent_kwargs())
+            with open(_os.path.join(tmp, "skill", "hedl", "tiers.json"), "w", encoding="utf-8") as f:
+                f.write("{ not valid json")
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("tiers.json", result.detail)
+
+    def test_fails_on_missing_commands_md(self) -> None:
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self._build(tmp, **self._consistent_kwargs())
+            _os.remove(_os.path.join(tmp, "skill", "hedl", "references", "commands.md"))
+            result = self._run(tmp)
+            self.assertFalse(result.passed)
+            self.assertIn("commands.md", result.detail)
+
+    def test_skips_outside_source_tree(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIsNone(self._run(tmp))
+
+
 if __name__ == "__main__":
     unittest.main()

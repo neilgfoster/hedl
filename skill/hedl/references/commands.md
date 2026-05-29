@@ -214,9 +214,9 @@ Whole-repo independent health evaluation (distinct from `/adversarial-review` wh
 **Run from a fresh session.** Session context skews findings.
 
 Steps:
-1. **Choose depth** — Standard (security-auditor, new-engineer, quality-synthesizer) or Full (all 6 core agents + composable reviewers from review-library.md). Use Standard for routine checks; Full for post-major-change or phase transitions.
+1. **Choose depth** — Standard (security-auditor, new-engineer, quality-synthesizer) or Full (all 7 core agents + composable reviewers from review-library.md). Use Standard for routine checks; Full for post-major-change or phase transitions.
 2. **Clone repo** — `CLONE_DIR=$(mktemp -d -p /tmp); trap 'rm -rf "$CLONE_DIR"' EXIT; git -c core.hooksPath=/dev/null clone --no-local --filter=blob:none "$REPO_ROOT" "$CLONE_DIR/$REPO_NAME"`. Read from clone only.
-3. **Convene panel** — instantiate agents from `.claude/agents/` (core 6) and from `review-library.md` (for Full depth).
+3. **Convene panel** — instantiate agents from `.claude/agents/` (core 7) and from `review-library.md` (for Full depth).
 4. **Run panel in parallel** — each agent reads `TARGET` independently.
 5. **Validate + synthesise** — validate JSON schema per agent, then synthesise.
 6. **Write output** — `RUN_DIR=".work/reviews/repo-health-{DATE}"`. Write one file per agent, then `report.md`.

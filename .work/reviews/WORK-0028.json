@@ -1,0 +1,30 @@
+{
+  "work_item": "WORK-0028",
+  "date": "2026-05-29",
+  "task_type": "architecture",
+  "panel": ["determinism-auditor", "edge-case-hunter", "simplicity-enforcer", "historian"],
+  "cycles": 2,
+  "cycle_1": {
+    "determinism-auditor": "PASS — check_doc_generated_facts is purely deterministic (filesystem + regex + arithmetic), no inference (ADR-003).",
+    "historian": "BLOCKING — commands.md:219 had a stale '(core 6)' missed by the first fix, and the detector's 'all N core agents' regex did not catch the parenthetical form (false PASS).",
+    "edge-case-hunter": "CONDITIONAL — ADR-template name-denylist fragile (collision/rename); skip-on-no-match; tier regex first-match; substring agent-name match; file-handle/try-except hygiene.",
+    "simplicity-enforcer": "CONDITIONAL — ADR-template heuristic fragile (same); _NUMBER_WORDS / tier-count / agent-naming weighed; reusable-mechanism concern self-downgraded (modelled on hardcoded skill-meta check)."
+  },
+  "fixes": [
+    "Fixed commands.md:219 '(core 6)' -> '(core 7)' and added a '\\(core (\\d+)\\)' detector pattern; _check_number now uses finditer so every stated form is verified.",
+    "Replaced the ADR-template name-denylist with fence-aware counting (_count_command_behaviours): counts ## outside code fences, robust to renamed/added example headings and name collisions.",
+    "Anchored the tier regex to the summary sentence ((\\w+) tiers[^\\n]*drop in) so 'Changing tiers' cannot false-match.",
+    "Whole-word agent-name match; file reads use with-statements; commands.md read wrapped in try/except.",
+    "Detector also guards agents.md (it states the core-agent count).",
+    "Added tests: tier-count failure, fence-excluded headings."
+  ],
+  "cycle_2": {
+    "historian": "PASS — commands.md:219 fixed; no other stale counts; all sources agree (7 agents, 18 behaviours); ADR-016 annotation correct; agents.md now guarded.",
+    "edge-case-hunter": "CONDITIONAL — 3 prior SIGNIFICANT resolved; 3 new MINOR latent (tilde fences, indented fences, skip-on-no-match). Fence MINORs fixed (CommonMark indent<=3 + ```/~~~)."
+  },
+  "accepted_minor": [
+    "_check_number skips when a doc states no count (no claim to verify) — documented inline; the agent-name completeness check covers the agent set. Accepted design choice.",
+    "_NUMBER_WORDS covers 0-12; agent/tier counts are far below that today."
+  ],
+  "verdict": "RESOLVED — zero BLOCKING after 2 cycles; cycle-1 BLOCKING (missed (core 6) + detector gap) and the denylist fragility fixed; residual items MINOR/accepted."
+}

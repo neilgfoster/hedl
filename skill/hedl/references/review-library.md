@@ -3,9 +3,9 @@
 Composable reviewer prompts. The dispatcher reads this file and instantiates these
 on demand by passing the prompt + scope context to a sub-agent call.
 
-Six core agents live as named `.claude/agents/` files: `review-dispatcher`,
+Seven core agents live as named `.claude/agents/` files: `review-dispatcher`,
 `scope-auditor`, `security-auditor`, `historian`, `simplicity-enforcer`,
-`edge-case-hunter`. Everything else is here.
+`edge-case-hunter`, `determinism-auditor`. Everything else is here.
 
 ---
 
