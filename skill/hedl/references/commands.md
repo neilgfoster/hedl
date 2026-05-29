@@ -243,6 +243,8 @@ Raise a PR, run adversarial review, address all findings, hand to operator for s
 
 Controller loop: branch → operator-ready PR. Runs gate → adversarial review → fix cycles.
 
+Invoked automatically as the final phase of `/iterate` once implementation completes; also independently invokable to drive an existing branch through PR cycles without a fresh implementation step.
+
 Stops only when: `am_i_done.py --pr N` exits 0 AND `am_i_done.py --pr N --check ci` exits 0 AND zero BLOCKING findings from adversarial review. Maximum 3 full review cycles, then `/stuck`.
 
 Phases: 1. Local gate → 2. Create/update PR + PR gate → 3. Dependabot check → 4. CI gate → 5. Adversarial review → 6. Fix cycle (if FAIL) → 7. Operator handoff.
