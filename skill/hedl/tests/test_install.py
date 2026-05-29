@@ -908,5 +908,137 @@ class TestTierDescriptionMatchesProjections(unittest.TestCase):
             )
 
 
+class TestInstallGuards(unittest.TestCase):
+    """WORK-0022: malformed .hedl-tier produces an actionable message (no
+    traceback); a tiers.json `includes` cycle is named and exits non-zero."""
+
+    def setUp(self) -> None:
+        self._td = tempfile.TemporaryDirectory()
+        self.repo = pathlib.Path(self._td.name)
+        self.marker = self.repo / M.TIER_MARKER
+
+    def tearDown(self) -> None:
+        self._td.cleanup()
+
+    # --- .hedl-tier reader ---
+
+    def test_read_tier_marker_valid(self) -> None:
+        self.marker.write_text('{"tier": "lightweight"}\n', encoding="utf-8")
+        tier, err = M._read_tier_marker(self.marker)
+        self.assertEqual(tier, "lightweight")
+        self.assertIsNone(err)
+
+    def test_read_tier_marker_malformed_json(self) -> None:
+        self.marker.write_text('{"tier": "light', encoding="utf-8")  # truncated
+        tier, err = M._read_tier_marker(self.marker)
+        self.assertIsNone(tier)
+        self.assertIsNotNone(err)
+        self.assertIn("not valid JSON", err)
+
+    def test_read_tier_marker_missing_tier_field(self) -> None:
+        self.marker.write_text('{"other": 1}', encoding="utf-8")
+        tier, err = M._read_tier_marker(self.marker)
+        self.assertIsNone(tier)
+        self.assertIn("'tier' field", err)
+
+    def test_read_tier_marker_wrong_type(self) -> None:
+        self.marker.write_text('{"tier": 5}', encoding="utf-8")
+        tier, err = M._read_tier_marker(self.marker)
+        self.assertIsNone(tier)
+        self.assertIsNotNone(err)
+
+    def test_read_tier_marker_empty_tier(self) -> None:
+        self.marker.write_text('{"tier": "  "}', encoding="utf-8")
+        tier, err = M._read_tier_marker(self.marker)
+        self.assertIsNone(tier)
+        self.assertIsNotNone(err)
+
+    def test_read_tier_marker_non_dict_toplevel(self) -> None:
+        self.marker.write_text('["lightweight"]', encoding="utf-8")
+        tier, err = M._read_tier_marker(self.marker)
+        self.assertIsNone(tier)
+        self.assertIsNotNone(err)
+
+    def test_cmd_status_malformed_marker_no_traceback(self) -> None:
+        self.marker.write_text("not json at all", encoding="utf-8")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = M.cmd_status(_ns(repo=str(self.repo)))
+        self.assertEqual(rc, 1)
+        self.assertIn(".hedl-tier", buf.getvalue())
+
+    def test_cmd_doctor_malformed_marker_no_traceback(self) -> None:
+        self.marker.write_text("not json at all", encoding="utf-8")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = M.cmd_doctor(_ns(repo=str(self.repo)))
+        self.assertEqual(rc, 1)
+        self.assertIn(".hedl-tier", buf.getvalue())
+
+    # --- includes cycle ---
+
+    _CYCLE = {"tiers": {"a": {"includes": ["b"]}, "b": {"includes": ["a"]}}}
+
+    def test_flatten_projections_detects_cycle(self) -> None:
+        with self.assertRaises(M.TiersIncludeCycleError) as ctx:
+            M._flatten_projections(self._CYCLE, "a")
+        self.assertIn("a -> b -> a", str(ctx.exception))
+
+    def test_flatten_inits_detects_cycle(self) -> None:
+        with self.assertRaises(M.TiersIncludeCycleError):
+            M._flatten_inits(self._CYCLE, "a")
+
+    def test_self_include_cycle(self) -> None:
+        tiers = {"tiers": {"x": {"includes": ["x"]}}}
+        with self.assertRaises(M.TiersIncludeCycleError) as ctx:
+            M._flatten_projections(tiers, "x")
+        self.assertIn("x -> x", str(ctx.exception))
+
+    def test_unknown_tier_reference_raises(self) -> None:
+        tiers = {"tiers": {"a": {"includes": ["nope"]}}}
+        with self.assertRaises(M.TiersConfigError) as ctx:
+            M._flatten_projections(tiers, "a")
+        self.assertIn("unknown tier", str(ctx.exception))
+        self.assertIn("nope", str(ctx.exception))
+
+    def test_diamond_includes_not_a_cycle(self) -> None:
+        # a -> b, a -> c, b -> d, c -> d : not a cycle; must not raise.
+        tiers = {"tiers": {
+            "a": {"includes": ["b", "c"]},
+            "b": {"includes": ["d"]},
+            "c": {"includes": ["d"]},
+            "d": {"projections": [{"source": "s", "target": "t"}]},
+        }}
+        result = M._flatten_projections(tiers, "a")
+        self.assertEqual(len(result), 2)  # d's projection appears once per branch
+
+    def test_excessive_include_depth_raises(self) -> None:
+        # A linear chain deeper than the cap raises TiersConfigError, not RecursionError.
+        n = M._MAX_INCLUDE_DEPTH + 5
+        tiers = {"tiers": {f"t{i}": {"includes": [f"t{i+1}"]} for i in range(n)}}
+        tiers["tiers"][f"t{n}"] = {}
+        with self.assertRaises(M.TiersConfigError):
+            M._flatten_projections(tiers, "t0")
+
+    def test_cmd_install_warns_on_malformed_marker(self) -> None:
+        self.marker.write_text("garbage{", encoding="utf-8")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            M.cmd_install(_ns(tier="gate", repo=str(self.repo), copy=True))
+        self.assertIn("WARN", buf.getvalue())
+
+    def test_main_exits_1_on_includes_cycle(self) -> None:
+        import sys as _sys
+        self.marker.write_text('{"tier": "a"}\n', encoding="utf-8")
+        argv = ["install.py", "--status", "--repo", str(self.repo)]
+        with mock.patch.object(M, "_load_tiers", return_value=self._CYCLE), \
+                mock.patch.object(_sys, "argv", argv):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+                rc = M.main()
+        self.assertEqual(rc, 1)  # clean exit, not a RecursionError traceback
+        self.assertIn("cycle", buf.getvalue().lower())
+
+
 if __name__ == "__main__":
     unittest.main()

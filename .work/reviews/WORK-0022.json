@@ -1,0 +1,30 @@
+{
+  "work_item": "WORK-0022",
+  "date": "2026-05-29",
+  "task_type": "architecture",
+  "panel": ["security-auditor", "edge-case-hunter", "historian", "simplicity-enforcer"],
+  "cycles": 2,
+  "audit": ".work/insights/WORK-0022-install-guards-audit.md — both bugs REAL (cmd_install already guarded via WORK-0016; cmd_status/cmd_doctor crash; includes recursion). Decision: FIX (change_class stays fix).",
+  "cycle_1": {
+    "historian": "PASS — audit-first pattern followed; change_class fix correct; TiersIncludeCycleError mirrors ProjectionContainmentError; behaviour change (missing tier now errors) documented.",
+    "security-auditor": "CONDITIONAL (MINOR) — no size cap; tier printed before validate; double flatten; deep-acyclic RecursionError; silent downgrade; tiers.json corruption (out of scope).",
+    "edge-case-hunter": "CONDITIONAL (3 SIGNIFICANT) — {\"tier\":\"\"} -> KeyError; unknown tier in includes -> KeyError; unknown installed tier -> KeyError in cmd_status/doctor. + diamond duplicate, assert-under-O MINORs.",
+    "simplicity-enforcer": "CONDITIONAL (MINOR) — cycle-check duplicated across both flatten fns; asserts."
+  },
+  "fixes": [
+    "Reject empty/whitespace 'tier' in _read_tier_marker (SIG-1).",
+    "Unified _flatten_projections/_flatten_inits into _flatten_tier_key with cycle + unknown-tier + depth (_MAX_INCLUDE_DEPTH=32) guards under a TiersConfigError base (SIG-2, SIG-3, deep-recursion, dedup).",
+    "main() catches TiersConfigError (base) -> clean exit for cycle/unknown-tier/depth from any command.",
+    "cmd_install prints WARN on an unreadable marker before proceeding as fresh (no silent downgrade).",
+    "Tests: empty tier, non-dict top-level, unknown-tier reference, diamond-not-a-cycle, excessive depth, install-warns."
+  ],
+  "cycle_2": {
+    "edge-case-hunter": "PASS — all 3 SIGNIFICANT resolved; depth cap + diamond verified. New: 3 MINOR (inconsistent guard but main-caught; diamond duplicate now commented; unreachable main return 0).",
+    "security-auditor": "CONDITIONAL PASS — in-scope MINORs resolved/justifiably deferred. New MINORs: _load_tiers corruption (out of scope, follow-up), print-before-validate (operator-only trust boundary)."
+  },
+  "deferred_out_of_scope": [
+    "_load_tiers() raises a raw traceback on a corrupt/missing tiers.json (the bundled manifest). Same 'no traceback' spirit but beyond WORK-0022's scope (.hedl-tier + includes-cycle). Candidate follow-up item.",
+    ".hedl-tier file-size cap and ANSI-in-tier print: accepted — .hedl-tier is a per-install, git-ignored, operator-controlled file (self-inflicted, not a trust-boundary attack)."
+  ],
+  "verdict": "RESOLVED — zero BLOCKING/SIGNIFICANT after 2 cycles; residual MINOR/out-of-scope noted."
+}
