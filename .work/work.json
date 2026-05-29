@@ -1,19 +1,18 @@
 {
   "meta": {
     "current_phase": 1,
-    "active_item": null,
+    "active_item": "WORK-0034",
     "last_updated": "2026-05-29",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
-  "active": [],
-  "backlog": [
+  "active": [
     {
       "id": "WORK-0034",
       "title": "feat: /iterate drives end-to-end through to PR-raised",
       "phase": 1,
       "workstream": "WS-ARCH",
       "change_class": "feat",
-      "status": "backlog",
+      "status": "active",
       "priority_band": "normal",
       "description": "Today /iterate completes implementation and stops, requiring the operator to separately invoke /pr-ready (or NL \"raise a PR\" / \"is the PR ready\"). This is a design oversight — the steps between implementation and PR-raised (gate, adversarial review, fix cycles, PR creation) are mechanical and require no operator judgement. The operator's meaningful checkpoint is PR review at merge time, structurally enforced by branch protection. Per Principle 1 (Deterministic over inference), /iterate should drive end-to-end.\n\n/pr-ready remains as an independently-invokable slash command for driving an existing branch through PR cycles without a fresh implementation step.",
       "acceptance_criteria": [
@@ -24,8 +23,11 @@
         "The 'operator handoff' definition in pr-ready stays the same: PR open, gate green, CI green, adversarial review verdict resolved, zero BLOCKING findings remaining — i.e., merge-ready.",
         "One real iteration cycle has been run end-to-end under the new behaviour to verify (e.g., this work item's own delivery is the proof: the implementation + PR-raised should all happen from one /iterate invocation).",
         "am_i_done.py passes."
-      ]
-    },
+      ],
+      "started_date": "2026-05-29"
+    }
+  ],
+  "backlog": [
     {
       "id": "WORK-0024",
       "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
