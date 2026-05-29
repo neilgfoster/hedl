@@ -31,6 +31,7 @@ See [Getting started](docs/getting-started.md). Already using Hedl? Add yourself
 ### Using Hedl
 
 - [Getting started](docs/getting-started.md) -- installation, first use, adopter checklist
+- [Bootstrap an adopter](docs/templates/bootstrap-adopter.md) -- the repeatable new-adopter-repo sequence
 - [Tiers](skill/hedl/references/tiers.md) -- gate-only, lightweight, and team tier detail
 - [Name and origin](docs/name.md) -- why "Hedl"
 - [Adopters](ADOPTERS.md) -- projects using Hedl

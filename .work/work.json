@@ -191,7 +191,8 @@
         "Lightweight-tier solo workflow is functionally unchanged.",
         "am_i_done.py passes including all existing tests on the new shape.",
         "Tests cover: leaf workstream (flat), nested workstreams (epic-of-stories), tier-graded behaviour, migration round-trip."
-      ]
+      ],
+      "note": "Data-model-adoption threshold (dogfood 2026-05-29, N=2 adopters): the recursive model's benefit exceeds prose-template cost only when concurrently-active workstreams exceed ~5-7, OR >1 concurrent operator needs shared machine-readable state, OR a parallel-bootstrap-under-coordination-strain repeats. Below that, prose templates (docs/templates/bootstrap-adopter.md) are the right tool. See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md."
     },
     {
       "id": "WORK-0011",
@@ -209,7 +210,8 @@
         "hedl.toml supports a `[workstreams] templates_path` override.",
         "First concrete use: existential-review runs on Hedl itself, producing docs/alternatives.md (already committed in PR #10 — reference it as the worked example); problem-statement is used to bootstrap Lume.",
         "am_i_done.py passes."
-      ]
+      ],
+      "note": "When this ships workstream templates in data-form (ADR-020), fold in / supersede the prose docs/templates/bootstrap-adopter.md (authored 2026-05-29 from the Lume/Wyrd bootstraps). See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md."
     },
     {
       "id": "WORK-0001",
