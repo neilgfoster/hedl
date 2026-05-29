@@ -654,6 +654,37 @@
         "WORK-0028",
         "WORK-0032"
       ]
+    },
+    {
+      "id": "WORK-0053",
+      "title": "feat(arch): operator-reputation tracking — score clarification options, capture selections, modulate autonomy (project-local)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "adr_class": true,
+      "description": "ADR-CLASS (Proposed ADR before implementation). MORATORIUM CAVEAT: operator decides land-now vs defer-to-/phase-complete. Idea (operator, 2026-05-29): every time Hedl asks for clarification it presents OPTIONS, each scored 0-10 by Hedl's confidence. Each operator selection (or rejection-of-all) is captured as an insights event. Aggregate into a reputation score for Hedl's recommendations; as reputation rises, Hedl acts more autonomously (fewer clarification stops), having learned the operator's decision criteria.\n\nHARD DESIGN CONSTRAINT (operator): this is PROJECT state, not Hedl state. Reputation starts fresh per project so it captures the consumer/adopter's preferences, NEVER the Hedl creator's. It lives in .work/insights/ (per-project, local-only — gitignored per WORK-0042), is created fresh on install, and is never shipped in skill/hedl/ defaults.\n\nWHY ADR-CLASS — the autonomy-modulation half is in direct tension with Hedl's core: ADR-003 (deterministic over inference — the gate must not use inference) and ADR-025 (the operator's clarification/merge stop is the deliberate human checkpoint, structurally enforced). Auto-loosening checkpoints on a learned score puts inference into the control flow that decides WHEN to involve the human — the opposite of the deterministic gate Hedl is built on. The capture+scoring half is comparatively benign (it extends the existing AskUserQuestion + record_insights + /reflect pipeline); the 'become more autonomous' half is the load-bearing, safety-relevant risk.\n\nEXISTENTIAL CHALLENGE (ADR-017; existential-challenger now a named mandatory reviewer per WORK-0005): (1) Does 'increase autonomy as reputation rises' violate ADR-003 + ADR-025? Likely acceptable only if autonomy-modulation is a TRANSPARENT DETERMINISTIC RULE with operator-set thresholds (e.g. 'after N consecutive accepted decisions of the same change_class, stop asking for that class'), NOT a learned/black-box score; reputation may INFORM but must never silently bypass a checkpoint. (2) LLM self-reported confidence (the 0-10) is uncalibrated — acting on it is dangerous; the real value is MEASURING calibration (does the score predict acceptance? a Brier-style metric), computed deterministically. (3) Whose reputation under multi-operator (ADR-018)? per-operator vs per-project aggregate — an average may erase differing criteria. (4) Safety/blast radius (CLAUDE.md): growing autonomy is hard to bound; HIGH-blast-radius decisions (main, deploys, external systems) must ALWAYS require human approval regardless of reputation. (5) Does the existing substrate already suffice — /iterate supervised vs autonomous + record_insights + /reflect (ADR-026)? The minimal version may be: record option-scores + selections, surface a calibration metric, let the operator MANUALLY widen autonomy — no auto-modulation. Prior art: active-learning/bandits, RLHF preference capture, trust-tier automation, calibration (Brier/ECE).",
+      "acceptance_criteria": [
+        "ADR phase: Proposed ADR-NNNN with prior-art audit (active-learning/bandits, RLHF preference capture, trust-tier automation, calibration metrics) + existential-challenger pass.",
+        "The ADR MUST resolve the ADR-003/ADR-025 tension explicitly: autonomy-modulation is a deterministic operator-set rule (preferred) or a learned model (challenged hard); reputation INFORMS; high-blast-radius decisions always stop for a human regardless of score.",
+        "Decides whose-reputation under multi-operator (ADR-018): per-operator or per-project aggregate.",
+        "Confirms project-state-not-Hedl-state: data in .work/insights/, per-project, fresh on install, gitignored (WORK-0042), never in skill/hedl/ defaults.",
+        "Operator decision: accept (which variant — likely capture+calibration-metric + operator-driven autonomy, deferring auto-modulation), reject, or defer.",
+        "If deferred: docs/alternatives.md entry with conditions to revisit.",
+        "am_i_done.py passes (ADR PR is docs-only).",
+        "POST-ADR IMPLEMENTATION (if accepted): AskUserQuestion options carry a 0-10 confidence; {question, options+scores, selection-or-reject-all} recorded to .work/insights/ (project-local, gitignored); /reflect aggregates a deterministic calibration/reputation metric (pure arithmetic, ADR-003); any autonomy change is a transparent deterministic rule with operator-set thresholds + a hard high-blast-radius stop; per-project + fresh-per-install + never-shipped-in-defaults; tests + docs."
+      ],
+      "relates_to": [
+        "ADR-003",
+        "ADR-025",
+        "ADR-005",
+        "ADR-018",
+        "ADR-026",
+        "WORK-0042",
+        "WORK-0050"
+      ]
     }
   ],
   "completed": [
