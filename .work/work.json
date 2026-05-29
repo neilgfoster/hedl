@@ -420,6 +420,187 @@
         "Behaviour documented where the template check is described (pr-ready.md / references/commands.md or check_pr_template docstring).",
         "am_i_done.py passes."
       ]
+    },
+    {
+      "id": "WORK-0042",
+      "title": "fix: install.py ships a baseline .gitignore protecting ADR-005 local-only artefacts",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "high",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29: a fresh `--tier team --copy` install produces NO .gitignore in the adopter repo. The installer projects .claudeignore (Claude Code visibility) but nothing for git. If the adopter enables [insights] enabled = true in hedl.toml, .work/insights/*.jsonl and events.jsonl become eligible to commit — violating ADR-005's 'insights data is local-only; never commit' contract. Hedl itself only gained the relevant .gitignore entries via PR#12 (citing ADR-005), after events.jsonl was almost committed; an adopter following the documented install path has no equivalent protection. Distinct from WORK-0013 (--invisible mode hides Hedl wholesale); this protects ADR-005 artefacts in normal (visible) installs.",
+      "acceptance_criteria": [
+        "install.py projects a .gitignore entry (idempotent: appends a delimited Hedl-managed block if .gitignore exists; creates the file otherwise).",
+        "Block protects, minimally: .work/insights/*.jsonl, events.jsonl, .pytest_cache/, __pycache__/, *.pyc.",
+        "Verify on a fresh empty repo: install.py --tier team --copy produces a .gitignore that prevents `git add .work/insights/test.jsonl` from staging the file.",
+        "ADR-005 referenced in the projection comment so adopters see the why.",
+        "Test added to test_install.py covering the gitignore projection on fresh-install AND existing-gitignore paths.",
+        "am_i_done.py passes.",
+        "Distinct from WORK-0013 (--invisible mode) — acknowledged overlap, different scope."
+      ],
+      "relates_to": [
+        "ADR-005",
+        "WORK-0013"
+      ]
+    },
+    {
+      "id": "WORK-0043",
+      "title": "feat: install.py --copy mode detects and warns on local drift to projected files",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "medium-high",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29: install.py --copy (the recommended adopter mode) silently overwrites any local edits the operator made to projected files, no warning. _project_one(): if target bytes differ from source, shutil.copy2 runs and returns 'updated' — no user-file-modified detection, confirmation, or backup. Affected: .claude/agents/*, .claude/commands/*, .claude/settings.json, .claude/startup.sh, .github/scripts/*, .github/workflows/*, .github/PULL_REQUEST_TEMPLATE.md, requirements-ci.txt, docs/spec/* (33 files at team tier). A data-loss class of surprise: an adopter who customised .claude/settings.json loses it on the next --copy install.",
+      "acceptance_criteria": [
+        "For each projection, install.py records a content hash of what was last projected (extend .hedl-tier, or add a .hedl-manifest.json sibling).",
+        "On re-install, if target_bytes != source_bytes AND target_bytes != last_projected_hash, treat as user drift: log 'drift detected' and skip by default.",
+        "New flag --force-overwrite-drift opts into the current behaviour.",
+        "--dry-run lists drifted files explicitly so the operator can decide.",
+        "--doctor reports drifted files.",
+        "Test added: clean re-install (no drift), single-file drift detected and preserved, --force-overwrite-drift behaves as today.",
+        "docs/upgrading.md (WORK-0044) explains the drift-detection contract.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "ADR-009"
+      ]
+    },
+    {
+      "id": "WORK-0044",
+      "title": "docs: write docs/upgrading.md covering the adopter update workflow",
+      "phase": 2,
+      "workstream": "WS-PLAN",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "medium",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29: an adopter asked 'if Hedl is updated, how do I update Lume?' and the answer was not findable in any shipped doc — required reading install.py source. The documented workflow (pull Hedl -> re-run install.py at same tier -> --migrate if schema bumped -> --doctor) is correct but undiscoverable. WORK-0014 (README/positioning) is about marketing the gate/invisible/iteration-layer framing, not operating-the-tool docs — distinct concern.",
+      "acceptance_criteria": [
+        "New file docs/upgrading.md covering: (1) update command sequence (pull, re-install, --migrate, --doctor, diff, PR); (2) what is preserved vs overwritten (table format from the 2026-05-29 Lume bootstrap chat is a good start); (3) handling --migrate schema bumps; (4) drift detection (depends on WORK-0043) or, until then, the known clobber behaviour named explicitly as a caveat; (5) current limitation: no `pip install hedl` yet — source-checkout pattern is the only path (links WORK-0045).",
+        "README links to docs/upgrading.md from a clearly-marked 'Updating' section.",
+        "am_i_done.py passes (docs-only PR)."
+      ],
+      "relates_to": [
+        "WORK-0014",
+        "WORK-0043",
+        "WORK-0045"
+      ]
+    },
+    {
+      "id": "WORK-0045",
+      "title": "feat: distribute Hedl as a pip/pipx-installable package with `hedl` CLI",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "low",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29: adopters must maintain a local clone of neilgfoster/hedl next to every Hedl-using repo, then invoke install.py via absolute path. This blocks: onboarding without a Hedl checkout; `hedl update`/`hedl doctor` as native commands; versioned install (pip install hedl==0.2.0) for reproducible adopter state; a future `hedl init` UX that beats `python ~/source/hedl/skill/hedl/scripts/install.py --tier team --copy --repo .`. Verify against docs/alternatives.md (may already be on the watchlist) and reference if so; otherwise this is a new strategic capability warranting an explicit ADR (likely Phase 2/3, depends on ADR triage at /phase-complete).",
+      "acceptance_criteria": [
+        "ADR drafted (Proposed) recording the distribution decision: pyproject.toml + entry points, or alternative (shell installer like rustup, npx-style runner).",
+        "ADR existentially challenged per ADR-017 (does pipx install hedl change anything that justifies new code? compare with the Skill-distribution model per ADR-001).",
+        "If accepted: pyproject.toml with a `hedl` console-script entry point proxying install.py / status / doctor / migrate.",
+        "Published-package smoke test: `pipx install hedl && cd /tmp/test-repo && hedl install --tier team` reproduces the source-checkout install.",
+        "Versioning aligned with Axis A (Hedl framework version) per ADR-004.",
+        "docs/upgrading.md updated to lead with pip/pipx; source-checkout becomes the fallback.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "ADR-001",
+        "ADR-004",
+        "WORK-0044",
+        "alternatives.md"
+      ]
+    },
+    {
+      "id": "WORK-0046",
+      "title": "feat: install.py --project / --description flags seed context.json directly",
+      "phase": 2,
+      "workstream": "WS-PLAN",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "low",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29: a fresh team install ships .work/context.json, .work/work.json, .work/phases/phase-0.json with EDIT ME placeholders. This (a) trips am_i_done.py on the install PR itself, forcing a two-PR adoption flow (install -> seed), and (b) makes PR#1 noisy. May be by design (forces a deliberate seed step) — flag for /phase-complete evaluation. If retained, document as intentional in docs/upgrading.md (WORK-0044); if changed, install.py grows interactive prompts or flags. Existential-challenger question: is forcing a second PR for the seed useful friction (operator must deliberately articulate project intent) or gratuitous friction (mechanical churn)? Decision-justified either way at /phase-complete.",
+      "acceptance_criteria": [
+        "install.py --project NAME --description \"TEXT\" --phase 0 writes those values into context.json instead of EDIT ME placeholders.",
+        "Without those flags: behaviour unchanged (placeholder shipped).",
+        "am_i_done.py recognises a fully-seeded context.json as gate-passing on the install PR (eliminates the two-PR pattern for adopters who provide --project on first install).",
+        "Test added covering both paths.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "ADR-009",
+        "WORK-0044"
+      ]
+    },
+    {
+      "id": "WORK-0047",
+      "title": "feat: harness-agnostic adoption — Hedl works with GitHub Copilot, OpenCode, and other AI coding tools",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29 framing: Hedl should work not just with Claude Code but with GitHub Copilot, OpenCode, and any equivalent AI coding tool. Today the deterministic gate (am_i_done.py), .work/ state, hedl.toml, and the SKILL.md natural-language routing table are already harness-agnostic (plain Python/CI + readable NL), while the .claude/ projections (slash commands, named agents, settings/hooks) are Claude-Code-specific adapters. Define the multi-harness strategy: a harness-agnostic core plus thin per-tool adapter projection sets (e.g. GitHub Copilot .github/copilot-instructions.md; OpenCode AGENTS.md/config) rather than Claude-only assumptions baked into the core. Relates to ADR-016 (NL routing as the cross-harness fallback) and ADR-023 (invisible mode).",
+      "acceptance_criteria": [
+        "Audit which parts of Hedl are Claude-Code-specific (.claude/ projections, slash commands, agents, settings hooks) vs harness-agnostic (am_i_done.py gate, .work/ state, hedl.toml, SKILL.md NL routing); document in an insights note.",
+        "ADR drafted (Proposed) on the multi-harness model: per-tool projection sets (tiers.json gains harness-specific projections, e.g. a 'copilot' / 'opencode' adapter) vs a single agnostic core + thin adapters; existentially challenged per ADR-017 (does the gate + NL routing already suffice for non-Claude tools, or is adapter code justified?).",
+        "Define explicitly what 'works with tool X' means: the gate runs unchanged (tool-agnostic Python/CI); the NL workflow in SKILL.md is consumable by any agent; tool-specific command/agent files are the per-harness adapter.",
+        "If accepted: at least one non-Claude adapter shipped as a real example (GitHub Copilot recommended) with an install path, mirroring the Claude-Code projection contract.",
+        "README/tiers docs state the supported harnesses and the agnostic-core guarantee; counts stay consistent (doc-facts check passes).",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "ADR-016",
+        "ADR-023",
+        "ADR-001",
+        "WORK-0013"
+      ]
+    },
+    {
+      "id": "WORK-0048",
+      "title": "fix: install.py _load_tiers handles corrupt/missing tiers.json with a clean error",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "normal",
+      "dependencies": [],
+      "description": "Surfaced by the WORK-0022 adversarial review (security + edge-case, 2026-05-29) as out-of-scope-for-0022 but the same 'no traceback' class: install.py _load_tiers() does `with TIERS_FILE.open() as f: return json.load(f)` with no error handling. A corrupt or missing tiers.json raises an unhandled json.JSONDecodeError/FileNotFoundError traceback, bypassing the clean-exit (TiersConfigError) pattern WORK-0022 established for the includes path. Mirror that pattern: wrap _load_tiers in try/except and raise TiersConfigError (or print a JSON/actionable error + non-zero exit) so a malformed bundled manifest never produces a raw traceback.",
+      "acceptance_criteria": [
+        "_load_tiers (or its callers) handle a missing or unparseable tiers.json with an actionable message + non-zero exit, no traceback — consistent with WORK-0022's TiersConfigError handling in main().",
+        "Test added covering corrupt and missing tiers.json.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0022"
+      ]
+    },
+    {
+      "id": "WORK-0049",
+      "title": "fix: release.py guards empty phase item-set and unknown change_class",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "low",
+      "dependencies": [],
+      "description": "Surfaced by the WORK-0023 adversarial review (edge-case, 2026-05-29), out-of-scope for 0023 (which was --current-version) but real minor gaps in release.py: (1) a mistyped/empty --phase yields items=[] -> compute_bump returns 'patch' -> a 0.0.1 proposal emitted silently with exit 0, indistinguishable from a real no-change run; (2) group_by_class silently DROPS an item whose change_class is not in the fixed _ORDER list from the output groups, even though that item still influences compute_bump. Decide: surface an empty/unknown-phase result distinctly (e.g. a note/empty-groups flag), and either reject unknown change_class at load (CHANGE_CLASSES validation) or route it to an explicit 'other' bucket.",
+      "acceptance_criteria": [
+        "An empty phase item-set is distinguishable in the output (e.g. an explicit empty-groups indicator) rather than silently producing a patch bump as if it were a real release.",
+        "An unknown change_class is either rejected with an actionable error at load, or routed to a visible 'other' bucket — never silently dropped from the output groups.",
+        "Tests cover empty-phase and unknown-change_class paths.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0023"
+      ]
     }
   ],
   "completed": [
