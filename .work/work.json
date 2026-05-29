@@ -8,22 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0024",
-      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2. Promoted from later in Phase 1 for drift-cleanup batching alongside WORK-0026/0028. NOTE: unlike those two (doc/count drift in review-library.md / commands.md / tiers.json), this item reconciles ADR-022 state_backend storage (hedl.toml vs .work/context.json) and may require code + a one-shot migration, not just a doc edit — it likely warrants its own PR rather than the doc batch.",
-      "acceptance_criteria": [
-        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
-        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
-        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0026",
       "title": "fix: tiers.json team-tier description matches actual projections",
       "phase": 1,
@@ -212,7 +196,7 @@
         "For each item, creates a GitHub issue via gh api with: title formatted 'WORK-XXXX: <title>' (preserves the historical ID for cross-references in commits/ADRs), body containing the description + acceptance criteria, labels mapping to change_class / phase / workstream / priority_band per the WORK-0007 scheme.",
         "Records the mapping (issue-number ↔ WORK-XXXX) under .work/archive/<timestamp>/state-backend-migration.json.",
         "Archives the pre-migration .work/work.json to .work/archive/<timestamp>/work.json.pre-github-issues.",
-        "Updates .work/context.json with state_backend: github-issues and any backend-specific configuration (label_prefix, repo) per ADR-022.",
+        "Updates hedl.toml [state] backend = github-issues and any backend-specific configuration (label_prefix, repo, under [state_backend.github-issues]) per ADR-022 (state_backend lives in hedl.toml, not context.json — WORK-0024).",
         "Empties .work/work.json (or removes it; operator's call — preserve backwards-compat reads if removal breaks the gate).",
         "Idempotent: re-running on a repo already on github-issues backend is a no-op with a clear message.",
         "Tests cover: round-trip mapping, idempotency, label correctness, archive contents.",
@@ -234,7 +218,7 @@
       "description": "Decide explicitly that Hedl's own development uses github-issues as its state backend (per ADR-022, team tier's recommended backend). Record as ADR-024 with Prior art (per ADR-017) citing CCPM's existing approach, Linear's project model, and GitHub's own project workflow as comparators. Then dogfood: run WORK-0032's migration on this repo's own work.json, verify the full iteration cycle works end-to-end (issue created -> branch referenced via 'closes #N' -> PR merged -> issue auto-closes), tag the milestone (likely v0.2.0).",
       "acceptance_criteria": [
         ".work/decisions/ADR-024-hedl-own-state-backend.md exists with Status, Decision, Context, Prior art, Options considered, Consequences sections. Prior-art section actually engages with CCPM and Linear, not just acknowledges them.",
-        "WORK-0032's migration script has been run on this repo; .work/context.json shows state_backend: github-issues.",
+        "WORK-0032's migration script has been run on this repo; hedl.toml shows [state] backend = github-issues (WORK-0024).",
         ".work/archive/ contains the pre-migration snapshot.",
         "All open WORK-XXXX items now exist as GitHub issues with the label scheme applied; the mapping JSON is committed under .work/archive/.",
         "At least one new work item is activated, worked, and CLOSED via the new backend end-to-end (issue assigned -> branch references 'closes #N' -> PR merged -> issue auto-closes via 'Fixes #N'). Documented as the verification cycle.",
@@ -770,6 +754,25 @@
       "started_date": "2026-05-29",
       "completed_date": "2026-05-29",
       "resolution": "iterate.md extended through the /pr-ready loop; stop-point moved to PR-open/merge-ready (ADR-025). Branch-protection assertion + /stuck recovery added per cycle-1 adversarial review. Delivered end-to-end from one /iterate invocation (AC6 proof)."
+    },
+    {
+      "id": "WORK-0024",
+      "title": "feat: reconcile ADR-022 state_backend storage with implementation (hedl.toml vs .work/context.json)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — ADR-022 is Accepted and specifies that `state_backend` configuration lives in `hedl.toml`; the actual code, tests, installer, and docs still use `.work/context.json`. Either (a) implement the ADR — move state_backend reads/writes into hedl.toml with a one-shot migration from context.json — or (b) supersede ADR-022 with an ADR that records the decision to keep state_backend in context.json and explain why. Whichever path is chosen must converge ADRs, code, tests, docs, and installer behaviour on a single source of truth. This item is a precondition for the backend-adapter framework (WORK-0012) in Phase 2. Promoted from later in Phase 1 for drift-cleanup batching alongside WORK-0026/0028. NOTE: unlike those two (doc/count drift in review-library.md / commands.md / tiers.json), this item reconciles ADR-022 state_backend storage (hedl.toml vs .work/context.json) and may require code + a one-shot migration, not just a doc edit — it likely warrants its own PR rather than the doc batch.",
+      "acceptance_criteria": [
+        "Either the code reads state_backend from hedl.toml (with migration from context.json) and ADR-022 is unchanged, or a new superseding ADR is committed and ADR-022's status is marked Superseded.",
+        "Exactly one source of truth for state_backend across code, tests, installer, and docs.",
+        "If hedl.toml is chosen: install.py migrates existing context.json state_backend entries; tests cover the migration.",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-29",
+      "completed_date": "2026-05-29",
+      "resolution": "Implemented ADR-022 (operator decision): state_backend reads from hedl.toml [state] backend; install.py state schema 1->2 migration relocates any context.json value with a hardened crash-safe writer. ADR-022 kept Accepted + implementation note. WORK-0032/0033 ACs reconciled. This repo migrated to schema 2. Adversarial review 2 cycles, zero BLOCKING."
     }
   ]
 }

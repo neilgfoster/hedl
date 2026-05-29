@@ -149,19 +149,19 @@ Replaces `.work/work.json` as the source of truth for work items. Benefits:
 State interface: the gate (`am_i_done.py`) reads from whichever backend is configured.
 The local-file backend remains fully functional without `gh` — Tier 3 is additive.
 
-Backend configuration (add to `.work/context.json`):
-```json
-{
-  "state_backend": "github-issues",
-  "github_issues": {
-    "repo": "owner/repo",
-    "label_prefix": "work",
-    "phase_label": "phase-{N}"
-  }
-}
+Backend configuration (add to `hedl.toml`, per ADR-022):
+```toml
+[state]
+backend = "github-issues"
+
+[state_backend.github-issues]
+repo = "owner/repo"
+label_prefix = "work"
+phase_label = "phase-{N}"
 ```
 
-When `state_backend` is `local-file` (the default), the existing `.work/work.json` is used.
+When `backend` is `local-file` (the default), the existing `.work/work.json` is used.
+`install.py --migrate` relocates any legacy `.work/context.json` `state_backend` value into `hedl.toml`.
 
 ### Parallel worktree execution
 

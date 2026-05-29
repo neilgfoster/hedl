@@ -19,6 +19,7 @@ import datetime
 import json
 import os
 import platform
+import re
 import shutil
 import sys
 import tomllib
@@ -31,7 +32,7 @@ TIERS_FILE: Path = SKILL_ROOT / "tiers.json"
 TIER_MARKER: str = ".hedl-tier"
 TIER_ORDER: list[str] = ["gate", "lightweight", "team"]
 
-CURRENT_STATE_SCHEMA: str = "1"
+CURRENT_STATE_SCHEMA: str = "2"
 
 
 def _hedl_version() -> str:
@@ -86,8 +87,82 @@ def _migrate_unversioned_to_1(work_dir: Path) -> None:
     ctx.write_text(json.dumps(data, indent=2) + "\n")
 
 
+def _validate_backend_name(backend: str) -> None:
+    """Reject anything that is not a plain backend identifier.
+
+    The value is written verbatim into hedl.toml, which also carries the gate's
+    [verify]/[gate] command surface (WORK-0021). A length bound plus an
+    ASCII-only identifier pattern stops a crafted context.json value from
+    injecting additional TOML (e.g. a [verify] table) on migration.
+    """
+    if not (0 < len(backend) <= 64) or not re.fullmatch(r"[a-z][a-z0-9]*(-[a-z0-9]+)*", backend, re.ASCII):
+        raise ValueError(f"refusing to migrate unsafe state_backend value: {backend!r}")
+
+
+def _set_hedl_state_backend(repo: Path, backend: str) -> None:
+    """Ensure hedl.toml has [state] backend = "<backend>" (ADR-022).
+
+    Appends the [state] table if absent; idempotent if one already carries
+    backend. Text-append rather than a TOML writer because tomllib is read-only
+    and the files Hedl manages are simple. Raises if hedl.toml is unparseable, or
+    if it has a [state] table without a backend key, rather than appending a
+    second [state] header (which would produce a duplicate-table parse error).
+    """
+    _validate_backend_name(backend)
+    toml_path = repo / "hedl.toml"
+    existing = toml_path.read_text() if toml_path.exists() else ""
+    if existing:
+        parsed = tomllib.loads(existing)  # surfaces corruption instead of appending onto it
+        state = parsed.get("state")
+        if isinstance(state, dict):
+            if "backend" in state:
+                return  # idempotent — already configured
+            raise ValueError(
+                "hedl.toml already has a [state] table without 'backend'; "
+                f'add backend = "{backend}" to it manually'
+            )
+    text = existing
+    if text and not text.endswith("\n"):
+        text += "\n"
+    if text:
+        text += "\n"
+    text += f'[state]\nbackend = "{backend}"\n'
+    toml_path.write_text(text)
+
+
+def _migrate_1_to_2_state_backend_to_hedl_toml(work_dir: Path) -> None:
+    """Migration 1->2: relocate state_backend from context.json to hedl.toml (ADR-022).
+
+    A non-default state_backend value is moved into hedl.toml [state] backend;
+    the key is dropped from context.json. Default ("local-file") needs no
+    hedl.toml entry. Idempotent.
+
+    Ordering for crash-safety: validate the value and write hedl.toml *before*
+    bumping context.json's schema. If hedl.toml fails, context.json stays at
+    schema 1 with state_backend intact and a re-run retries cleanly; if the
+    context.json write fails after hedl.toml succeeds, the re-run's idempotency
+    guard skips the already-written [state] table.
+    """
+    ctx = work_dir / "context.json"
+    if not ctx.exists():
+        return
+    data = json.loads(ctx.read_text())
+    if _schema_ver_int(data.get("schema_version")) >= 2:
+        return  # idempotent
+    backend = data.get("state_backend")
+    relocate = backend is not None and str(backend) != "local-file"
+    if relocate:
+        _validate_backend_name(str(backend))  # fail before any archive/mutation
+        _set_hedl_state_backend(work_dir.parent, str(backend))  # may raise before ctx is touched
+    _archive_state_file(ctx)
+    data.pop("state_backend", None)
+    data["schema_version"] = "2"
+    ctx.write_text(json.dumps(data, indent=2) + "\n")
+
+
 MIGRATIONS: list[tuple[str | None, str, Callable[[Path], None]]] = [
     (None, "1", _migrate_unversioned_to_1),
+    ("1", "2", _migrate_1_to_2_state_backend_to_hedl_toml),
 ]
 
 
@@ -386,7 +461,7 @@ def cmd_install(args: argparse.Namespace) -> int:
     if target_tier == "team":
         if shutil.which("gh"):
             print("\n[team] gh CLI detected. To enable the GitHub Issues backend:")
-            print('       Add to .work/context.json: "state_backend": "github-issues"')
+            print('       Add to hedl.toml: [state]  backend = "github-issues"')
         else:
             print("\n[team] gh CLI not found — install for the GitHub Issues backend:")
             print("       https://cli.github.com/  then: gh auth login")
@@ -486,7 +561,12 @@ def cmd_migrate(args: argparse.Namespace) -> int:
                 continue
             print(f"  {prefix}Applying migration {from_ver!r} -> {to_ver!r}")
             if not args.dry_run:
-                fn(work_dir)
+                try:
+                    fn(work_dir)
+                except (ValueError, OSError, json.JSONDecodeError, tomllib.TOMLDecodeError) as exc:
+                    print(f"  Migration {from_ver!r} -> {to_ver!r} failed: {exc}")
+                    print("  No schema change applied. Fix the reported issue and re-run --migrate.")
+                    return 1
                 current = _read_state_schema(work_dir)
             else:
                 current = to_ver

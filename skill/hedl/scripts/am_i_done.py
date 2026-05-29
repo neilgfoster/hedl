@@ -459,9 +459,10 @@ def check_dispatch(panel: list[str]) -> CheckResult:
 # ---------------------------------------------------------------------------
 # State backend abstraction
 # ---------------------------------------------------------------------------
-# The gate reads work items from whichever backend context.json specifies.
-# Default is "local-file" (.work/work.json). Set "state_backend":
-# "github-issues" in context.json to read from open GitHub Issues instead.
+# The gate reads work items from whichever backend hedl.toml specifies (ADR-022).
+# Default is "local-file" (.work/work.json). Set [state] backend = "github-issues"
+# in hedl.toml to read from open GitHub Issues instead. install.py migrates any
+# legacy .work/context.json "state_backend" value into hedl.toml.
 # The GitHub Issues backend expects issues with titles like "WORK-NNNN: ..."
 # and treats open issues as live items.
 
@@ -469,16 +470,15 @@ _WORK_ITEM_ID_RE = re.compile(r"^(WORK-\d+):")
 
 
 def _state_backend() -> str:
-    """Return the configured state backend name (default 'local-file')."""
-    context_path = os.path.join(REPO_ROOT, ".work", "context.json")
-    if not os.path.exists(context_path):
+    """Return the configured state backend name (default 'local-file').
+
+    Read from hedl.toml [state] backend (ADR-022).
+    """
+    config = _load_hedl_config()
+    if config is None:
         return "local-file"
-    try:
-        with open(context_path, encoding="utf-8") as fh:
-            ctx = json.load(fh)
-        return str(ctx.get("state_backend", "local-file"))
-    except (json.JSONDecodeError, KeyError, TypeError, OSError):
-        return "local-file"
+    state_section = config.get("state") or {}
+    return str(state_section.get("backend", "local-file"))
 
 
 def _load_work_items() -> tuple[set[str], Optional[str]]:

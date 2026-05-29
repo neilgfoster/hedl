@@ -80,6 +80,11 @@ features. None does today; if one emerges, this ADR re-evaluates per
 - `state_backend` field in `hedl.toml` becomes a first-class
   configuration. `none` (gate-only) and `local-file` are no-adapter
   defaults; `github-issues` already implemented; others extensible.
+  *Implementation note (WORK-0024):* the concrete key is `[state] backend`
+  in `hedl.toml`, chosen so per-adapter config can live under
+  `[state_backend.<name>]` tables (WORK-0012) without a TOML scalar/table
+  name collision. `install.py --migrate` relocates any legacy
+  `.work/context.json` `state_backend` value (state schema 1 -> 2).
 - A **backend adapter contract** must be defined: read workstreams,
   write workstream state, list/claim/release, status transitions,
   comments/journey, authentication handshake. Adapters implement the
