@@ -654,7 +654,23 @@ class TestStateBackend(unittest.TestCase):
                 M.REPO_ROOT = original
         self.assertEqual(backend, "local-file")
 
-    def test_reads_state_backend_from_context_json(self) -> None:
+    def test_reads_state_backend_from_hedl_toml(self) -> None:
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with open(_os.path.join(tmpdir, "hedl.toml"), "w") as f:
+                f.write('[state]\nbackend = "github-issues"\n')
+            original = M.REPO_ROOT
+            M.REPO_ROOT = tmpdir
+            try:
+                backend = M._state_backend()
+            finally:
+                M.REPO_ROOT = original
+        self.assertEqual(backend, "github-issues")
+
+    def test_state_backend_ignores_context_json(self) -> None:
+        """ADR-022: state_backend now lives in hedl.toml; a legacy context.json
+        value must NOT be read by the gate (migration relocates it)."""
         import json as _json
         import os as _os
         import tempfile
@@ -669,7 +685,7 @@ class TestStateBackend(unittest.TestCase):
                 backend = M._state_backend()
             finally:
                 M.REPO_ROOT = original
-        self.assertEqual(backend, "github-issues")
+        self.assertEqual(backend, "local-file")
 
     def test_github_issues_parses_open_issues(self) -> None:
         payload = (

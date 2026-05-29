@@ -755,3 +755,101 @@ class TestGithubParsedCopies(unittest.TestCase):
         wf.write_text(wf.read_text() + "\n# local drift\n")
         rc = M.cmd_doctor(_ns(repo=str(self.tmp)))
         self.assertEqual(rc, 1, "doctor must flag a github-parsed copy that drifts from source")
+
+
+class TestStateBackendMigration(unittest.TestCase):
+    """WORK-0024 / ADR-022: state_backend relocates from context.json to hedl.toml."""
+
+    def setUp(self) -> None:
+        self._td = tempfile.TemporaryDirectory()
+        self.repo = pathlib.Path(self._td.name)
+        self.work = self.repo / ".work"
+        self.work.mkdir()
+
+    def tearDown(self) -> None:
+        self._td.cleanup()
+
+    def _write_ctx(self, data: dict[str, Any]) -> None:
+        (self.work / "context.json").write_text(json.dumps(data, indent=2) + "\n")
+
+    def test_migrates_non_default_backend_to_hedl_toml(self) -> None:
+        self._write_ctx({"schema_version": "1", "state_backend": "github-issues"})
+        rc = M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        self.assertEqual(rc, 0)
+        ctx = json.loads((self.work / "context.json").read_text())
+        self.assertEqual(ctx["schema_version"], "2")
+        self.assertNotIn("state_backend", ctx)
+        toml_text = (self.repo / "hedl.toml").read_text()
+        self.assertIn("[state]", toml_text)
+        self.assertIn('backend = "github-issues"', toml_text)
+
+    def test_default_backend_needs_no_hedl_toml_entry(self) -> None:
+        self._write_ctx({"schema_version": "1"})
+        rc = M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        self.assertEqual(rc, 0)
+        ctx = json.loads((self.work / "context.json").read_text())
+        self.assertEqual(ctx["schema_version"], "2")
+        self.assertFalse((self.repo / "hedl.toml").exists())
+
+    def test_migration_is_idempotent(self) -> None:
+        self._write_ctx({"schema_version": "1", "state_backend": "github-issues"})
+        M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        first = (self.repo / "hedl.toml").read_text()
+        rc = M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        self.assertEqual(rc, 0)
+        self.assertEqual((self.repo / "hedl.toml").read_text(), first)
+
+    def test_preserves_existing_hedl_toml_sections(self) -> None:
+        (self.repo / "hedl.toml").write_text("[insights]\nenabled = true\n")
+        self._write_ctx({"schema_version": "1", "state_backend": "github-issues"})
+        M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        toml_text = (self.repo / "hedl.toml").read_text()
+        self.assertIn("[insights]", toml_text)
+        self.assertIn('backend = "github-issues"', toml_text)
+
+    def test_rejects_unsafe_backend_value(self) -> None:
+        """A crafted state_backend must not inject TOML into hedl.toml (the
+        gate's [verify]/[gate] command surface). The migration refuses it."""
+        with self.assertRaises(ValueError):
+            M._set_hedl_state_backend(self.repo, 'x"\n[verify.evil]\ncmd = "id')
+        self.assertFalse((self.repo / "hedl.toml").exists())
+
+    def test_cmd_migrate_fails_cleanly_on_unsafe_value(self) -> None:
+        """A crafted value yields a clean exit 1, not a traceback, and leaves
+        context.json untouched (schema 1, value intact) so no archive churn."""
+        self._write_ctx({"schema_version": "1", "state_backend": 'evil"\n[verify.x]\ncmd="id'})
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        self.assertEqual(rc, 1)
+        ctx = json.loads((self.work / "context.json").read_text())
+        self.assertEqual(ctx["schema_version"], "1")
+        self.assertIn("state_backend", ctx)
+        self.assertFalse((self.repo / "hedl.toml").exists())
+
+    def test_chained_unversioned_to_2(self) -> None:
+        """An unversioned context.json migrates None->1->2 in one run."""
+        self._write_ctx({"meta": {"project": "x"}})
+        rc = M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        self.assertEqual(rc, 0)
+        ctx = json.loads((self.work / "context.json").read_text())
+        self.assertEqual(ctx["schema_version"], "2")
+
+    def test_refuses_state_table_without_backend(self) -> None:
+        """A [state] table lacking 'backend' must not get a second [state]
+        header appended (which would be a duplicate-table parse error)."""
+        (self.repo / "hedl.toml").write_text("[state]\nother = 1\n")
+        with self.assertRaises(ValueError):
+            M._set_hedl_state_backend(self.repo, "github-issues")
+
+    def test_explicit_local_file_dropped_without_hedl_toml(self) -> None:
+        self._write_ctx({"schema_version": "1", "state_backend": "local-file"})
+        M.cmd_migrate(_ns(repo=str(self.repo), dry_run=False))
+        ctx = json.loads((self.work / "context.json").read_text())
+        self.assertEqual(ctx["schema_version"], "2")
+        self.assertNotIn("state_backend", ctx)
+        self.assertFalse((self.repo / "hedl.toml").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

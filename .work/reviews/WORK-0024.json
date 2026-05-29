@@ -1,0 +1,31 @@
+{
+  "work_item": "WORK-0024",
+  "date": "2026-05-29",
+  "task_type": "architecture",
+  "panel": ["security-auditor", "edge-case-hunter", "historian", "simplicity-enforcer"],
+  "cycles": 2,
+  "cycle_1": {
+    "security-auditor": "CONDITIONAL — no length bound on backend value; ValueError propagated as raw traceback through cmd_migrate; regex lacked re.ASCII; partial-write window.",
+    "edge-case-hunter": "FAIL — BLOCKING x2: non-atomic write ordering (hedl.toml before context.json) could leave a stuck migration / duplicate [state] on corrupt partial write; dual-write inconsistency. SIGNIFICANT: uncaught exception + silent-swallow of corrupt TOML.",
+    "historian": "CONDITIONAL — WORK-0032/0033 ACs still referenced .work/context.json for state_backend (downstream drift).",
+    "simplicity-enforcer": "PASS — text-append writer + injection guard proportionate for the RCE-area; 5 tests not redundant."
+  },
+  "fixes": [
+    "Added _validate_backend_name with length<=64 + re.ASCII identifier guard (TOML-injection defence; hedl.toml is the gate command surface).",
+    "Reordered migration: validate + write hedl.toml before bumping/writing context.json; archive moved after the hedl.toml write to avoid churn on failure.",
+    "_set_hedl_state_backend now raises on a corrupt hedl.toml (no silent-swallow) and on a [state] table lacking 'backend' (no duplicate-header append) instead of blindly appending.",
+    "cmd_migrate wraps fn(work_dir) in try/except (ValueError/OSError/JSON/TOML decode) -> clean exit 1 with message, no traceback or re-archive loop.",
+    "Reconciled WORK-0032 and WORK-0033 ACs to hedl.toml [state] backend.",
+    "Tightened backend regex to forbid trailing hyphen."
+  ],
+  "cycle_2": {
+    "edge-case-hunter": "PASS — both BLOCKING resolved; ordering + raise-on-corrupt + cmd_migrate catch verified. New findings MINOR only.",
+    "security-auditor": "CONDITIONAL -> [state]-without-backend duplicate-header SIGNIFICANT (now fixed: raises); trailing-hyphen MINOR (fixed); archive-churn MINOR (fixed)."
+  },
+  "deferred_minor": [
+    "_state_backend() returns an unknown hedl.toml backend value verbatim (falls through to local-file) — pre-existing behaviour, not introduced here.",
+    "_load_hedl_config swallows a corrupt hedl.toml -> None -> local-file (shared with [verify]/[gate]); broader change, deferred.",
+    "_schema_ver_int maps a non-integer schema_version to 0 — pre-existing."
+  ],
+  "verdict": "RESOLVED — zero BLOCKING remaining after 2 cycles; deferred items are MINOR/pre-existing, noted for /phase-complete."
+}

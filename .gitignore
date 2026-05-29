@@ -48,3 +48,6 @@ kubeconfig
 # Never commit — a tracked marker ships one machine's tier/state into clones.
 # Anchored to root: install.py only ever writes <repo>/.hedl-tier.
 /.hedl-tier
+
+# Transient state backups written by install.py migrations
+.work/archive/
