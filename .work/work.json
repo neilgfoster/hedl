@@ -2,7 +2,7 @@
   "meta": {
     "current_phase": 1,
     "active_item": null,
-    "last_updated": "2026-05-28",
+    "last_updated": "2026-05-29",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
   "active": [],
@@ -661,6 +661,35 @@
         "If resolved as false-positive: mirror the WORK-0019 resolution pattern (test_*.py with negative meta-test + insights note); change_class becomes chore."
       ],
       "completed_date": "2026-05-28"
+    },
+    {
+      "id": "WORK-0037",
+      "title": "docs: add ADOPTERS.md tracking projects using hedl",
+      "phase": 1,
+      "workstream": "WS-PLAN",
+      "change_class": "docs",
+      "status": "complete",
+      "priority_band": "normal",
+      "dependencies": [],
+      "started_date": "2026-05-29",
+      "description": "Add a lightweight ADOPTERS.md at the repo root tracking projects that have adopted and are actively using Hedl. Hedl itself is the first adopter (it is built using its own workflow — the dogfood is the proof). The file is a simple human-maintained markdown list, not a generated artifact; it gives prospective adopters social proof and gives the project a place to record real-world usage as the substrate-release strategy (ADR-013) plays out and Lume comes online as the second adopter.",
+      "acceptance_criteria": [
+        "ADOPTERS.md exists at the repo root with a one-line purpose statement and a table or list of adopters.",
+        "Each entry records at minimum: project name, adoption date, and a short note (tier adopted / how it uses Hedl).",
+        "Hedl is listed as the first adopter, framed as self-hosting/dogfooding.",
+        "README.md links to ADOPTERS.md (and the file invites new adopters to add themselves via PR).",
+        "No new CI gate or generator is added — the file is hand-maintained markdown (minimum code).",
+        "am_i_done.py passes."
+      ],
+      "completed_date": "2026-05-29",
+      "review": {
+        "panel": [
+          "historian: PASS",
+          "scope-auditor: FAIL (goal-displacement; defer to Phase 2)"
+        ],
+        "verdict": "FAIL overridden by operator via /change-direction",
+        "override_reason": "Operator judges ADOPTERS.md a justified standard OSS convention (social proof for the substrate-release strategy, ADR-013) — low-cost hand-maintained markdown, no new gate or generator. The scope-auditor FAIL (anti goal-displacement, phase-1) is recorded, not hidden."
+      }
     }
   ]
 }
