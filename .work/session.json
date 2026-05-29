@@ -9,7 +9,8 @@
     "WORK-0037: ADOPTERS.md (root) + README links. First adopter = Hedl (dogfood). Adversarial panel: historian PASS, scope-auditor FAIL (goal-displacement); FAIL overridden by operator via /change-direction, reason recorded on the work item.",
     "WORK-0038: Dependabot checkout v5.0.1->v6.0.2 (PR #39, merged b29a558). SHA verified vs upstream tag; v6 breaking changes no-impact. PR body rewritten to satisfy the Hedl template (gate's template check fetches live body); branch updated; gate+CodeQL green.",
     "WORK-0040: Dependabot ruff 0.15.14->0.15.15 uv (PR #42, merged 0531caa). Patch; preview-gated rules off; ruff clean confirmed under 0.15.15 in CI.",
-    "WORK-0039: ruff pip #41 closed as superseded by #42 (identical pyproject edit; auto-closed on merge)."
+    "WORK-0039: ruff pip #41 closed as superseded by #42 (identical pyproject edit; auto-closed on merge).",
+    "WORK-0034: /iterate now drives end-to-end through to an operator-ready PR (ADR-025). Adversarial review caught the ADR-025 branch-protection-assertion requirement + a premature-completion/stuck-recovery BLOCKING; both fixed. Delivered end-to-end from one /iterate (AC6)."
   ],
   "decisions": [
     "WORK-0021 audit-first outcome = FIX (real vuln), the counterpart to WORK-0019's guard-only false positive. Both recorded under .work/insights/.",
@@ -18,7 +19,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0034",
+  "next_item": "WORK-0024",
   "blockers": [],
-  "notes": "Dependabot triage complete: WORK-0038 (checkout #39), WORK-0040 (ruff uv #42) merged; WORK-0039 (ruff pip #41) auto-closed as superseded. No open Dependabot PRs remain."
+  "notes": "WORK-0034 delivered via the new behaviour itself (dogfood/AC6). active_item null. Next per priority: WORK-0024 (ADR-022 state_backend reconcile)."
 }

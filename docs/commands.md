@@ -12,7 +12,7 @@ are accessible via natural language through the Hedl SKILL.md router.
 | Command | What it does |
 |---------|--------------|
 | `/start-session` | Loads context at session start: phase, active item, last session. |
-| `/iterate [supervised]` | Work loop: orient → select tool → act → validate → record. |
+| `/iterate [supervised]` | Work loop through to a merge-ready PR, then stops for operator review at merge time. |
 | `/adversarial-review [type]` | Convenes a review panel for the current diff or target. |
 | `/pr-ready` | Drives a branch to an operator-ready PR: gate → PR → CI → review → fix cycle. |
 | `/phase-complete` | Validates the phase DoD, runs a final review, transitions to the next phase. |
