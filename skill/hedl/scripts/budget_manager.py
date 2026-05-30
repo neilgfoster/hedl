@@ -499,6 +499,18 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    # Budget tracking lives under .work/, which install creates only at
+    # lightweight+ tiers. Gate-only installs have no .work/ by design, so a
+    # state-mutating budget op must no-op rather than create it (tier contract,
+    # WORK-0002). Read-only commands (tier, status, queue) work off defaults.
+    _MUTATING = {"record", "reset", "defer", "drain", "record-panel"}
+    if args.cmd in _MUTATING and not (REPO_ROOT / ".work").is_dir():
+        print(
+            "Budget tracking inactive: no .work/ directory (gate-only tier). "
+            "No state written."
+        )
+        return 0
+
     budget = _load_budget()
     queue = _load_queue()
 
