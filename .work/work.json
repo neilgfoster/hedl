@@ -3,7 +3,7 @@
     "current_phase": 2,
     "active_item": null,
     "last_updated": "2026-05-30",
-    "reconciliation_note": "Backlog re-shaped 2026-05-30 (Phase-2 entry) from two inputs: internal Full repo-health (.work/reviews/repo-health-2026-05-30-full/) and external 9-agent adversarial review (.work/reviews/external-2026-05-30/). Both converge: defensible surface is the gate + --streams + reversible installer; most surrounding framework is redundant with native Claude Code or out-competed; adoption value unproven. Minted WORK-0060..0065 (integrity/adoption-path fixes + substrate re-eval WORK-0065); reprioritized P0 integrity/adoption above forward-capability work; flagged 5 cull-or-prove candidates (WORK-0010/0011/0015/0004/0058 + budget_manager + self-improvement loop) for /phase-complete. Supersedes the 2026-05-28 reconciliation."
+    "reconciliation_note": "Backlog re-shaped 2026-05-30 (Phase-2 entry) from two inputs: internal Full repo-health (.work/reviews/repo-health-2026-05-30-full/) and external 9-agent adversarial review (.work/reviews/external-2026-05-30/). Both converge: defensible surface is the gate + --streams + reversible installer; most surrounding framework is redundant with native Claude Code or out-competed; adoption value unproven. Minted WORK-0060..0065 (integrity/adoption-path fixes + substrate re-eval WORK-0065); reprioritized P0 integrity/adoption above forward-capability work; flagged 5 cull-or-prove candidates (WORK-0010/0011/0015/0004/0058 + budget_manager + self-improvement loop) for /phase-complete. Supersedes the 2026-05-28 reconciliation. | Re-reconciled 2026-05-30 against external-2026-05-30-1 (third review, 8-agent): confirmed WORK-0060..0065 already cover the bulk (install break check_docs_index=0061, template/lockfile drift+CI guard=0062, native substrate=0065, gh-sub-issue/contribute-docstring/record_insights disposition=0064, branch-naming detached-HEAD=0057, config-regex ReDoS=0063). Minted WORK-0068 (gate-tier CI break — uv sync vs unprojected pyproject/uv.lock, verified), 0069 (record_insights roster drift omits existential-challenger), 0070 (alternatives.md stale --streams citations + citation guard), 0071 (hook trust model), 0072 (LOW quality/robustness nits), 0073 (am_i_done.py monolith split, operator-approved Phase 2). Folded the 'same checks local+CI is a superset' reword into WORK-0064. No-create: bus factor 1 (inherent), no push trigger (branch-protection-mitigated), _BRANCH_RE dup (accepted by stdlib/no-shared-pkg design), ADR-number gaps (cosmetic), remove-vaporware-from-pitch (WORK-0014 already flags planned)."
   },
   "active": [],
   "backlog": [
@@ -184,13 +184,14 @@
       "priority_band": "medium",
       "dependencies": null,
       "status": "backlog",
-      "description": "Documentation defects from both 2026-05-30 reviews. Adopter-install confusion (internal new-engineer): tiers.md:104 Tier-2 'manual copy into .claude/skills/Hedl/' contradicts install.py's projection model (it never creates .claude/skills/); skill-dir casing 'Hedl' vs lowercase 'hedl'; 'tier' overloaded (adoption tier vs budget/review tier) in SKILL.md/README:75; tier display names inconsistent and not always adjacent to the --tier CLI value; --migrate/--version undocumented in getting-started/commands.md though --doctor instructs running --migrate; gate-only curl install is silently weaker than --tier gate; commands.md:217 conflates named agents with review-library prompts and miscounts review-dispatcher as a reviewer. Accuracy fixes (external): docs/alternatives.md:228 misattributes gh-sub-issue to k1LoW (maintained forks are yahsan2 / agbiotech); contribute.py docstring overclaims a 'privacy fail-closed scrub' when it is a filename-prefix check that reads no content; record_insights.py is declared a team projection but wired into no hook (wire it or drop it and the claim).",
+      "description": "Documentation defects from both 2026-05-30 reviews. Adopter-install confusion (internal new-engineer): tiers.md:104 Tier-2 'manual copy into .claude/skills/Hedl/' contradicts install.py's projection model (it never creates .claude/skills/); skill-dir casing 'Hedl' vs lowercase 'hedl'; 'tier' overloaded (adoption tier vs budget/review tier) in SKILL.md/README:75; tier display names inconsistent and not always adjacent to the --tier CLI value; --migrate/--version undocumented in getting-started/commands.md though --doctor instructs running --migrate; gate-only curl install is silently weaker than --tier gate; commands.md:217 conflates named agents with review-library prompts and miscounts review-dispatcher as a reviewer. Accuracy fixes (external): docs/alternatives.md:228 misattributes gh-sub-issue to k1LoW (maintained forks are yahsan2 / agbiotech); contribute.py docstring overclaims a 'privacy fail-closed scrub' when it is a filename-prefix check that reads no content; record_insights.py is declared a team projection but wired into no hook (wire it or drop it and the claim). [external-2026-05-30-1 addition: AC added for the 'same checks local+CI is a superset, not identity' reword (Accuracy claim 1 PARTIAL).]",
       "acceptance_criteria": [
         "tiers.md install instructions match install.py's projection model; no '.claude/skills/' manual-copy guidance survives; casing standardised to lowercase 'hedl'.",
         "Tier display names are consistent and always shown next to the literal --tier value; 'tier' overload is disambiguated (rename one axis or add a Vocabulary entry).",
         "--migrate and --version are documented in getting-started.md and commands.md including the needs-migrate recovery loop; gate-only curl caveat stated.",
         "commands.md labels reviewers by roster and clarifies review-dispatcher is a selector not a reviewer.",
         "gh-sub-issue attribution corrected in docs/alternatives.md; contribute.py docstring no longer overclaims; record_insights.py is either wired into a hook or removed with its privacy claim.",
+        "README's 'same checks locally and in CI' claim is reworded to reflect that CI runs a superset — the --pr-gated checks (PR template, Dependabot, threads) do not run on the bare local invocation.",
         "am_i_done.py passes (doc-facts / docs-index / skill-meta green)."
       ],
       "source": "repo-health-2026-05-30-full (new-engineer) + external-2026-05-30 (Security/Accuracy/Competitive)."
@@ -770,6 +771,114 @@
         "WORK-0015"
       ],
       "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
+    },
+    {
+      "id": "WORK-0068",
+      "title": "fix: gate-tier CI fails on fresh install — shipped am-i-done.yml runs uv sync but the tier projects no pyproject/uv.lock",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (external-2026-05-30-1, Utility 5/10) finding, verified first-hand. The gate tier projects workflows/am-i-done.yml — which runs `uv sync --frozen --only-group dev --python ...` (skill/hedl/workflows/am-i-done.yml:41) — and requirements-ci.txt, but NOT pyproject.toml or uv.lock (verified: tiers.json gate.projections lists am_i_done.py/budget_manager.py/check_pr_template.py/check_markdown_schema.py, the three workflow files, PR template, and requirements-ci.txt only). On a fresh gate-tier adopter repo `uv sync --frozen` has no manifest/lockfile, so the CI install step fails before the gate runs, breaking the README:39-41 'local pass = green PR' promise. The documented pip fallback (`pip install -r requirements-ci.txt`) is not what the shipped workflow uses. Distinct from WORK-0061 (check_docs_index adopter guard) and WORK-0062 (template/lockfile drift).",
+      "acceptance_criteria": [
+        "A fresh gate-tier install yields a CI workflow whose dev-toolchain install uses only artifacts the gate tier actually projects (e.g. switch the shipped am-i-done.yml to `pip install -r requirements-ci.txt`, OR project pyproject.toml + uv.lock into the gate tier); the chosen approach is recorded.",
+        "A test simulates the gate-tier projection set and asserts the shipped am-i-done.yml install step references only projected files (no dependency on an unprojected pyproject.toml/uv.lock).",
+        "The README 'local pass = green PR' claim holds for a gate-tier adopter, or is scoped to tiers that project the toolchain.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30-1 (Utility 5/10; verified tiers.json gate.projections vs skill/hedl/workflows/am-i-done.yml:41)"
+    },
+    {
+      "id": "WORK-0069",
+      "title": "fix: record_insights.py reviewer roster drifts from agents dir (omits existential-challenger)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "medium",
+      "dependencies": "WORK-0064",
+      "status": "backlog",
+      "description": "External review (external-2026-05-30-1, Quality 7/10; independently-verified #9). record_insights.py:68-72 hardcodes 7 reviewer names but skill/hedl/agents/ ships 8 — existential-challenger is missing, so a fired existential-challenger is never recorded as a reviewer_fired insight. This is exactly the filesystem-drift class check_doc_generated_facts (am_i_done.py:1467) is built to catch, but the insights recorder is not covered by it. Relates to WORK-0064 AC5, which frames record_insights as wire-or-remove; this item is the drift defect itself.",
+      "acceptance_criteria": [
+        "The reviewer roster used by record_insights.py is derived from skill/hedl/agents/*.md (no hardcoded list), OR the hardcoded list is brought under check_doc_generated_facts so future drift fails the gate.",
+        "existential-challenger insights become recordable (the current omission is fixed) — unless record_insights.py is removed per WORK-0064, in which case this item closes as superseded.",
+        "A test asserts the roster matches the on-disk skill/hedl/agents/ directory.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30-1 (Quality 7/10; independently-verified #9)"
+    },
+    {
+      "id": "WORK-0070",
+      "title": "docs: correct stale am_i_done.py citations in alternatives.md + guard cited line numbers",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "priority_band": "medium",
+      "dependencies": "WORK-0064",
+      "status": "backlog",
+      "description": "External review (external-2026-05-30-1, Accuracy 6.5/10; 5 FAIL claims, verified first-hand). docs/alternatives.md carries stale file:line citations, worst on the flagship --streams feature: check_streams is at am_i_done.py:1237 (cited 937-981 — which are actually check_types/check_tests), the --streams flag at :1580 (cited 1147), dispatch at :1646-1647 (cited 1208-1209). alternatives.md:50 says the check list spans '1-1300' but the file is 1703 lines. README:84 '8 named reviewer agents, a dispatcher' double-counts (7 reviewer agents + 1 dispatcher = 8 files; agents.md:1 'Eight core agents' is correct). Recommend extending check_doc_generated_facts (am_i_done.py:1467) to assert cited line numbers resolve to the named symbol so citations cannot silently rot.",
+      "acceptance_criteria": [
+        "alternatives.md --streams citations corrected to current lines (check_streams 1237, --streams flag 1580, dispatch 1646-1647) and the '1-1300' range corrected to the actual file length.",
+        "README:84 agent count reworded to '7 reviewer agents + 1 dispatcher (8 files)' to match agents.md.",
+        "check_doc_generated_facts (or a new check) asserts that file:line citations in alternatives.md resolve to the named symbol and fails the gate on drift; any documented exceptions are explicit.",
+        "am_i_done.py passes (doc-facts / docs-index / skill-meta green)."
+      ],
+      "source": "external-2026-05-30-1 (Accuracy 6.5/10, FAIL claims 4/5a/5b/5c + 3a)"
+    },
+    {
+      "id": "WORK-0071",
+      "title": "docs/feat: document the hook trust model + optional CI guard for settings.json/hook changes",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "priority_band": "medium",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (external-2026-05-30-1, Security 8/10, MEDIUM). The committed skill/hedl/integrations/claude-code/settings.json:9-37 auto-runs SessionStart(startup.sh), PostToolUse(posttooluse_lint.py), and Stop(stop_reminder.py) every session and auto-allows Write(.claude/agents/*) (:4). The _comment_security note (:2) is honest but is a convention, not an enforced control: a future malicious or compromised commit to any of those scripts executes in the adopter's session with no further prompt. Adoption-readiness gap: an adopter installing the team tier trusts those scripts at HEAD with no surfaced trust-review step.",
+      "acceptance_criteria": [
+        "The hook trust model is documented as a required adopter review step (which scripts auto-run, their blast radius, what to review before installing the team tier).",
+        "Decided at implementation: a CI check fails any PR touching settings.json or the hook scripts unless a trust-expansion-reviewed marker is present; if declined, the reason is recorded.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30-1 (Security 8/10, MEDIUM hook-trust expansion)"
+    },
+    {
+      "id": "WORK-0072",
+      "title": "fix: quality/robustness nits from external review (interpreter, exit-code docstring, scrub recipe, budget_manager tests)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "low",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (external-2026-05-30-1) LOW bundle, each verified first-hand. (a) am_i_done.py:559,562,1148 shell out with hardcoded 'python3' while peers use sys.executable (gen_skill_metadata.py:54, am_i_done.py:850,1346) — fragile in venvs/Windows where the gate was launched as `python`. (b) check_markdown_schema.py docstring (:13-14) says exit 1 == 'violations found', but main() also exits 1 for missing/malformed schemas file (:307-331) — a config-error exit a caller treating 1 as 'violations' would misread. (c) The documented scrub recipe (references/commands.md:296, docs/self-improvement.md:65) pipes `git diff --name-only | xargs` which splits on whitespace and mishandles leading-dash paths; harden to `git diff -z ... | xargs -0`. (d) budget_manager.py's concurrency surface (flock / atomic-write / corruption-quarantine) has ~7 tests and no test exercises the lock/race path.",
+      "acceptance_criteria": [
+        "am_i_done.py interpreter subprocess calls use sys.executable (or an explicit, documented rationale for python3).",
+        "check_markdown_schema.py uses a distinct exit code (e.g. 2) for config errors, OR its docstring documents the config-error exit so callers do not misread it.",
+        "The documented scrub recipe is hardened to null-delimited form (git diff -z | xargs -0).",
+        "budget_manager.py gains tests covering the flock / atomic-write / corruption-quarantine paths.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30-1 (Quality 7/10 + Security 8/10 LOW nits)"
+    },
+    {
+      "id": "WORK-0073",
+      "title": "refactor: split am_i_done.py (1703 lines) into a checks/ package with a thin dispatcher + CLI",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "refactor",
+      "priority_band": "normal",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (external-2026-05-30-1, Quality 7/10) dominant weakness: am_i_done.py is a 1703-line monolith holding ~20 check_* functions, the [verify] allow-list/denylist engine, two state backends, the CLI spec, and the insights writer. The check functions are independent and split cleanly into a checks/ package (e.g. vcs / dispatch / markdown / github / state) behind a thin dispatcher. Constraint: this is the most security-sensitive file (the [verify] allow-list/denylist and the fail-closed security floor) and is symlinked into .github/scripts/ — the refactor must preserve behaviour, the stdlib-only invariant, and the symlink single-source-of-truth, with the full test suite green. Operator-approved as a Phase 2 item (2026-05-30).",
+      "acceptance_criteria": [
+        "am_i_done.py is decomposed into a checks/ package (one module per logical group) with a thin dispatcher + CLI retained at the symlinked entrypoint; no behaviour change.",
+        "stdlib-only invariant preserved (test_stdlib_only green); the symlink single-source-of-truth preserved; mypy --strict clean.",
+        "Full test suite green with no reduction in coverage; the security-floor and [verify] allow-list paths are unchanged and still tested.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30-1 (Quality 7/10, 'what would raise the score' #1; operator-approved Phase 2)"
     }
   ],
   "completed": [
