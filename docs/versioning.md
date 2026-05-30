@@ -106,4 +106,7 @@ Current migration sequence:
 | From | To | Effect |
 |---|---|---|
 | unversioned | 1 | Adds `schema_version: "1"` to `context.json` |
-| 1 | 2 | Relocates `state_backend` from `context.json` to `hedl.toml` `[state] backend` (ADR-022) |
+| 1 | 2 | Drops `state_backend` from `context.json`; writes `hedl.toml [state] backend` if non-default (ADR-022) |
+
+A single `--migrate` applies all pending steps in sequence: an unversioned repo
+traverses both rows in one run (→1, then →2).
