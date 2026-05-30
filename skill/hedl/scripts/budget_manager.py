@@ -53,6 +53,11 @@ except (subprocess.CalledProcessError, FileNotFoundError):
 BUDGET_FILE = REPO_ROOT / ".work" / "budget.json"
 QUEUE_FILE = REPO_ROOT / ".work" / "reviews" / "queue.json"
 
+# Subcommands that write state under .work/. main() refuses these (no-op) when
+# .work/ is absent so a gate-only install is never given one (WORK-0002). Keep
+# in sync with the cmd_* writers; the test suite asserts coverage of every member.
+_MUTATING_COMMANDS = {"record", "reset", "defer", "drain", "record-panel"}
+
 # PROVISIONAL defaults. These numbers are estimates, not measurements. They are
 # intentionally exposed as config so they can be edited without changing this
 # script. Replace with measured values once enough sessions of real burn data
@@ -502,12 +507,18 @@ def main() -> int:
     # Budget tracking lives under .work/, which install creates only at
     # lightweight+ tiers. Gate-only installs have no .work/ by design, so a
     # state-mutating budget op must no-op rather than create it (tier contract,
-    # WORK-0002). Read-only commands (tier, status, queue) work off defaults.
-    _MUTATING = {"record", "reset", "defer", "drain", "record-panel"}
-    if args.cmd in _MUTATING and not (REPO_ROOT / ".work").is_dir():
+    # WORK-0002). Read-only commands (tier, status, queue, suggest-rotation) work
+    # off defaults. main() is the sole CLI entry point, so guarding the full set
+    # of mutating commands here covers every real invocation; the test suite
+    # asserts the guard over each member of _MUTATING so a new writer added
+    # without updating the set is caught. The message goes to stderr so a no-op
+    # is not mistaken for written state on stdout (exit 0 = "not applicable here",
+    # not failure).
+    if args.cmd in _MUTATING_COMMANDS and not (REPO_ROOT / ".work").is_dir():
         print(
             "Budget tracking inactive: no .work/ directory (gate-only tier). "
-            "No state written."
+            "No state written.",
+            file=sys.stderr,
         )
         return 0
 
