@@ -4,6 +4,11 @@ Three tiers — gate-only in 2 minutes, full lightweight in 5, team adds Claude 
 integration when you want the hooks, worktree gate workflow, and GitHub Issues read
 backend. The installer is a single Python script; no network access, no sudo.
 
+Hedl is an iteration layer built around a deterministic completion gate; it plugs
+into your PM system rather than replacing it. Before adopting, check whether it
+fits — [Don't use Hedl if](../README.md#dont-use-hedl-if) — and the per-capability
+[alternatives](alternatives.md).
+
 **Prerequisites**: Python 3.11+, git. Claude Code for slash commands and named agents (optional).
 
 ---

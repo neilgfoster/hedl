@@ -76,24 +76,6 @@
       ]
     },
     {
-      "id": "WORK-0014",
-      "title": "docs: README and positioning updates (lead with gate; invisible qualifier; iteration-layer framing)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "POSITIONING",
-      "description": "Update README and docs/getting-started.md to reflect the architectural story established in this ADR series and confirmed by the 2026-05-28 alternatives.md draft. Three threads: (a) lead with the gate (ADR-011, corroborated by the external review and the alternatives.md disqualifier story — the deterministic completion gate is the genuine differentiator), (b) Hedl-as-iteration-layer framing per ADR-022 (Hedl plugs into PM systems; doesn't replace them), (c) explicit 'Use Hedl if...' qualifier section per ADR-023 including the invisible-mode case. Honesty-over-marketing per ADR-010: no percentage-gain claims, no comparative superlatives. The alternatives.md stub already exists (committed in PR #10); this work uses it as the source for the disqualifier wording rather than re-creating it.",
-      "acceptance_criteria": [
-        "README opens with the gate as the headline capability (ADR-011 lead-with-gate), citing alternatives.md as the disqualifier source.",
-        "README contains a 'Use Hedl if...' qualifier section including the invisible-mode case from ADR-023.",
-        "README and getting-started.md frame Hedl as an iteration layer above PM systems, not a replacement.",
-        "Cross-link from README to docs/alternatives.md and from getting-started to the disqualifier section.",
-        "No marketing claims (no percentages, no 'X% faster', no superlatives) survive review.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0015",
       "title": "docs: terminology audit — align surviving recursive-'workstream' usages to the canonical four-category meaning (post-WORK-0027)",
       "phase": 1,
@@ -1258,6 +1240,28 @@
       "started_date": "2026-05-30",
       "completed_date": "2026-05-30",
       "resolution": "Gate's --pr template check (am_i_done.py check_template) now exempts Dependabot-authored PRs, keyed off the GitHub-verified author (is_bot AND login in {app/dependabot, dependabot[bot]}, confirmed against PR #39) — never body/branch (spoofable). Human PRs stay fully enforced; fails closed for any non-Dependabot/missing-author case. Documented in standards.md. 4-agent panel (security, determinism, scope, edge-case): determinism+scope clean; two BLOCKINGs rebutted with reasoning (App slugs are globally unique so the login is not spoofable; TOCTOU handled by the PR-gate re-run on synchronize); defensive tests added (is_bot=1 not exempt, null author not exempt, dependabot[bot] variant exempt). 413 tests. Optional future hardening noted: App-ID pinning; verified-bot allowlist if Renovate adopted."
+    },
+    {
+      "id": "WORK-0014",
+      "title": "docs: README and positioning updates (lead with gate; invisible qualifier; iteration-layer framing)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "complete",
+      "priority_band": "POSITIONING",
+      "description": "Update README and docs/getting-started.md to reflect the architectural story established in this ADR series and confirmed by the 2026-05-28 alternatives.md draft. Three threads: (a) lead with the gate (ADR-011, corroborated by the external review and the alternatives.md disqualifier story — the deterministic completion gate is the genuine differentiator), (b) Hedl-as-iteration-layer framing per ADR-022 (Hedl plugs into PM systems; doesn't replace them), (c) explicit 'Use Hedl if...' qualifier section per ADR-023 including the invisible-mode case. Honesty-over-marketing per ADR-010: no percentage-gain claims, no comparative superlatives. The alternatives.md stub already exists (committed in PR #10); this work uses it as the source for the disqualifier wording rather than re-creating it.",
+      "acceptance_criteria": [
+        "README opens with the gate as the headline capability (ADR-011 lead-with-gate), citing alternatives.md as the disqualifier source.",
+        "README contains a 'Use Hedl if...' qualifier section including the invisible-mode case from ADR-023.",
+        "README and getting-started.md frame Hedl as an iteration layer above PM systems, not a replacement.",
+        "Cross-link from README to docs/alternatives.md and from getting-started to the disqualifier section.",
+        "No marketing claims (no percentages, no 'X% faster', no superlatives) survive review.",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "reframe": "AC1 said 'README opens with the gate as the headline (ADR-011 lead-with-gate)', but ADR-011's Decision actually mandates 'Don't use Hedl if...' FIRST, gate SECOND, alternatives third, what-it-doesn't-do fourth. Operator chose (2026-05-30) to follow ADR-011. The README therefore opens with a neutral one-line definition (not a pitch), then 'Don't use Hedl if' (ADR-011) AND 'Use Hedl if' (ADR-023, AC2) — both qualifiers are required and compose. AC1's 'lead-with-gate' wording was the misquote; the gate is the second section, per ADR-011.",
+      "resolution": "README restructured to ADR-011 order (disqualifiers-first) + ADR-023's 'Use Hedl if' qualifier: neutral one-line definition -> Don't use Hedl if -> Use Hedl if (incl. invisible-mode, flagged planned/WORK-0013) -> The gate -> Alternatives (->docs/alternatives.md) -> What Hedl doesn't do (iteration layer; invisible planned). getting-started.md gains the iteration-layer framing + a link to the disqualifier section. github-issues stated read-only-today/write-back-planned (WORK-0012) to match getting-started/team-tier. No marketing claims (ADR-010). 3-agent panel (historian, scope, new-engineer): one BLOCKING fixed (the 'Use Hedl if' section had been dropped in the restructure — re-added), plus new-engineer comprehension fixes (define product before disqualifiers; gloss 'iteration layer') and the github read-only accuracy note."
     }
   ]
 }
