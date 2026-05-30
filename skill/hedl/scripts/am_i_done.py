@@ -510,12 +510,19 @@ def _load_work_items_local() -> tuple[set[str], Optional[str]]:
         return set(), f"work.json malformed: {exc}"
 
 
+# Upper bound on open issues the github-issues backend reads in one pass. A repo
+# at this many open WORK-issues is well beyond Hedl's design point; hitting the
+# cap is surfaced as a loud error rather than silently dropping live IDs from the
+# stale-WORK-ID check (which would weaken the gate).
+_GITHUB_ISSUE_READ_LIMIT = 1000
+
+
 def _load_work_items_github() -> tuple[set[str], Optional[str]]:
     if not shutil.which("gh"):
         return set(), "gh CLI not available — cannot read GitHub Issues backend"
     code, out, err = run([
         "gh", "issue", "list", "--state", "open",
-        "--json", "number,title", "--limit", "200",
+        "--json", "number,title", "--limit", str(_GITHUB_ISSUE_READ_LIMIT),
     ])
     if code != 0:
         return set(), f"gh issue list failed: {(err or '').strip()[:200]}"
@@ -523,9 +530,22 @@ def _load_work_items_github() -> tuple[set[str], Optional[str]]:
         issues = json.loads(out) if out.strip() else []
     except json.JSONDecodeError as exc:
         return set(), f"could not parse gh issue list output: {exc}"
+    if len(issues) >= _GITHUB_ISSUE_READ_LIMIT:
+        # The read is unfiltered (counts ALL open issues, not just WORK-issues),
+        # so hitting the cap means the gate cannot guarantee it saw every open
+        # WORK-issue — a missed one would let a stale WORK-ID past the check.
+        # Failing loudly is the safe choice for a gate; the real fix (a
+        # hedl:work label-scoped, paginated read) is WORK-0032. See backends.md.
+        return set(), (
+            f"github-issues backend hit the read cap ({_GITHUB_ISSUE_READ_LIMIT} open "
+            "issues); the unfiltered read cannot guarantee completeness — scope by "
+            "the hedl:work label / paginate (WORK-0032) before trusting the gate"
+        )
     live_ids: set[str] = set()
     for issue in issues:
-        m = _WORK_ITEM_ID_RE.match(issue.get("title", ""))
+        # `title` can be present-but-null in the gh JSON; coerce to "" so a null
+        # title is ignored rather than crashing the gate with a TypeError.
+        m = _WORK_ITEM_ID_RE.match(issue.get("title") or "")
         if m:
             live_ids.add(m.group(1))
     return live_ids, None

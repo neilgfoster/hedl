@@ -937,6 +937,36 @@ class TestStateBackend(unittest.TestCase):
         self.assertEqual(ids, set())
         self.assertIsNotNone(err)
 
+    def test_github_issues_null_title_does_not_crash(self) -> None:
+        """A present-but-null issue title must be ignored, not crash the gate."""
+        payload = (
+            '[{"number":1,"title":"WORK-0001: real"},'
+            ' {"number":2,"title":null}]'
+        )
+        with mock.patch.object(M, "shutil") as sh, \
+             mock.patch.object(M, "run", return_value=(0, payload, "")):
+            sh.which.return_value = "/usr/bin/gh"
+            ids, err = M._load_work_items_github()
+        self.assertIsNone(err)
+        self.assertEqual(ids, {"WORK-0001"})
+
+    def test_github_issues_truncated_read_fails_loudly(self) -> None:
+        """A read that hits the issue cap must FAIL, not silently drop IDs —
+        a partial set would let a stale WORK-ID slip past the gate (WORK-0007)."""
+        import json as _json
+        capped = M._GITHUB_ISSUE_READ_LIMIT
+        payload = _json.dumps(
+            [{"number": n, "title": f"WORK-{n:04d}: item"} for n in range(1, capped + 1)]
+        )
+        with mock.patch.object(M, "shutil") as sh, \
+             mock.patch.object(M, "run", return_value=(0, payload, "")):
+            sh.which.return_value = "/usr/bin/gh"
+            ids, err = M._load_work_items_github()
+        self.assertEqual(ids, set())
+        self.assertIsNotNone(err)
+        assert err is not None
+        self.assertIn("read cap", err)
+
 
 class TestCheckStreams(unittest.TestCase):
     def _run(self, side_effects: list[tuple[int, str, str]], streams: list[str]) -> Any:
