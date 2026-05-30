@@ -66,11 +66,13 @@ items in the closing phase:
 
 ## Schema versioning
 
-Hedl embeds a schema version in `.work/context.json` (`schema_version` field) and
-optionally in `hedl.toml` (`[hedl] schema_version`). These track the format version
-of Hedl's state files, independent of the product or Hedl semver.
+Hedl embeds a schema version in `.work/context.json` (`schema_version` field). It
+tracks the format version of Hedl's state files, independent of the product or Hedl
+semver. `hedl.toml` does not carry a schema version — `install.py` reads
+`schema_version` only from `.work/context.json`, and no gate or installer code
+reads a `[hedl] schema_version`.
 
-Current state schema: **1**
+Current state schema: **2**
 
 ### Checking and migrating
 
@@ -104,15 +106,4 @@ Current migration sequence:
 | From | To | Effect |
 |---|---|---|
 | unversioned | 1 | Adds `schema_version: "1"` to `context.json` |
-
-### hedl.toml schema version
-
-Add to `hedl.toml` to track format compatibility explicitly:
-
-```toml
-[hedl]
-schema_version = "1"
-```
-
-The gate and `--doctor` read this field and warn if it does not match the current
-Hedl build's expected `hedl.toml` schema.
+| 1 | 2 | Relocates `state_backend` from `context.json` to `hedl.toml` `[state] backend` (ADR-022) |
