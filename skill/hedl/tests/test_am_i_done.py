@@ -676,14 +676,55 @@ class TestCheckStateTemplateSync(unittest.TestCase):
         propagate a traceback out of the gate."""
         import tempfile
         from unittest import mock
+        real_open = open
+
+        def selective_open(path: Any, *a: Any, **k: Any) -> Any:
+            # Raise only for the file under test; delegate everything else so the
+            # patch can't mask unrelated I/O (avoids a brittle global open patch).
+            if "dispatch-rules.json" in str(path):
+                raise PermissionError("denied")
+            return real_open(path, *a, **k)
+
         with tempfile.TemporaryDirectory() as tmpdir:
             self._build(tmpdir)
-            with mock.patch("builtins.open", side_effect=PermissionError("denied")):
+            with mock.patch("builtins.open", side_effect=selective_open):
                 res = self._run(tmpdir)
         self.assertIsNotNone(res)
         assert res is not None
         self.assertFalse(res.passed)
         self.assertIn("unreadable", res.detail)
+
+    def test_symlink_escaping_tree_fails(self) -> None:
+        """A guarded path that resolves outside its tree via a symlink must FAIL
+        (escapes tree), never be read."""
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir)
+            outside = _os.path.join(tmpdir, "outside.txt")
+            with open(outside, "w") as f:
+                f.write("secret\n")
+            guarded = _os.path.join(tmpdir, ".work", "config", "dispatch-rules.json")
+            _os.remove(guarded)
+            _os.symlink(outside, guarded)
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("escapes tree", res.detail)
+
+    def test_empty_guarded_set_fails(self) -> None:
+        """An empty _STATE_SYNC_GUARDED must FAIL, not vacuously pass."""
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir)
+            with mock.patch.object(M, "_STATE_SYNC_GUARDED", ()):
+                res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("no guarded files", res.message)
 
     def test_framework_repo_missing_template_tree_fails(self) -> None:
         """In the framework repo (skill/hedl/ present) a missing work-state/

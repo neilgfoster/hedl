@@ -656,8 +656,20 @@ def check_state_template_sync() -> Optional[CheckResult]:
     if not os.path.isdir(os.path.join(REPO_ROOT, "skill", "hedl")):
         return None  # adopter repo layout — check not applicable
 
-    live_root = os.path.join(REPO_ROOT, ".work")
-    template_root = os.path.join(REPO_ROOT, "skill", "hedl", "work-state")
+    if not _STATE_SYNC_GUARDED:
+        # A misconfiguration (e.g. the tuple emptied during a merge) must FAIL,
+        # not vacuously pass with zero comparisons performed.
+        return CheckResult(
+            "state-sync", False,
+            "no guarded files configured",
+            "  _STATE_SYNC_GUARDED is empty — the guard would compare nothing",
+        )
+
+    # realpath both roots once: canonicalising here (rather than relying on the
+    # raw REPO_ROOT) keeps the containment check below correct even when the repo
+    # is reached through a symlinked path.
+    live_root = os.path.realpath(os.path.join(REPO_ROOT, ".work"))
+    template_root = os.path.realpath(os.path.join(REPO_ROOT, "skill", "hedl", "work-state"))
 
     # In the framework repo both trees must exist; a missing one is a broken
     # checkout, not a reason to silently stop guarding.
@@ -676,9 +688,15 @@ def check_state_template_sync() -> Optional[CheckResult]:
         )
 
     drifted: list[str] = []
-    problems: list[str] = []  # missing / non-file / oversized / unreadable
+    problems: list[str] = []  # escaped / missing / non-file / oversized / unreadable
 
-    def _read(path: str, label: str, rel: str) -> Optional[bytes]:
+    def _read(path: str, root: str, label: str, rel: str) -> Optional[bytes]:
+        # Containment: a guarded path that resolves (via symlink) outside its tree
+        # is a fault, not something to read — guarded files are real repo files.
+        real = os.path.realpath(path)
+        if real != root and not real.startswith(root + os.sep):
+            problems.append(f"  escapes tree ({label}): {rel}")
+            return None
         # Distinguish absent, non-regular-file (dir or broken/special symlink),
         # oversized, and unreadable — each FAILs with a clear message rather than
         # crashing the gate with a raw traceback (gate no-traceback discipline).
@@ -697,8 +715,10 @@ def check_state_template_sync() -> Optional[CheckResult]:
             return None
 
     for rel in _STATE_SYNC_GUARDED:
-        live_bytes = _read(os.path.join(live_root, rel), "live .work", rel)
-        template_bytes = _read(os.path.join(template_root, rel), "template", rel)
+        live_bytes = _read(os.path.join(live_root, rel), live_root, "live .work", rel)
+        template_bytes = _read(
+            os.path.join(template_root, rel), template_root, "template", rel
+        )
         if (
             live_bytes is not None
             and template_bytes is not None
