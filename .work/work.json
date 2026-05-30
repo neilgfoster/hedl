@@ -65,8 +65,12 @@
         "Empties .work/work.json (or removes it; operator's call — preserve backwards-compat reads if removal breaks the gate).",
         "Idempotent: re-running on a repo already on github-issues backend is a no-op with a clear message.",
         "Tests cover: round-trip mapping, idempotency, label correctness, archive contents.",
-        "am_i_done.py passes after migration (including gate read-paths via the github-issues backend)."
-      ]
+        "am_i_done.py passes after migration (including gate read-paths via the github-issues backend).",
+        "Harden the gate read path (WORK-0007 audit follow-up): scope the github-issues read to Hedl-managed issues via the `hedl:work` label rather than title-matching alone (closes the title-injection / non-Hedl-collision trust gap), and paginate so the read is complete rather than failing at the _GITHUB_ISSUE_READ_LIMIT cap. Update skill/hedl/references/backends.md 'Known limitations' as each is resolved.",
+        "Migration applies the `hedl:work` label (and the WORK-0007 label scheme) to every created issue so the label-scoped read works from day one.",
+        "The stale-ID check is skipped or handled cleanly when the github backend has zero open WORK-issues (mirror the local-file no-work.json skip), and `gh` stderr is not leaked verbatim into gate output."
+      ],
+      "note": "WORK-0007 audit (2026-05-30) folded the github-issues read-path hardening into this item: hedl:work label-scoped + paginated reads, label application on migration, and the empty-set/stderr handling. See WORK-0059 for the separate multi-operator (assignee/claim) layer."
     },
     {
       "id": "WORK-0033",

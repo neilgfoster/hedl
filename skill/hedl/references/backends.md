@@ -65,6 +65,36 @@ the claim/assignee layer now would be speculative (WORK-0007 audit decision,
 
 ---
 
+## Known limitations (deferred to WORK-0032)
+
+The read path is shallow by design today; the adversarial review of WORK-0007
+surfaced these, all rooted in the same gap — **identity is the issue title, and
+the read is not scoped to Hedl-managed issues**. The fix is the `hedl:work`
+label-scoped, paginated read that WORK-0032 owns.
+
+- **Title-based identity / trust boundary.** A live WORK-ID is any open issue
+  whose title matches `WORK-NNNN:`. Anyone who can open an issue can therefore
+  inject a synthetic live ID (suppressing a stale-ID flag), and a non-Hedl issue
+  that happens to match (`WORK-1234: customer ticket`) is mis-read as Hedl work.
+  On a repo where untrusted users can open issues, do not rely on this backend
+  until label-scoping lands. (Consistent with the gate's stance that the real
+  untrusted-input control is fork/PR approval, not the gate — see WORK-0021.)
+- **Completeness cap.** The read counts *all* open issues against the 1000 cap,
+  not just WORK-issues; a repo with many non-Hedl open issues will hit the cap
+  and the gate will FAIL the stale-ID check (loudly, by design — it cannot prove
+  completeness). Label-scoping + pagination removes this.
+- **Empty live set.** With zero open WORK-issues the github read returns an empty
+  set with no error; unlike the local-file path, the stale-ID check is not
+  skipped, so command-file WORK-ID references would all flag as stale.
+- **`gh` stderr** is surfaced (truncated) in the gate output; it can carry the
+  GitHub hostname / API error detail in CI logs.
+
+Until WORK-0032 addresses these, the github-issues backend is suitable for
+single-operator / trusted-issue repos and is not Hedl's own backend yet
+(local-file remains the default; the dogfood migration is WORK-0033).
+
+---
+
 ## File-level conflict across operator PRs
 
 Independent of the state backend, `am_i_done.py --streams <branchA,branchB,...>`

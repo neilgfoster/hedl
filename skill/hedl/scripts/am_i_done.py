@@ -531,15 +531,21 @@ def _load_work_items_github() -> tuple[set[str], Optional[str]]:
     except json.JSONDecodeError as exc:
         return set(), f"could not parse gh issue list output: {exc}"
     if len(issues) >= _GITHUB_ISSUE_READ_LIMIT:
-        # Truncated read: silently using a partial set would let a stale WORK-ID
-        # slip past the gate. Fail loudly instead.
+        # The read is unfiltered (counts ALL open issues, not just WORK-issues),
+        # so hitting the cap means the gate cannot guarantee it saw every open
+        # WORK-issue — a missed one would let a stale WORK-ID past the check.
+        # Failing loudly is the safe choice for a gate; the real fix (a
+        # hedl:work label-scoped, paginated read) is WORK-0032. See backends.md.
         return set(), (
-            f"github-issues backend returned the read cap ({_GITHUB_ISSUE_READ_LIMIT}) "
-            "open issues — result may be truncated; paginate before trusting the gate"
+            f"github-issues backend hit the read cap ({_GITHUB_ISSUE_READ_LIMIT} open "
+            "issues); the unfiltered read cannot guarantee completeness — scope by "
+            "the hedl:work label / paginate (WORK-0032) before trusting the gate"
         )
     live_ids: set[str] = set()
     for issue in issues:
-        m = _WORK_ITEM_ID_RE.match(issue.get("title", ""))
+        # `title` can be present-but-null in the gh JSON; coerce to "" so a null
+        # title is ignored rather than crashing the gate with a TypeError.
+        m = _WORK_ITEM_ID_RE.match(issue.get("title") or "")
         if m:
             live_ids.add(m.group(1))
     return live_ids, None
