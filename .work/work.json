@@ -8,25 +8,9 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0018",
-      "title": "chore: Phase 1 = discipline-restoration (tracker)",
-      "phase": 1,
-      "workstream": "WS-PLAN",
-      "change_class": "chore",
-      "status": "backlog",
-      "priority_band": "BLOCKING",
-      "description": "Repo-health 2026-05-28 (BLOCKING #4 goal-displacement, #5 validation-theatre, existential-challenger) — ~4650 lines of process artefacts (ADRs, SKILL, agents, commands, references) vs ~4145 lines of Python + tests, and one shipped capability (the gate). The product had become the process. `.work/reviews/` and `.work/insights/` held only README/.gitkeep before the 2026-05-28 review run; the 'every agent output is validated' loop had never closed with a saved finding. This is a governance fact, not a single fixable defect. It is captured here as a tracker so the rest of Phase 1 (everything below) can be measured against it: BLOCKING fixes that produce running code, governance closures that bring ADRs into line with implementation, README that leads with the gate, and the workstream model that makes 'one shipped capability per workstream' the unit of progress. This item closes only when every other Phase-1 item closes.",
-      "acceptance_criteria": [
-        "Every other Phase-1 item is closed before this one.",
-        "Repo-health re-run after Phase 1 close shows the goal-displacement and validation-theatre findings resolved (process-to-code ratio improved or the surplus process retired; reviews directory contains at least one real run produced inside Phase 1).",
-        ".work/reviews/ contains at least the 2026-05-28 run plus the Phase-1-close existential cycle.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0032",
       "title": "feat: state-backend migration script (local-file -> github-issues)",
-      "phase": 1,
+      "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "priority_band": "normal",
@@ -49,12 +33,13 @@
         "Migration applies the `hedl:work` label (and the WORK-0007 label scheme) to every created issue so the label-scoped read works from day one.",
         "The stale-ID check is skipped or handled cleanly when the github backend has zero open WORK-issues (mirror the local-file no-work.json skip), and `gh` stderr is not leaked verbatim into gate output."
       ],
-      "note": "WORK-0007 audit (2026-05-30) folded the github-issues read-path hardening into this item: hedl:work label-scoped + paginated reads, label application on migration, and the empty-set/stderr handling. See WORK-0059 for the separate multi-operator (assignee/claim) layer."
+      "note": "WORK-0007 audit (2026-05-30) folded the github-issues read-path hardening into this item: hedl:work label-scoped + paginated reads, label application on migration, and the empty-set/stderr handling. See WORK-0059 for the separate multi-operator (assignee/claim) layer.",
+      "reclassify_reason": "Reclassified to Phase 2 (/phase-complete 2026-05-30). Named forward-capability exception that did not ship in Phase 1; carries to Phase 2 with the github-issues read-path hardening ACs folded in from WORK-0007. Dep WORK-0007 (done)."
     },
     {
       "id": "WORK-0033",
       "title": "feat: ADR-024 record + dogfood github-issues backend migration on Hedl itself",
-      "phase": 1,
+      "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "priority_band": "normal",
@@ -73,12 +58,13 @@
         "Existing test suite passes; gate passes with state_backend: github-issues.",
         "/finish-task is verified to close the right issue when the active item is marked complete.",
         "am_i_done.py passes."
-      ]
+      ],
+      "reclassify_reason": "Reclassified to Phase 2. github-issues dogfood; depends on WORK-0032 which slipped to Phase 2."
     },
     {
       "id": "WORK-0015",
       "title": "docs: terminology audit — align surviving recursive-'workstream' usages to the canonical four-category meaning (post-WORK-0027)",
-      "phase": 1,
+      "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "docs",
       "status": "backlog",
@@ -90,12 +76,13 @@
         "A glossary entry (standards.md or a new terminology.md) records the canonical meaning and the name reserved for the deferred recursive model.",
         "am_i_done.py passes."
       ],
-      "reframe": "Retargeted 2026-05-30 by WORK-0027. Originally 'workstream replaces phase/work-item where ADR-019 specifies' — i.e. it assumed ADR-019's recursive model was canonical and would replace 'work item'/'phase'. WORK-0027 reversed that (four-category meaning canonical; ADR-019 superseded), so the audit's job is now the opposite: sweep the surviving recursive-sense usages and align/annotate them, rather than migrate everything to the recursive primitive."
+      "reframe": "Retargeted 2026-05-30 by WORK-0027. Originally 'workstream replaces phase/work-item where ADR-019 specifies' — i.e. it assumed ADR-019's recursive model was canonical and would replace 'work item'/'phase'. WORK-0027 reversed that (four-category meaning canonical; ADR-019 superseded), so the audit's job is now the opposite: sweep the surviving recursive-sense usages and align/annotate them, rather than migrate everything to the recursive primitive.",
+      "reclassify_reason": "Reclassified to Phase 2. Terminology sweep depends on the recursive-cluster decision; per /phase-complete the cluster is DEFERRED (not culled), so WORK-0015 ANNOTATES surviving recursive-sense 'workstream' references as deferred rather than removing them."
     },
     {
       "id": "WORK-0010",
       "title": "feat: implement recursive workstream data model + schema migration",
-      "phase": 1,
+      "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "status": "backlog",
@@ -110,12 +97,13 @@
         "am_i_done.py passes including all existing tests on the new shape.",
         "Tests cover: leaf workstream (flat), nested workstreams (epic-of-stories), tier-graded behaviour, migration round-trip."
       ],
-      "note": "Data-model-adoption threshold (dogfood 2026-05-29, N=2 adopters): the recursive model's benefit exceeds prose-template cost only when concurrently-active workstreams exceed ~5-7, OR >1 concurrent operator needs shared machine-readable state, OR a parallel-bootstrap-under-coordination-strain repeats. Below that, prose templates (docs/templates/bootstrap-adopter.md) are the right tool. See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md."
+      "note": "Data-model-adoption threshold (dogfood 2026-05-29, N=2 adopters): the recursive model's benefit exceeds prose-template cost only when concurrently-active workstreams exceed ~5-7, OR >1 concurrent operator needs shared machine-readable state, OR a parallel-bootstrap-under-coordination-strain repeats. Below that, prose templates (docs/templates/bootstrap-adopter.md) are the right tool. See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
+      "reclassify_reason": "Reclassified to Phase 2 (operator decision at /phase-complete 2026-05-30: defer, not cull). Recursive workstream data model is demand-gated; the 2026-05-29 dogfood found the benefit exceeds prose-template cost only above ~5-7 concurrent workstreams, a threshold not met. ADR-019 superseded; kept deferred pending real demand."
     },
     {
       "id": "WORK-0011",
       "title": "feat: ship existential-review and problem-statement workstream templates",
-      "phase": 1,
+      "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "status": "backlog",
@@ -129,12 +117,13 @@
         "First concrete use: existential-review runs on Hedl itself, producing docs/alternatives.md (already committed in PR #10 — reference it as the worked example); problem-statement is used to bootstrap Lume.",
         "am_i_done.py passes."
       ],
-      "note": "When this ships workstream templates in data-form (ADR-020), fold in / supersede the prose docs/templates/bootstrap-adopter.md (authored 2026-05-29 from the Lume/Wyrd bootstraps). See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md."
+      "note": "When this ships workstream templates in data-form (ADR-020), fold in / supersede the prose docs/templates/bootstrap-adopter.md (authored 2026-05-29 from the Lume/Wyrd bootstraps). See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
+      "reclassify_reason": "Reclassified to Phase 2 (defer). Named forward-capability exception that did not ship as data-form templates; prose templates (docs/templates/bootstrap-adopter.md) serve below the recursive-model threshold. Carries to Phase 2 with WORK-0010."
     },
     {
       "id": "WORK-0001",
       "title": "fix: install.py path resolves in consumer repos",
-      "phase": 1,
+      "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "fix",
       "status": "backlog",
@@ -144,12 +133,13 @@
         "Install management instructions in SKILL.md resolve and execute successfully in an installed consumer repo (any tier).",
         "A test simulates the consumer layout (skill symlinked to .claude/skills/hedl/) and exercises --status, --doctor, --tier change, and --migrate without 'file not found'.",
         "am_i_done.py passes."
-      ]
+      ],
+      "reclassify_reason": "Reclassified to Phase 2. BLIND-SPOT consumer-install-path fix; its a/b/c fix-approach decision (symlink projection breaks under --copy) is deferred with it and decided when built."
     },
     {
       "id": "WORK-0035",
       "title": "feat: ship the external adversarial review kit (consistency + report contract)",
-      "phase": 1,
+      "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "status": "backlog",
@@ -165,7 +155,8 @@
         "README/tiers/docs reference the kit and any agent/command counts stay consistent (skill-meta + docs-index checks pass).",
         "Relationship to ADR-028 recorded: this is its implementation; ADR-028 remains Proposed until reviews #2/#3 clear its evidence gate.",
         "am_i_done.py passes."
-      ]
+      ],
+      "reclassify_reason": "Reclassified to Phase 2. External adversarial review kit is net-new forward-capability NOT in Phase-1's sanctioned exception set (github-issues backend + workstream templates); ADR-028 stays Proposed pending reviews #2/#3."
     },
     {
       "id": "WORK-0004",
@@ -1262,6 +1253,25 @@
       "completed_date": "2026-05-30",
       "reframe": "AC1 said 'README opens with the gate as the headline (ADR-011 lead-with-gate)', but ADR-011's Decision actually mandates 'Don't use Hedl if...' FIRST, gate SECOND, alternatives third, what-it-doesn't-do fourth. Operator chose (2026-05-30) to follow ADR-011. The README therefore opens with a neutral one-line definition (not a pitch), then 'Don't use Hedl if' (ADR-011) AND 'Use Hedl if' (ADR-023, AC2) — both qualifiers are required and compose. AC1's 'lead-with-gate' wording was the misquote; the gate is the second section, per ADR-011.",
       "resolution": "README restructured to ADR-011 order (disqualifiers-first) + ADR-023's 'Use Hedl if' qualifier: neutral one-line definition -> Don't use Hedl if -> Use Hedl if (incl. invisible-mode, flagged planned/WORK-0013) -> The gate -> Alternatives (->docs/alternatives.md) -> What Hedl doesn't do (iteration layer; invisible planned). getting-started.md gains the iteration-layer framing + a link to the disqualifier section. github-issues stated read-only-today/write-back-planned (WORK-0012) to match getting-started/team-tier. No marketing claims (ADR-010). 3-agent panel (historian, scope, new-engineer): one BLOCKING fixed (the 'Use Hedl if' section had been dropped in the restructure — re-added), plus new-engineer comprehension fixes (define product before disqualifiers; gloss 'iteration layer') and the github read-only accuracy note."
+    },
+    {
+      "id": "WORK-0018",
+      "title": "chore: Phase 1 = discipline-restoration (tracker)",
+      "phase": 1,
+      "workstream": "WS-PLAN",
+      "change_class": "chore",
+      "status": "complete",
+      "priority_band": "BLOCKING",
+      "description": "Repo-health 2026-05-28 (BLOCKING #4 goal-displacement, #5 validation-theatre, existential-challenger) — ~4650 lines of process artefacts (ADRs, SKILL, agents, commands, references) vs ~4145 lines of Python + tests, and one shipped capability (the gate). The product had become the process. `.work/reviews/` and `.work/insights/` held only README/.gitkeep before the 2026-05-28 review run; the 'every agent output is validated' loop had never closed with a saved finding. This is a governance fact, not a single fixable defect. It is captured here as a tracker so the rest of Phase 1 (everything below) can be measured against it: BLOCKING fixes that produce running code, governance closures that bring ADRs into line with implementation, README that leads with the gate, and the workstream model that makes 'one shipped capability per workstream' the unit of progress. This item closes only when every other Phase-1 item closes.",
+      "acceptance_criteria": [
+        "Every other Phase-1 item is closed before this one.",
+        "Repo-health re-run after Phase 1 close shows the goal-displacement and validation-theatre findings resolved (process-to-code ratio improved or the surplus process retired; reviews directory contains at least one real run produced inside Phase 1).",
+        ".work/reviews/ contains at least the 2026-05-28 run plus the Phase-1-close existential cycle.",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-28",
+      "completed_date": "2026-05-30",
+      "resolution": "Discipline tracker closed at /phase-complete 2026-05-30. AC1: every other Phase-1 item closed (29) or reclassified to Phase 2 with rationale (WORK-0001/0010/0011/0015/0032/0033/0035). AC2: repo-health re-run (.work/reviews/repo-health-2026-05-30/) shows both 2026-05-28 BLOCKING findings RESOLVED — goal-displacement (Python 9,691 vs process ~3,358, ratio flipped from ~4145/~4650) and validation-theatre (14 review runs, 10 this session, vs README/.gitkeep at phase start). AC3: .work/reviews/ holds the 2026-05-28 run + the phase-1-complete-2026-05-30 existential cycle. AC4: gate green. Caveat recorded in the phase retro: surplus was largely justified/carried not retired (recursive cluster + budget_manager kept-deferred; Lume bootstrap accreted 5 ADR-class items) — Phase 2 inherits the 'watch net-new process' caution + 2 culling-candidates."
     }
   ]
 }
