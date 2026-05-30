@@ -535,6 +535,112 @@ class TestCheckCommands(unittest.TestCase):
         self.assertIsNone(res)
 
 
+class TestCheckStateTemplateSync(unittest.TestCase):
+    """check_state_template_sync (WORK-0025): guarded framework-config files must
+    stay byte-identical between live .work/ and the skill/hedl/work-state/ seed,
+    but only in the framework source repo, and only for the guarded subset."""
+
+    GUARDED = (
+        "config/dispatch-rules.json",
+        "config/markdown-schemas.json",
+        "decisions/README.md",
+        "reviews/README.md",
+    )
+
+    def _build(self, tmpdir: str, *, with_template: bool = True,
+               overrides: "dict[str, tuple[str, str]] | None" = None,
+               omit: "set[str] | None" = None) -> None:
+        """Create a .work/ tree and (optionally) a skill/hedl/work-state/ seed.
+
+        overrides maps a guarded rel-path to (live_bytes, template_bytes) so a
+        single file can be made to drift. omit drops a rel-path from the seed.
+        """
+        import os as _os
+        overrides = overrides or {}
+        omit = omit or set()
+        live_root = _os.path.join(tmpdir, ".work")
+        template_root = _os.path.join(tmpdir, "skill", "hedl", "work-state")
+        # A non-guarded file that legitimately diverges (scout-populated).
+        live_files = dict.fromkeys(self.GUARDED, "shared-content\n")
+        live_files["config/project-registry.json"] = '{"competing_projects": ["x"]}\n'
+        template_files = dict.fromkeys(self.GUARDED, "shared-content\n")
+        template_files["config/project-registry.json"] = '{"competing_projects": []}\n'
+        for rel, (live_b, tmpl_b) in overrides.items():
+            live_files[rel] = live_b
+            template_files[rel] = tmpl_b
+        for rel, content in live_files.items():
+            p = _os.path.join(live_root, rel)
+            _os.makedirs(_os.path.dirname(p), exist_ok=True)
+            with open(p, "w") as f:
+                f.write(content)
+        if with_template:
+            for rel, content in template_files.items():
+                if rel in omit:
+                    continue
+                p = _os.path.join(template_root, rel)
+                _os.makedirs(_os.path.dirname(p), exist_ok=True)
+                with open(p, "w") as f:
+                    f.write(content)
+
+    def _run(self, tmpdir: str) -> Any:
+        original_root = M.REPO_ROOT
+        M.REPO_ROOT = tmpdir
+        try:
+            return M.check_state_template_sync()
+        finally:
+            M.REPO_ROOT = original_root
+
+    def test_in_sync_passes(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir)
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertTrue(res.passed)
+
+    def test_drift_fails_and_names_file(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir, overrides={
+                "config/dispatch-rules.json": ("live-edited\n", "seed-stale\n"),
+            })
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("config/dispatch-rules.json", res.detail)
+
+    def test_missing_guarded_file_fails(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir, omit={"reviews/README.md"})
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("reviews/README.md", res.detail)
+
+    def test_consumer_layout_skips(self) -> None:
+        """Only .work/ at root (no skill/hedl/work-state/) — adopter repo, skip."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir, with_template=False)
+            res = self._run(tmpdir)
+        self.assertIsNone(res)
+
+    def test_project_registry_divergence_allowed(self) -> None:
+        """project-registry.json is scout-populated per project and NOT guarded;
+        its divergence must not fail the gate."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir)  # builds with project-registry already diverging
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertTrue(res.passed)
+
+
 class TestCheckTemplate(unittest.TestCase):
     def test_valid_template_passes(self) -> None:
         good_body = (

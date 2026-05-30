@@ -610,6 +610,80 @@ def check_config() -> Optional[CheckResult]:
     )
 
 
+# State-template sync (WORK-0025)
+# ---------------------------------------------------------------------------
+# `skill/hedl/work-state/` is the installable template (projection source per
+# tiers.json: {source: work-state, target: .work, on_exists: skip}); `.work/`
+# is live state (the projection target). Most of the tree diverges by design:
+# work.json, context.json, session.json and phases/* are seed-vs-live, and
+# config/project-registry.json is scout-populated per project. A small subset
+# is framework config / boilerplate that must stay byte-identical so the
+# defaults shipped to adopters never drift from what Hedl itself runs
+# (dogfooding fidelity). This check guards exactly that subset.
+#
+# Scoped to the framework source repo: it only runs when skill/hedl/work-state/
+# sits at the repo root. In an adopter repo the skill lives under
+# .claude/skills/hedl/, so the check is a no-op and never nags an operator who
+# has customised their own .work/config.
+
+_STATE_SYNC_GUARDED = (
+    "config/dispatch-rules.json",
+    "config/markdown-schemas.json",
+    "decisions/README.md",
+    "reviews/README.md",
+)
+
+
+def check_state_template_sync() -> Optional[CheckResult]:
+    """Fail if guarded framework-config files drift between the live .work/ tree
+    and the skill/hedl/work-state/ template they are projected from.
+
+    Returns None (skip) unless this is the framework source repo — i.e. both
+    skill/hedl/work-state/ and .work/ exist at the repo root. Adopter installs
+    (skill under .claude/skills/) and gate-only installs (no .work/) skip it.
+    """
+    live_root = os.path.join(REPO_ROOT, ".work")
+    template_root = os.path.join(REPO_ROOT, "skill", "hedl", "work-state")
+    if not os.path.isdir(live_root) or not os.path.isdir(template_root):
+        return None  # not the framework source repo — check not applicable
+
+    drifted: list[str] = []
+    missing: list[str] = []
+    for rel in _STATE_SYNC_GUARDED:
+        live = os.path.join(live_root, rel)
+        template = os.path.join(template_root, rel)
+        if not os.path.exists(live) or not os.path.exists(template):
+            missing.append(rel)
+            continue
+        with open(live, "rb") as fh:
+            live_bytes = fh.read()
+        with open(template, "rb") as fh:
+            template_bytes = fh.read()
+        if live_bytes != template_bytes:
+            drifted.append(rel)
+
+    if drifted or missing:
+        issues = [f"  missing from one tree: {rel}" for rel in missing]
+        issues += [
+            f"  drifted: .work/{rel} != skill/hedl/work-state/{rel}" for rel in drifted
+        ]
+        issues.append(
+            "  Update both copies in lockstep — the seed is what ships to adopters."
+        )
+        return CheckResult(
+            "state-sync",
+            False,
+            f"{len(drifted)} drifted, {len(missing)} missing in guarded state template",
+            "\n".join(issues),
+        )
+
+    return CheckResult(
+        "state-sync",
+        True,
+        f"live .work/ matches work-state template ({len(_STATE_SYNC_GUARDED)} guarded files)",
+    )
+
+
 def check_commands() -> Optional[CheckResult]:
     """Detect stale hardcoded work-item IDs in .claude/commands/.
 
@@ -1106,7 +1180,7 @@ CLI_SPEC: dict[str, Any] = {
                     "type": "str",
                     "required": False,
                     "choices": [
-                        "git", "branch", "dispatch", "config", "commands",
+                        "git", "branch", "dispatch", "config", "state-sync", "commands",
                         "schemas", "markdown", "lint", "types", "tests",
                         "template", "dependabot", "threads", "ci",
                         "budget", "streams", "skill-meta", "docs-index", "doc-facts",
@@ -1413,6 +1487,8 @@ def main() -> int:
         maybe_add(check_dispatch(panel))
     if not only or only == "config":
         maybe_add(check_config())
+    if not only or only == "state-sync":
+        maybe_add(check_state_template_sync())
     if not only or only == "commands":
         maybe_add(check_commands())
     if not only or only == "schemas":

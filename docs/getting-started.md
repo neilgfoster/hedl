@@ -164,6 +164,26 @@ python3 .github/scripts/am_i_done.py
 
 `requirements-ci.txt` is generated from `uv.lock` — do not edit it by hand.
 
+### State template vs. live state
+
+Two parallel trees exist in this repo, and the distinction matters when you edit either:
+
+- `skill/hedl/work-state/` is the **installable template** — the seed `install.py`
+  projects into a fresh adopter's `.work/` (per `tiers.json`:
+  `{ source: work-state, target: .work, on_exists: skip }`). It is the source of truth
+  for the defaults Hedl ships.
+- `.work/` is this repo's **live state** — the projection target. After install it
+  diverges by design: `work.json`, `context.json`, `session.json`, `phases/*` are
+  this project's real state, and `config/project-registry.json` is populated by the
+  scouts. Editing these does **not** touch the template.
+
+A small subset must stay byte-identical across both trees so the shipped defaults never
+drift from what Hedl itself runs (dogfooding fidelity): `config/dispatch-rules.json`,
+`config/markdown-schemas.json`, and the `decisions/` / `reviews/` README scaffolds. If you
+edit one of these in `.work/`, make the same edit in `skill/hedl/work-state/` (and vice
+versa). The `state-sync` gate check enforces this — it fails on drift in the framework
+source repo and is a no-op in adopter repos (where the skill lives under `.claude/skills/`).
+
 ---
 
 ## Review panels
