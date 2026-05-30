@@ -187,8 +187,20 @@ MIGRATIONS: list[tuple[str | None, str, Callable[[Path], None]]] = [
 
 
 def _load_tiers() -> Any:
-    with TIERS_FILE.open() as f:
-        return json.load(f)
+    # A missing or corrupt bundled manifest must surface as a clean non-zero exit
+    # (TiersConfigError, caught in main()), never a raw traceback (WORK-0048,
+    # mirroring the includes-path handling from WORK-0022).
+    try:
+        with TIERS_FILE.open() as f:
+            return json.load(f)
+    except FileNotFoundError as exc:
+        raise TiersConfigError(
+            f"tier manifest not found at {TIERS_FILE} — the Hedl install is incomplete"
+        ) from exc
+    except (OSError, json.JSONDecodeError) as exc:
+        raise TiersConfigError(
+            f"tier manifest {TIERS_FILE} is unreadable or not valid JSON: {exc}"
+        ) from exc
 
 
 class TiersConfigError(Exception):

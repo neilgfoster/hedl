@@ -1147,5 +1147,32 @@ class TestGitignoreProjection(unittest.TestCase):
         self.assertEqual(r.returncode, 1, ".work/insights/README.md must stay trackable")
 
 
+class TestTiersManifestErrors(unittest.TestCase):
+    """WORK-0048: a missing or corrupt tiers.json must surface as a clean
+    TiersConfigError (non-zero exit via main()), never a raw traceback."""
+
+    def test_missing_tiers_raises_clean_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = pathlib.Path(tmp) / "nonexistent-tiers.json"
+            with mock.patch.object(M, "TIERS_FILE", missing):
+                with self.assertRaises(M.TiersConfigError) as ctx:
+                    M._load_tiers()
+            self.assertIn("not found", str(ctx.exception))
+
+    def test_corrupt_tiers_raises_clean_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            corrupt = pathlib.Path(tmp) / "tiers.json"
+            corrupt.write_text("{ not valid json")
+            with mock.patch.object(M, "TIERS_FILE", corrupt):
+                with self.assertRaises(M.TiersConfigError) as ctx:
+                    M._load_tiers()
+            self.assertIn("not valid JSON", str(ctx.exception))
+
+    def test_valid_tiers_still_loads(self) -> None:
+        # Regression: the real manifest still parses unchanged.
+        tiers = M._load_tiers()
+        self.assertIn("tiers", tiers)
+
+
 if __name__ == "__main__":
     unittest.main()
