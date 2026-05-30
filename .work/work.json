@@ -774,6 +774,26 @@
   ],
   "completed": [
     {
+      "id": "WORK-0067",
+      "title": "docs: attribute am_i_done's direct origin to theshadow27/mcp-cli (prior art)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "complete",
+      "description": "Follow-up to WORK-0066. Verified 2026-05-30: the DIRECT origin of am_i_done is theshadow27/mcp-cli (github.com/theshadow27/mcp-cli, created 2026-03-02, ~3 months before Hedl; MIT). It ships scripts/am-i-done.ts (16KB) + package script 'am-i-done'; its CLAUDE.md calls 'bun run am-i-done' 'the single command for checking whether work is done — run it before committing' and 'the same command the pre-commit hook and CI both run, so a local pass means a green PR'; ci.yml/pre-commit/pre-push all invoke it. So Hedl took BOTH the name AND the deterministic, CI-symmetric design from mcp-cli — i.e. exactly the property WORK-0066's docs claimed as 'Hedl's contribution' over bun. That claim was itself unattributed prior art. bun remains the upstream concept (prose 'run the checks before finishing'). Re-scope Hedl's honest residual to PACKAGING only: stdlib-Python, LLM-agnostic, drop-in; distributable tiered Skill for other repos; work-item/PR-aware check bundle tied to a tracker. Operator directive: attribute the PROJECT only (URL), do not name the individual. Principle: unacknowledged prior art is theft (ADR-010).",
+      "acceptance_criteria": [
+        "README '## The gate' credits theshadow27/mcp-cli (project URL only) as the DIRECT origin of am_i_done (the name + the deterministic, CI-symmetric design), with bun as the upstream concept; it no longer claims the deterministic/CI-symmetric form as Hedl's, and re-scopes Hedl's contribution to packaging (stdlib/LLM-agnostic drop-in, distributable tiered Skill, tracker-aware bundle).",
+        "docs/alternatives.md gate entry adds theshadow27/mcp-cli as the direct-origin closest-alternative, leads Prior art with mcp-cli (then bun), qualifies the Status, and reframes the residual to packaging — removing the now-false 'binds desk+CI into one boundary ... is the differentiator' claim (mcp-cli already does that).",
+        "ADR-011 Decision + Prior art name mcp-cli (direct) + bun (upstream); a second dated amendment records the correction; the project is attributed, never the individual.",
+        "No individual/person is named anywhere (project URL only). Quotes are verbatim-accurate to mcp-cli source (verified). No new process ADR minted.",
+        "am_i_done.py passes (doc-facts / docs-index / schemas green)."
+      ],
+      "source": "Operator directive 2026-05-30 (attribute project only); evidence: github.com/theshadow27/mcp-cli (CLAUDE.md, package.json am-i-done, ci.yml, .git-hooks). Ties to ADR-010/ADR-011/ADR-017; follows WORK-0066.",
+      "resolution": "Attributed am_i_done's DIRECT origin to theshadow27/mcp-cli (project URL only) across README, docs/alternatives.md, ADR-011 (Decision + Prior art + Amendment 2); bun retained as upstream concept; Hedl's residual re-scoped to packaging (stdlib/LLM-agnostic drop-in, distributable tiered Skill, work-item/PR-aware bundle). 3-agent panel: evidence-checker VERBATIM-verified every mcp-cli quote against source (the bun lesson applied — clean this time) and confirmed no individual named; scope-auditor clean; historian found 2 — BLOCKING: the external review artifact still claimed 'no competitor ships this' (now false), resolved by prepending a clearly-marked editorial erratum while preserving the reviewer's text verbatim (independence per the WORK-0066 convention); SIGNIFICANT: README/alternatives summary lines called 'the bundled gate' Hedl-specific without qualifier — tightened to 'work-item-aware gate bundle (deterministic gate is prior art)'. am_i_done.py green."
+    },
+    {
       "id": "WORK-0066",
       "title": "docs: attribute the completion-gate concept to oven-sh/bun (prior art)",
       "phase": 2,

@@ -46,7 +46,7 @@ status downgrades; two watchlist objectives sharpened.
 
 ## Deterministic completion gate (am_i_done.py)
 
-**Status**: uniquely-hedl
+**Status**: uniquely-hedl (packaging only — the deterministic core is prior art from mcp-cli; see Prior art / origin)
 **Hedl evidence**: `skill/hedl/scripts/am_i_done.py:1`; check list spans
 `am_i_done.py:1-1300`; stack-agnostic dispatch via `hedl.toml` documented at
 `skill/hedl/references/tiers.md:41-63`; same script runs locally and in CI per
@@ -55,24 +55,31 @@ status downgrades; two watchlist objectives sharpened.
 - pre-commit (pre-commit.com)
 - GitHub Actions matrix + required status checks
 - task / just / Make declarative runners
+- theshadow27/mcp-cli — ships an `am-i-done` script (same name) run identically
+  by its pre-commit hook and in CI; the **direct origin** of Hedl's gate (both
+  the name and the deterministic, CI-symmetric design)
 - oven-sh/bun — `CLAUDE.md` (symlinked as `AGENTS.md`), the "Important
   Development Notes" completion instruction (the origin of the agent
   completion-gate idea: prose the agent is told to run before finishing, not a
   deterministic script)
-**Prior art / origin**: the completion-gate *concept* is not Hedl's. It comes from
-oven-sh/bun's `CLAUDE.md` (symlinked as `AGENTS.md`), whose "Important Development Notes"
-instruct: "ONLY push up changes after running `bun bd test <file>` and ensuring your tests
-pass", alongside a `claude/`-prefixed branch CI requirement — the direct inspiration for
-`am_i_done`, via a contributor.
-What remains Hedl-specific is the *deterministic* form: bun's gate is prose the agent is
-trusted to follow (inference); Hedl packages the bundle as a single pass/fail: clean tree,
-branch naming, PR-template validity, stale work-item IDs, unresolved review
-threads, Dependabot alerts, *and* the consumer's lint/types/tests, with one
-exit code, no LLM inference, same invocation in CI and on the desk. pre-commit
-sits at the commit boundary, not the "am-I-done" boundary, and does not see
-work-item state. CI status checks sit on the server, not at the desk. Hedl
-binds them into one boundary that an agent can call and act on. The bundle —
-not any single check — is the differentiator.
+**Prior art / origin**: Hedl's gate is derivative; both sources are named. The **direct
+origin** is [theshadow27/mcp-cli](https://github.com/theshadow27/mcp-cli) (created 2026-03-02,
+predating Hedl): it ships an `am-i-done` script its `CLAUDE.md` calls "the single command for
+checking whether work is done — run it before committing" and "the same command the pre-commit
+hook and CI both run, so a local pass means a green PR" — Hedl took both the name and the
+deterministic, CI-symmetric design from there. The **upstream concept** is oven-sh/bun's
+`CLAUDE.md`/`AGENTS.md` ("Important Development Notes": "ONLY push up changes after running
+`bun bd test <file>` and ensuring your tests pass"; a `claude/`-branch CI rule) — the "run the
+checks before you finish" idea, in prose.
+
+What is Hedl-specific is therefore **not** the deterministic CI-symmetric form — mcp-cli
+already binds desk + CI into one `am-i-done` boundary. It is the *packaging*: a stdlib-Python,
+LLM-agnostic, drop-in gate (no JS/bun toolchain) distributed as an opt-in tiered Skill so
+*other* repos adopt it, where mcp-cli's gate is internal to one project; plus a
+**work-item/PR-aware** bundle — clean tree, branch naming, PR-template validity, stale
+work-item IDs, unresolved review threads, Dependabot alerts, *and* the consumer's
+lint/types/tests, in one exit code, no LLM inference, tied to a tracker. The distributable,
+tracker-aware packaging — not the gate, and not the CI-symmetry — is what is Hedl-specific.
 
 ---
 
@@ -395,7 +402,8 @@ entry must be re-evaluated if a competitor lands the same primitive.
 ## Disqualifier story
 
 Three capabilities are genuinely Hedl-specific today and earn their place
-on cited evidence: the bundled completion gate, the tiered install with a
+on cited evidence: the work-item-aware completion-gate bundle (its deterministic
+core is prior art — see the gate entry above), the tiered install with a
 reversible projection model, and the gate-enforced multi-stream overlap
 check. The phase-tracking capability is uniquely-hedl in its current form
 but is the most likely to lose that status if ADR-022's PM-pluggability

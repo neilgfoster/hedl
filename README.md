@@ -32,18 +32,24 @@ tracker you already use, not in place of it. Distributed as an Agent Skill.
 
 ## The gate
 
-The completion gate — a checklist an agent must satisfy before it declares a change done —
-is **not Hedl's idea**. It comes from [oven-sh/bun](https://github.com/oven-sh/bun)'s
-`CLAUDE.md` (symlinked as `AGENTS.md`), which instructs the agent under *Important Development
-Notes*: "ONLY push up changes after running `bun bd test <file>` and ensuring your tests
-pass." That is where Hedl got it.
+Hedl's completion gate is **not original**. A single deterministic command that decides
+whether a change is done — run identically by the pre-commit hook and in CI — comes directly
+from [theshadow27/mcp-cli](https://github.com/theshadow27/mcp-cli), which has shipped an
+`am-i-done` script since before Hedl existed: "the same command the pre-commit hook and CI
+both run, so a local pass means a green PR". Hedl took the name and the design from it. The
+older, upstream idea — "run the checks before you finish", as agent prose — is
+[oven-sh/bun](https://github.com/oven-sh/bun)'s (`CLAUDE.md` / `AGENTS.md`).
 
-What Hedl adds is making the gate **deterministic**: `am_i_done.py` runs the same pass/fail
-checks locally and in CI — clean tree, branch naming, PR template, stale work-item IDs, lint,
-types, tests, unresolved review threads, Dependabot alerts. No inference; the script decides,
-not the agent; a task is done when the gate says so. That deterministic, CI-symmetric,
-work-item-aware form — not the idea of a gate — is what differentiates Hedl. Everything else
-is opt-in scaffolding around that gate. See [Alternatives](docs/alternatives.md).
+`am_i_done.py` runs the same pass/fail checks locally and in CI — clean tree, branch naming,
+PR template, stale work-item IDs, lint, types, tests, unresolved review threads, Dependabot
+alerts. No inference; the script decides, not the agent; a task is done when the gate says so.
+
+What Hedl adds over mcp-cli's gate is only the **packaging**: a stdlib-Python, LLM-agnostic,
+drop-in gate (no JS/bun toolchain) distributed as an opt-in tiered **Skill** so *other* repos
+can adopt it, plus a work-item/PR-aware check bundle (stale work-item IDs, PR-template
+validity, unresolved threads, Dependabot) tied to a tracker. The deterministic, CI-symmetric
+core is mcp-cli's. Everything else is opt-in scaffolding around the gate. See
+[Alternatives](docs/alternatives.md).
 
 Three opt-in tiers:
 
@@ -55,8 +61,9 @@ Three opt-in tiers:
 ## Alternatives
 
 For most Hedl capabilities a focused tool already does that one thing. What is genuinely
-Hedl-specific today — the bundled gate, the tiered and reversible install, and the
-`--streams` overlap check — and the alternative for every other piece are catalogued in
+Hedl-specific today — the work-item-aware gate bundle (the deterministic gate itself is
+prior art, see below), the tiered and reversible install, and the `--streams` overlap
+check — and the alternative for every other piece are catalogued in
 [docs/alternatives.md](docs/alternatives.md).
 
 ## What Hedl doesn't do
