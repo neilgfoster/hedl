@@ -34,11 +34,12 @@
       "description": "Repo-health 2026-05-28 — `.work/config/` and `skill/hedl/work-state/config/` are byte-identical committed twins (same shape for `phases/`, `session.json`, `work.json`). No doc explains the relationship; editing one silently drifts. Decide which is the source of truth (the installable template lives in `skill/hedl/work-state/` and the live repo state lives in `.work/`, which is the most likely intent), then enforce that: either delete the duplicate, or generate one from the other at install time, and add a gate check that catches future drift. Document the relationship in docs/getting-started.md.",
       "acceptance_criteria": [
         "Single source of truth chosen and documented: which directory is the installable template, which is live state, and how install.py relates them.",
-        "Duplicate files are eliminated (deleted, generated, or symlinked, per the chosen model).",
+        "Genuine duplicates are reconciled per the chosen model. Chosen model: retain-and-guard. The two trees are template-vs-projection (skill/hedl/work-state/ seed projected to .work/ live state per tiers.json on_exists:skip), so most files diverge by design (work.json/context.json/session.json/phases/* and the scout-populated config/project-registry.json); only the byte-identical framework-config subset is guarded. No files are deleted or symlinked.",
         "Gate check exists for drift between any retained duplicates.",
         "Tests cover the chosen relationship (fresh install reproduces .work/ from the template).",
         "am_i_done.py passes."
-      ]
+      ],
+      "reframe": "AC2 originally read 'Duplicate files are eliminated (deleted, generated, or symlinked, per the chosen model).' Reconciled 2026-05-30 during implementation: the premise that the two trees are duplicated state was a misdiagnosis. They are template (skill/hedl/work-state/) vs projection (.work/); deleting/symlinking would break the projection model and per-project state divergence. The chosen model is retain-and-guard, which AC3 already anticipated ('drift between any retained duplicates'). Delivered as the am_i_done.py state-sync check + tests + docs/getting-started.md."
     },
     {
       "id": "WORK-0027",

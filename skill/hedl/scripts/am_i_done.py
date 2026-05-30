@@ -621,10 +621,17 @@ def check_config() -> Optional[CheckResult]:
 # defaults shipped to adopters never drift from what Hedl itself runs
 # (dogfooding fidelity). This check guards exactly that subset.
 #
-# Scoped to the framework source repo: it only runs when skill/hedl/work-state/
-# sits at the repo root. In an adopter repo the skill lives under
-# .claude/skills/hedl/, so the check is a no-op and never nags an operator who
-# has customised their own .work/config.
+# Scoped to the framework source repo, detected by skill/hedl/ existing at the
+# repo root. In an adopter repo the skill lives under .claude/skills/hedl/, so
+# the check is a no-op and never nags an operator who has customised their own
+# .work/config. Once the framework repo is identified, a missing state tree is a
+# FAIL (a broken/half-moved checkout), not a silent skip.
+#
+# The check is read-only and never emits file contents — it only reports drift by
+# path name — so it is not a content-disclosure surface. The byte-comparison is
+# intentional (line endings included). It cannot defend against a PR that edits
+# both copies in lockstep; that boundary is owned by branch protection / fork
+# approval, as recorded for the gate's executable allow-list (WORK-0021).
 
 _STATE_SYNC_GUARDED = (
     "config/dispatch-rules.json",
@@ -633,37 +640,74 @@ _STATE_SYNC_GUARDED = (
     "reviews/README.md",
 )
 
+# Guarded files are small configs / READMEs; anything larger is treated as a
+# fault rather than read into memory (defends against a symlinked large file or
+# device node resolved at a guarded path).
+_STATE_SYNC_MAX_BYTES = 1_048_576  # 1 MiB
+
 
 def check_state_template_sync() -> Optional[CheckResult]:
     """Fail if guarded framework-config files drift between the live .work/ tree
     and the skill/hedl/work-state/ template they are projected from.
 
-    Returns None (skip) unless this is the framework source repo — i.e. both
-    skill/hedl/work-state/ and .work/ exist at the repo root. Adopter installs
-    (skill under .claude/skills/) and gate-only installs (no .work/) skip it.
+    Returns None (skip) unless this is the framework source repo (skill/hedl/ at
+    the repo root). Adopter installs (skill under .claude/skills/) skip it.
     """
+    if not os.path.isdir(os.path.join(REPO_ROOT, "skill", "hedl")):
+        return None  # adopter repo layout — check not applicable
+
     live_root = os.path.join(REPO_ROOT, ".work")
     template_root = os.path.join(REPO_ROOT, "skill", "hedl", "work-state")
-    if not os.path.isdir(live_root) or not os.path.isdir(template_root):
-        return None  # not the framework source repo — check not applicable
+
+    # In the framework repo both trees must exist; a missing one is a broken
+    # checkout, not a reason to silently stop guarding.
+    missing_trees = [
+        rel for rel, path in (
+            (".work/", live_root),
+            ("skill/hedl/work-state/", template_root),
+        )
+        if not os.path.isdir(path)
+    ]
+    if missing_trees:
+        return CheckResult(
+            "state-sync", False,
+            "state tree missing in framework repo",
+            "  expected present: " + ", ".join(missing_trees),
+        )
 
     drifted: list[str] = []
-    missing: list[str] = []
+    problems: list[str] = []  # missing / non-file / oversized / unreadable
+
+    def _read(path: str, label: str, rel: str) -> Optional[bytes]:
+        # Distinguish absent, non-regular-file (dir or broken/special symlink),
+        # oversized, and unreadable — each FAILs with a clear message rather than
+        # crashing the gate with a raw traceback (gate no-traceback discipline).
+        if not os.path.isfile(path):
+            kind = "not a regular file" if os.path.lexists(path) else "missing"
+            problems.append(f"  {kind} ({label}): {rel}")
+            return None
+        try:
+            if os.path.getsize(path) > _STATE_SYNC_MAX_BYTES:
+                problems.append(f"  too large to compare ({label}): {rel}")
+                return None
+            with open(path, "rb") as fh:
+                return fh.read()
+        except OSError as exc:
+            problems.append(f"  unreadable ({label}): {rel} ({exc})")
+            return None
+
     for rel in _STATE_SYNC_GUARDED:
-        live = os.path.join(live_root, rel)
-        template = os.path.join(template_root, rel)
-        if not os.path.exists(live) or not os.path.exists(template):
-            missing.append(rel)
-            continue
-        with open(live, "rb") as fh:
-            live_bytes = fh.read()
-        with open(template, "rb") as fh:
-            template_bytes = fh.read()
-        if live_bytes != template_bytes:
+        live_bytes = _read(os.path.join(live_root, rel), "live .work", rel)
+        template_bytes = _read(os.path.join(template_root, rel), "template", rel)
+        if (
+            live_bytes is not None
+            and template_bytes is not None
+            and live_bytes != template_bytes
+        ):
             drifted.append(rel)
 
-    if drifted or missing:
-        issues = [f"  missing from one tree: {rel}" for rel in missing]
+    if drifted or problems:
+        issues = list(problems)
         issues += [
             f"  drifted: .work/{rel} != skill/hedl/work-state/{rel}" for rel in drifted
         ]
@@ -673,7 +717,7 @@ def check_state_template_sync() -> Optional[CheckResult]:
         return CheckResult(
             "state-sync",
             False,
-            f"{len(drifted)} drifted, {len(missing)} missing in guarded state template",
+            f"{len(drifted)} drifted, {len(problems)} unresolved in guarded state template",
             "\n".join(issues),
         )
 

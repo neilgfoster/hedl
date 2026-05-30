@@ -640,6 +640,66 @@ class TestCheckStateTemplateSync(unittest.TestCase):
         assert res is not None
         self.assertTrue(res.passed)
 
+    def test_live_side_missing_fails(self) -> None:
+        """A guarded file removed from the live .work/ tree (not the template)
+        must FAIL — exercises the live-side branch of the missing check."""
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir)
+            _os.remove(_os.path.join(tmpdir, ".work", "reviews", "README.md"))
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("reviews/README.md", res.detail)
+
+    def test_directory_at_guarded_path_fails_without_crash(self) -> None:
+        """A directory where a guarded file is expected must FAIL cleanly
+        (not a regular file), never crash the gate with IsADirectoryError."""
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir)
+            p = _os.path.join(tmpdir, ".work", "config", "dispatch-rules.json")
+            _os.remove(p)
+            _os.makedirs(p)
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("not a regular file", res.detail)
+        self.assertIn("config/dispatch-rules.json", res.detail)
+
+    def test_unreadable_file_fails_without_crash(self) -> None:
+        """An OSError on read (e.g. permission denied) must FAIL cleanly, not
+        propagate a traceback out of the gate."""
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._build(tmpdir)
+            with mock.patch("builtins.open", side_effect=PermissionError("denied")):
+                res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("unreadable", res.detail)
+
+    def test_framework_repo_missing_template_tree_fails(self) -> None:
+        """In the framework repo (skill/hedl/ present) a missing work-state/
+        tree must FAIL — not silently skip and stop guarding."""
+        import os as _os
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Framework marker + live tree, but NO skill/hedl/work-state/.
+            _os.makedirs(_os.path.join(tmpdir, "skill", "hedl"))
+            _os.makedirs(_os.path.join(tmpdir, ".work"))
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res)
+        assert res is not None
+        self.assertFalse(res.passed)
+        self.assertIn("state tree missing", res.message)
+
 
 class TestCheckTemplate(unittest.TestCase):
     def test_valid_template_passes(self) -> None:
