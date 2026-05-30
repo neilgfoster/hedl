@@ -1,11 +1,31 @@
 {
   "meta": {
     "current_phase": 2,
-    "active_item": null,
+    "active_item": "WORK-0067",
     "last_updated": "2026-05-30",
     "reconciliation_note": "Backlog re-shaped 2026-05-30 (Phase-2 entry) from two inputs: internal Full repo-health (.work/reviews/repo-health-2026-05-30-full/) and external 9-agent adversarial review (.work/reviews/external-2026-05-30/). Both converge: defensible surface is the gate + --streams + reversible installer; most surrounding framework is redundant with native Claude Code or out-competed; adoption value unproven. Minted WORK-0060..0065 (integrity/adoption-path fixes + substrate re-eval WORK-0065); reprioritized P0 integrity/adoption above forward-capability work; flagged 5 cull-or-prove candidates (WORK-0010/0011/0015/0004/0058 + budget_manager + self-improvement loop) for /phase-complete. Supersedes the 2026-05-28 reconciliation."
   },
-  "active": [],
+  "active": [
+    {
+      "id": "WORK-0067",
+      "title": "docs: attribute am_i_done's direct origin to theshadow27/mcp-cli (prior art)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "active",
+      "description": "Follow-up to WORK-0066. Verified 2026-05-30: the DIRECT origin of am_i_done is theshadow27/mcp-cli (github.com/theshadow27/mcp-cli, created 2026-03-02, ~3 months before Hedl; MIT). It ships scripts/am-i-done.ts (16KB) + package script 'am-i-done'; its CLAUDE.md calls 'bun run am-i-done' 'the single command for checking whether work is done — run it before committing' and 'the same command the pre-commit hook and CI both run, so a local pass means a green PR'; ci.yml/pre-commit/pre-push all invoke it. So Hedl took BOTH the name AND the deterministic, CI-symmetric design from mcp-cli — i.e. exactly the property WORK-0066's docs claimed as 'Hedl's contribution' over bun. That claim was itself unattributed prior art. bun remains the upstream concept (prose 'run the checks before finishing'). Re-scope Hedl's honest residual to PACKAGING only: stdlib-Python, LLM-agnostic, drop-in; distributable tiered Skill for other repos; work-item/PR-aware check bundle tied to a tracker. Operator directive: attribute the PROJECT only (URL), do not name the individual. Principle: unacknowledged prior art is theft (ADR-010).",
+      "acceptance_criteria": [
+        "README '## The gate' credits theshadow27/mcp-cli (project URL only) as the DIRECT origin of am_i_done (the name + the deterministic, CI-symmetric design), with bun as the upstream concept; it no longer claims the deterministic/CI-symmetric form as Hedl's, and re-scopes Hedl's contribution to packaging (stdlib/LLM-agnostic drop-in, distributable tiered Skill, tracker-aware bundle).",
+        "docs/alternatives.md gate entry adds theshadow27/mcp-cli as the direct-origin closest-alternative, leads Prior art with mcp-cli (then bun), qualifies the Status, and reframes the residual to packaging — removing the now-false 'binds desk+CI into one boundary ... is the differentiator' claim (mcp-cli already does that).",
+        "ADR-011 Decision + Prior art name mcp-cli (direct) + bun (upstream); a second dated amendment records the correction; the project is attributed, never the individual.",
+        "No individual/person is named anywhere (project URL only). Quotes are verbatim-accurate to mcp-cli source (verified). No new process ADR minted.",
+        "am_i_done.py passes (doc-facts / docs-index / schemas green)."
+      ],
+      "source": "Operator directive 2026-05-30 (attribute project only); evidence: github.com/theshadow27/mcp-cli (CLAUDE.md, package.json am-i-done, ci.yml, .git-hooks). Ties to ADR-010/ADR-011/ADR-017; follows WORK-0066."
+    }
+  ],
   "backlog": [
     {
       "id": "WORK-0060",
