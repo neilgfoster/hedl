@@ -33,7 +33,7 @@
       "priority_band": "GOVERNANCE",
       "description": "Repo-health 2026-05-28 — `standards.md` and `iterate.md` define workstream as one of four fixed categories (WS-PLAN/WS-REQ/WS-TECH/WS-ARCH); ADR-019 redefines workstream as a recursive container subsuming phase and work-item. Both meanings are live in shipped files; the contradiction will confuse any reader. Pick one canonical meaning and rename the other. Recommended: keep ADR-019's recursive workstream as the canonical primitive, and rename the four-category taxonomy to something narrower (e.g., 'work-class' or 'workstream-class') across standards.md, iterate.md, work.json, and any code paths that read the WS-* prefix. Pair with WORK-0015 (terminology audit) if helpful, but resolve the double-definition first so the audit has a target.",
       "acceptance_criteria": [
-        "One canonical meaning of 'workstream' across all shipped docs and code.",
+        "A single canonical meaning of 'workstream' is established and anchored in standards.md (the four-category work classification) with ADR-019 superseded to match; repo-wide prose alignment of surviving recursive-sense usages (ADR-020/021/031, alternatives.md, bootstrap-adopter.md) is tracked by WORK-0015. (Original wording 'across all shipped docs and code' tightened — see reframe.)",
         "The competing meaning is resolved consistently. Chosen direction: the live four-category work classification (WS-PLAN/REQ/TECH/ARCH) is canonical and retained unchanged in standards.md, iterate.md routing, and the work.json `workstream` field (no data migration; no am_i_done.py/install.py logic reads WS-*). The recursive-container meaning is deferred (WORK-0010), not renamed.",
         "ADR-019 reads as the source of truth for the recursive primitive (or, if the four-category meaning wins, ADR-019 is superseded with rationale).",
         "am_i_done.py passes."
@@ -129,19 +129,20 @@
     },
     {
       "id": "WORK-0015",
-      "title": "docs: terminology audit — workstream replaces phase/work-item where ADR-019 specifies",
+      "title": "docs: terminology audit — align surviving recursive-'workstream' usages to the canonical four-category meaning (post-WORK-0027)",
       "phase": 1,
       "workstream": "WS-ARCH",
       "change_class": "docs",
       "status": "backlog",
       "priority_band": "POSITIONING",
-      "description": "Per ADR-019, the flat phase + work-item model collapses to a single recursive workstream primitive. Audit all references and bring them into alignment: CLAUDE.md, SKILL.md, skill/hedl/references/*.md, prior ADRs that mention 'phase' or 'work item' in the now-deprecated sense, docs/*. Add a glossary entry mapping old→new where helpful. Where 'phase' is genuinely useful as 'a top-level workstream of release scope', the term remains; where 'work item' is genuinely useful as 'a leaf workstream', the term remains; otherwise standardise on 'workstream'. Depends on WORK-0027 (resolve the double-definition first so this audit has a single target).",
+      "description": "Per WORK-0027, 'workstream' canonically means the four-category work classification (WS-PLAN/REQ/TECH/ARCH; standards.md), and ADR-019's recursive-container primitive is superseded/deferred (WORK-0010). This audit sweeps the surviving shipped usages that still use 'workstream' in the recursive/container sense and brings them into line: ADR-020, ADR-021, ADR-031, docs/alternatives.md, docs/templates/bootstrap-adopter.md (and any WORK-0010/0011 prose). Each either aligns to the canonical meaning or is explicitly annotated as referencing the deferred recursive model (gated on WORK-0010), so no shipped doc presents the recursive primitive as the current meaning of 'workstream'. Also review 'phase' / 'work item' usage for consistency. Add a glossary entry if helpful. Depends on WORK-0027 (done) — and on the /phase-complete decision on whether the recursive cluster (WORK-0010, ADR-031) is kept-deferred or culled, which determines whether surviving references get annotated or removed.",
       "acceptance_criteria": [
-        "All references to 'work item' in the deprecated singular sense are reviewed and either updated to 'workstream' or annotated with 'leaf workstream'.",
-        "All references to 'phase' in the deprecated sense are reviewed and either updated to 'top-level workstream' or left if the phase terminology is still preferable.",
-        "A glossary entry (likely in standards.md or a new terminology.md) maps the relationship for future readers.",
+        "Surviving 'workstream' usages in the recursive/container sense (ADR-020, ADR-021, ADR-031, docs/alternatives.md, docs/templates/bootstrap-adopter.md) are each reviewed and either aligned to the canonical four-category meaning or explicitly annotated as referencing the deferred recursive model (WORK-0010).",
+        "No shipped doc presents the recursive primitive as the current meaning of 'workstream'; references to 'phase' / 'work item' are reviewed for consistency with the canonical model.",
+        "A glossary entry (standards.md or a new terminology.md) records the canonical meaning and the name reserved for the deferred recursive model.",
         "am_i_done.py passes."
-      ]
+      ],
+      "reframe": "Retargeted 2026-05-30 by WORK-0027. Originally 'workstream replaces phase/work-item where ADR-019 specifies' — i.e. it assumed ADR-019's recursive model was canonical and would replace 'work item'/'phase'. WORK-0027 reversed that (four-category meaning canonical; ADR-019 superseded), so the audit's job is now the opposite: sweep the surviving recursive-sense usages and align/annotate them, rather than migrate everything to the recursive primitive."
     },
     {
       "id": "WORK-0010",
