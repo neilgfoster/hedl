@@ -510,12 +510,19 @@ def _load_work_items_local() -> tuple[set[str], Optional[str]]:
         return set(), f"work.json malformed: {exc}"
 
 
+# Upper bound on open issues the github-issues backend reads in one pass. A repo
+# at this many open WORK-issues is well beyond Hedl's design point; hitting the
+# cap is surfaced as a loud error rather than silently dropping live IDs from the
+# stale-WORK-ID check (which would weaken the gate).
+_GITHUB_ISSUE_READ_LIMIT = 1000
+
+
 def _load_work_items_github() -> tuple[set[str], Optional[str]]:
     if not shutil.which("gh"):
         return set(), "gh CLI not available — cannot read GitHub Issues backend"
     code, out, err = run([
         "gh", "issue", "list", "--state", "open",
-        "--json", "number,title", "--limit", "200",
+        "--json", "number,title", "--limit", str(_GITHUB_ISSUE_READ_LIMIT),
     ])
     if code != 0:
         return set(), f"gh issue list failed: {(err or '').strip()[:200]}"
@@ -523,6 +530,13 @@ def _load_work_items_github() -> tuple[set[str], Optional[str]]:
         issues = json.loads(out) if out.strip() else []
     except json.JSONDecodeError as exc:
         return set(), f"could not parse gh issue list output: {exc}"
+    if len(issues) >= _GITHUB_ISSUE_READ_LIMIT:
+        # Truncated read: silently using a partial set would let a stale WORK-ID
+        # slip past the gate. Fail loudly instead.
+        return set(), (
+            f"github-issues backend returned the read cap ({_GITHUB_ISSUE_READ_LIMIT}) "
+            "open issues — result may be truncated; paginate before trusting the gate"
+        )
     live_ids: set[str] = set()
     for issue in issues:
         m = _WORK_ITEM_ID_RE.match(issue.get("title", ""))

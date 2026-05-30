@@ -49,6 +49,7 @@ See [Getting started](docs/getting-started.md). Already using Hedl? Add yourself
 ### Standards and workflow
 
 - [Standards](docs/standards.md) -- branch, commit, and PR conventions
+- [State backends](skill/hedl/references/backends.md) -- local-file vs github-issues, read/write paths
 - [Spec pipeline](docs/spec-pipeline.md) -- epic/PRD/task workflow
 - [Team tier](docs/team-tier.md) -- Claude Code integration, worktree gate workflow, GitHub Issues backend
 - [Self-improvement](docs/self-improvement.md) -- /reflect and /contribute flows

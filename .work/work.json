@@ -734,6 +734,36 @@
         "WORK-0027",
         "WORK-0015"
       ]
+    },
+    {
+      "id": "WORK-0059",
+      "title": "feat: github-issues backend multi-operator read layer (assignees + concurrent-claim detection)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "DEFERRED",
+      "dependencies": [
+        "WORK-0007",
+        "WORK-0032"
+      ],
+      "description": "Deferred from the WORK-0007 audit (2026-05-30). The github-issues backend is read-only and reads only issue number+title for the stale-WORK-ID check; it does not read assignees and has no concurrent-claim model. WORK-0007 chose to audit+document these gaps rather than build them, because Hedl has not migrated its own queue to github-issues (WORK-0033) and there is no current multi-operator user — building the claim/assignee layer now would be speculative. Activate this when github-issues is the live backend (post-WORK-0033) AND a real multi-operator need exists. Build: extend the gh read to include assignees; surface two operators claiming the same issue as a detected conflict; integrate with the claim/release lifecycle (see WORK-0006 for the lightweight-tier counterpart). See skill/hedl/references/backends.md 'Write paths'.",
+      "acceptance_criteria": [
+        "gh read path includes assignees; Hedl's view of an item carries its assignee(s).",
+        "Two operators assigned/claiming the same WORK-issue is detected and surfaced (gate or status output).",
+        "Integrates with the claim/release lifecycle (WORK-0006) where applicable; solo usage unchanged.",
+        "backends.md read/write tables updated from 'not built' to 'wired'.",
+        "Tests cover assignee read and concurrent-claim detection.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0007",
+        "WORK-0032",
+        "WORK-0033",
+        "WORK-0006",
+        "ADR-018",
+        "ADR-022"
+      ]
     }
   ],
   "completed": [
