@@ -430,25 +430,6 @@
       ]
     },
     {
-      "id": "WORK-0048",
-      "title": "fix: install.py _load_tiers handles corrupt/missing tiers.json with a clean error",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "normal",
-      "dependencies": [],
-      "description": "Surfaced by the WORK-0022 adversarial review (security + edge-case, 2026-05-29) as out-of-scope-for-0022 but the same 'no traceback' class: install.py _load_tiers() does `with TIERS_FILE.open() as f: return json.load(f)` with no error handling. A corrupt or missing tiers.json raises an unhandled json.JSONDecodeError/FileNotFoundError traceback, bypassing the clean-exit (TiersConfigError) pattern WORK-0022 established for the includes path. Mirror that pattern: wrap _load_tiers in try/except and raise TiersConfigError (or print a JSON/actionable error + non-zero exit) so a malformed bundled manifest never produces a raw traceback.",
-      "acceptance_criteria": [
-        "_load_tiers (or its callers) handle a missing or unparseable tiers.json with an actionable message + non-zero exit, no traceback — consistent with WORK-0022's TiersConfigError handling in main().",
-        "Test added covering corrupt and missing tiers.json.",
-        "am_i_done.py passes."
-      ],
-      "relates_to": [
-        "WORK-0022"
-      ]
-    },
-    {
       "id": "WORK-0049",
       "title": "fix: release.py guards empty phase item-set and unknown change_class",
       "phase": 2,
@@ -1252,6 +1233,28 @@
       "started_date": "2026-05-30",
       "completed_date": "2026-05-30",
       "resolution": "budget_manager.py mutating commands no longer create .work/ in a gate-only install. main() (the sole CLI entry) no-ops the mutating set {record,reset,defer,drain,record-panel} (now the module constant _MUTATING_COMMANDS) when .work/ is absent, printing to stderr; read commands work off defaults. Team/lightweight unchanged. 4-agent panel (security, determinism[clean], scope, edge-case): in-scope findings fixed (full mutating-set test coverage + constant pinned by test; stderr message); TOCTOU/helper-hardening rebutted as disproportionate for a single-operator local CLI; branch-naming + _load_queue-mkdir claims rebutted; AC2 reconciled. Pre-existing budget_manager input-validation gaps (record-panel/record/drain/suggest-rotation, REPO_ROOT env) noted as candidate hardening IF budget_manager survives the alternatives.md culling review. 402 tests."
+    },
+    {
+      "id": "WORK-0048",
+      "title": "fix: install.py _load_tiers handles corrupt/missing tiers.json with a clean error",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "normal",
+      "dependencies": [],
+      "description": "Surfaced by the WORK-0022 adversarial review (security + edge-case, 2026-05-29) as out-of-scope-for-0022 but the same 'no traceback' class: install.py _load_tiers() does `with TIERS_FILE.open() as f: return json.load(f)` with no error handling. A corrupt or missing tiers.json raises an unhandled json.JSONDecodeError/FileNotFoundError traceback, bypassing the clean-exit (TiersConfigError) pattern WORK-0022 established for the includes path. Mirror that pattern: wrap _load_tiers in try/except and raise TiersConfigError (or print a JSON/actionable error + non-zero exit) so a malformed bundled manifest never produces a raw traceback.",
+      "acceptance_criteria": [
+        "_load_tiers (or its callers) handle a missing or unparseable tiers.json with an actionable message + non-zero exit, no traceback — consistent with WORK-0022's TiersConfigError handling in main().",
+        "Test added covering corrupt and missing tiers.json.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0022"
+      ],
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "resolution": "install.py _load_tiers now raises TiersConfigError (caught by main() -> clean exit 1, no traceback) for a missing, unreadable, invalid-JSON, non-UTF-8, or wrong-shape tiers.json, mirroring WORK-0022. 4-agent panel (security, determinism, scope, edge-case): edge-case-hunter caught two BLOCKING traceback paths the first cut missed (UnicodeDecodeError on a binary file = a ValueError, not OSError/JSONDecodeError; and valid-JSON-wrong-shape crashing a caller); both fixed with a ValueError catch + a shape guard, plus split OSError/JSON clauses and strerror to avoid a misleading message / path duplication. Tests cover missing, corrupt, binary, wrong-shape, and valid-still-loads. 407 tests."
     }
   ]
 }

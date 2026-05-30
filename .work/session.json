@@ -1,6 +1,7 @@
 {
   "date": "2026-05-30",
   "completed": [
+    "WORK-0048: install.py _load_tiers raises TiersConfigError (clean exit, no traceback) for missing/unreadable/invalid-JSON/non-UTF-8/wrong-shape tiers.json (WORK-0022 pattern). Panel caught 2 BLOCKING traceback paths (binary UnicodeDecodeError; valid-JSON-wrong-shape) — both fixed. 407 tests.",
     "WORK-0002: budget_manager no longer creates .work/ in gate-only tier — main() no-ops the mutating command set (module constant _MUTATING_COMMANDS) when .work/ absent; message to stderr; reads unaffected; team unchanged. 4-agent panel PASS (determinism clean; TOCTOU/helper-hardening rebutted). 402 tests.",
     "WORK-0003: corrected docs/versioning.md to match code — removed the phantom hedl.toml [hedl] schema_version read claim; fixed schema 1->2 and the 1->2 migration row. change_class fix->docs. Panel PASS (scope-auditor change_class BLOCKING + edge-case 'Relocates' wording, both fixed).",
     "WORK-0007: audited + documented the github-issues backend (backends.md). Backend is read-only/shallow (title-based stale-ID read only). Fixed the silent --limit 200 cap (now loud-fail on incomplete read) and a null-title crash. Deferred per AC5: multi-op assignee/claim -> WORK-0059 (new); label-scoped/paginated read hardening -> WORK-0032 (ACs added). 5-agent panel, no BLOCKING. 400 tests.",
@@ -32,7 +33,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0001",
+  "next_item": "WORK-0041",
   "blockers": [],
-  "notes": "WORK-0002 delivered via /iterate; PR raised, awaiting operator merge. active_item null. 11 Phase-1 items remain. BLIND-SPOT trio: 0003 + 0002 done; WORK-0001 STILL HELD pending a fix-approach pick (symlink projection breaks under --copy; options a/b/c). /phase-complete agenda: (1) cull-vs-keep recursive cluster (WORK-0010/ADR-031); (2) github-issues backend trust/scale limits until WORK-0032; (3) WORK-0032/0033 migration go/no-go; (4) budget_manager culling (alternatives.md) — if kept, its pre-existing input-validation gaps want hardening."
+  "notes": "WORK-0048 delivered via /iterate; PR raised, awaiting operator merge. active_item null. 10 Phase-1 items remain. Clean fixes done: BLIND-SPOT 0002/0003 + 0048. WORK-0001 STILL HELD (fix-approach a/b/c). Remaining clean item: WORK-0041 (gate exempts Dependabot PRs). The rest are /phase-complete-gated: WORK-0014/0015 (docs/positioning; 0015 depends on cluster decision), WORK-0010/0011 (MODEL cull-vs-keep), WORK-0032/0033 (github-issues go/no-go), WORK-0035 (external review kit), WORK-0018 (tracker, closes last). /phase-complete agenda unchanged (recursive cluster cull; github-issues limits + migration go/no-go; budget_manager culling)."
 }
