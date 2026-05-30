@@ -402,7 +402,8 @@ entry must be re-evaluated if a competitor lands the same primitive.
 ## Disqualifier story
 
 Three capabilities are genuinely Hedl-specific today and earn their place
-on cited evidence: the bundled completion gate, the tiered install with a
+on cited evidence: the work-item-aware completion-gate bundle (its deterministic
+core is prior art — see the gate entry above), the tiered install with a
 reversible projection model, and the gate-enforced multi-stream overlap
 check. The phase-tracking capability is uniquely-hedl in its current form
 but is the most likely to lose that status if ADR-022's PM-pluggability

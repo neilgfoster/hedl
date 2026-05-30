@@ -1,5 +1,12 @@
 # External Adversarial Review — Hedl
 
+> **Editorial erratum — 2026-05-30 (WORK-0067).** This report's conclusion that the gate is
+> "genuinely not replicated elsewhere" / "No competitor or native feature ships this" was
+> **refuted** after publication: [theshadow27/mcp-cli](https://github.com/theshadow27/mcp-cli)
+> shipped a deterministic, CI-symmetric `am-i-done` gate (same name) before Hedl existed. The
+> reviewer's text below is preserved unaltered as an independent record; the corrected
+> attribution lives in ADR-011 "Prior art" and docs/alternatives.md.
+
 **Date:** 2026-05-30
 **Target:** https://github.com/neilgfoster/hedl @ `caa800e` (v0.1.0, tag `v0.1.0`)
 **Method:** Read-only clone to `/tmp/hedl-review-clone` (no scripts executed). Swarm of 9 independent agents — 6 code-assessment + 3 web-enabled competitive/redundancy analysts — each scoring 0-10. Latest (2026) Claude Code, CCPM, spec-kit, OpenSpec, BMAD, Task Master, pre-commit/Danger/adr-tools docs consulted live.

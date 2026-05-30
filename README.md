@@ -61,8 +61,9 @@ Three opt-in tiers:
 ## Alternatives
 
 For most Hedl capabilities a focused tool already does that one thing. What is genuinely
-Hedl-specific today — the bundled gate, the tiered and reversible install, and the
-`--streams` overlap check — and the alternative for every other piece are catalogued in
+Hedl-specific today — the work-item-aware gate bundle (the deterministic gate itself is
+prior art, see below), the tiered and reversible install, and the `--streams` overlap
+check — and the alternative for every other piece are catalogued in
 [docs/alternatives.md](docs/alternatives.md).
 
 ## What Hedl doesn't do
