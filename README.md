@@ -1,10 +1,66 @@
 # Hedl
 
-A disciplined engineering workflow distributed as an Agent Skill. Three opt-in tiers:
+Hedl is an **iteration layer** for AI-assisted coding — the per-task work → validate →
+done loop — built around a **deterministic completion gate**: a script that decides, by
+identical checks locally and in CI, whether a task is actually done. Opt-in adversarial
+review and phase discipline layer around that gate. It sits on top of whatever issue
+tracker you already use, not in place of it. Distributed as an Agent Skill.
+
+## Don't use Hedl if
+
+- it's a small or throwaway project where the ceremony costs more than it saves.
+- you're a solo developer who doesn't need a traceable engineering journey.
+- you're happy with native Claude Code flows and don't need a deterministic gate.
+- you want zero Python dependency.
+- you only need one of Hedl's pieces in isolation — for each, the
+  [alternatives](docs/alternatives.md) (Danger, adr-tools, CCPM, native agent workflows)
+  may serve you better.
+- you want a full project-management system — Hedl is a thin iteration layer, not a
+  replacement for Jira, Linear, or GitHub Projects.
+
+## Use Hedl if
+
+- you want a deterministic "am I done?" check on AI-generated work, identical locally
+  and in CI, with no inference in the verdict.
+- you want adversarial review and phase discipline as **opt-in** layers, not a framework
+  you must adopt whole.
+- you want it to plug into your existing PM tool (local files, or GitHub Issues today)
+  rather than replace it.
+- _(planned)_ you want the gate's discipline on a repo you don't own — an **invisible
+  mode** (ADR-023) is designed for exactly that, though the `install.py` flag is not yet
+  built (WORK-0013); see "What Hedl doesn't do" below.
+
+## The gate
+
+Hedl's uncontested differentiator is a **deterministic completion gate**: `am_i_done.py`
+runs the same pass/fail checks locally and in CI — clean tree, branch naming, PR template,
+stale work-item IDs, lint, types, tests, unresolved review threads, Dependabot alerts. No
+inference; a task is done when the gate says so. Everything else is opt-in scaffolding
+around that gate.
+
+Three opt-in tiers:
 
 - **Gate-only** — drop `am_i_done.py` into any repo. Two-minute setup.
 - **Lightweight** — gate + phase discipline + adversarial review + 5 slash commands.
-- **Team** — lightweight + Claude Code integration, the parallel-worktree gate check, and a GitHub Issues read backend.
+- **Team** — lightweight + Claude Code integration, the parallel-worktree gate check, and
+  a GitHub Issues backend (read-only today; write-back planned, WORK-0012).
+
+## Alternatives
+
+For most Hedl capabilities a focused tool already does that one thing. What is genuinely
+Hedl-specific today — the bundled gate, the tiered and reversible install, and the
+`--streams` overlap check — and the alternative for every other piece are catalogued in
+[docs/alternatives.md](docs/alternatives.md).
+
+## What Hedl doesn't do
+
+Hedl is an **iteration layer**, not a project-management system — it plugs into your PM
+tool (local `.work/` files, or a GitHub Issues backend, read-only today with write-back
+planned in WORK-0012) rather than replacing it. An **invisible mode** — installing into a
+repo you don't own, keeping Hedl's artifacts
+out of the committed tree (at the cost of the CI gate not running on your PRs) — is
+recorded in ADR-023 but **planned, not yet built**: the `install.py` flag is Phase-2 work
+(WORK-0013), so treat it as intent, not a current capability.
 
 ## What you get
 
