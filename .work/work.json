@@ -112,7 +112,8 @@
         "Valid-JSON-wrong-shape inputs to am_i_done.py (violation dicts) and budget_manager.py (budget/tier) yield a clean FAIL or default, not KeyError/AttributeError tracebacks; tests cover each.",
         "fcntl import is guarded (no-op lock fallback) or Windows is explicitly declared unsupported with a clear startup error; budget_manager imports cleanly on a no-fcntl platform.",
         "PR_BODY is truncated to a documented bound before entering the subprocess env.",
-        "am_i_done.py passes. Cross-link WORK-0049 for the release.py overlap."
+        "am_i_done.py passes. Cross-link WORK-0049 for the release.py overlap.",
+        "check_markdown_schema._matches_any_glob resolves exclude_globs against the live filesystem (glob), so an exclude is a silent no-op when its target is absent; switch to path-string matching (fnmatch/PurePosixPath.match) so excludes are deterministic regardless of which files exist."
       ],
       "source": "repo-health-2026-05-30-full (security + edge-case + determinism)."
     },
@@ -196,22 +197,22 @@
     },
     {
       "id": "WORK-0065",
-      "title": "arch: native-substrate re-evaluation (ADR-012/ADR-034) — gate-binding vs hand-rolled orchestration",
+      "title": "arch: native-substrate re-evaluation (ADR-012) — gate-binding vs hand-rolled orchestration",
       "phase": 2,
       "workstream": "WS-ARCH",
-      "change_class": "feat",
+      "change_class": "docs",
       "priority_band": "high",
       "dependencies": null,
       "status": "backlog",
-      "description": "External review (2026-05-30) finding #9, the single most important for a plugin/extension: a majority of Hedl's surface is now native in current (2026) Claude Code. Adversarial panel+dispatcher -> native Dynamic Workflows (judge-panel / adversarial-verify) + Agent Teams (TaskCompleted/TeammateIdle blocking hooks, parallel PR review); the 28-row SKILL.md NL routing table -> native skill auto-activation from the description field; five slash commands -> native commands/skills + native /code-review //security-review; hooks -> the native primitive Hedl just wires. Genuinely additive residue: the deterministic no-inference completion gate (sees work-item state native gates do not), the --streams pre-merge overlap check (Agent Teams explicitly does NOT prevent overlap), and the reversible graduated installer + LLM-agnostic gate-only drop-in. Per ADR-012 (managed competitive lifecycle) / ADR-034, run a substrate re-evaluation and decide cull/keep per surface, repositioning Hedl as gate-binding + a curated subagent roster ON TOP OF native orchestration rather than a hand-rolled orchestrator. This decision GATES the panel/routing/commands/hooks cull-or-prove calls.",
+      "description": "External review (2026-05-30) finding #9, the single most important for a plugin/extension: a majority of Hedl's surface is now native in current (2026) Claude Code. Adversarial panel+dispatcher -> native Dynamic Workflows (judge-panel / adversarial-verify) + Agent Teams (TaskCompleted/TeammateIdle blocking hooks, parallel PR review); the 28-row SKILL.md NL routing table -> native skill auto-activation from the description field; five slash commands -> native commands/skills + native /code-review //security-review; hooks -> the native primitive Hedl just wires. Genuinely additive residue: the deterministic no-inference completion gate (sees work-item state native gates do not), the --streams pre-merge overlap check (Agent Teams explicitly does NOT prevent overlap), and the reversible graduated installer + LLM-agnostic gate-only drop-in. Per ADR-012 (managed competitive lifecycle), run a substrate re-evaluation and decide cull/keep per surface, repositioning Hedl as gate-binding + a curated subagent roster ON TOP OF native orchestration rather than a hand-rolled orchestrator. This decision GATES the panel/routing/commands/hooks cull-or-prove calls.",
       "acceptance_criteria": [
         "Each surface (review panel/dispatcher, NL routing table, slash commands, hooks) is evaluated against the named GA native capability with a recorded keep / cull / reposition verdict and evidence (cite current Claude Code docs).",
-        "A short ADR (or ADR-012/ADR-034 update) records the substrate decision and the repositioning (gate + curated roster over native orchestration).",
+        "A short new ADR (next free number) or an ADR-012 update records the substrate decision and the repositioning (gate + curated roster over native orchestration).",
         "Surfaces decided 'cull' produce follow-up work items or are removed; surfaces decided 'keep' carry a one-line non-native-value justification.",
         "Output feeds /phase-complete as the resolution of the panel/routing/commands/hooks deferred bets.",
         "am_i_done.py passes."
       ],
-      "source": "external-2026-05-30 (Redundancy 4/10, finding #9); ties to ADR-012/ADR-034."
+      "source": "external-2026-05-30 (Redundancy 4/10, finding #9); ties to ADR-012. (ADR-034 was a proposed substrate-release-trigger ADR rejected per ADR-013; not cited as authority.)"
     },
     {
       "id": "WORK-0032",
@@ -287,7 +288,8 @@
         "Relationship to ADR-028 recorded: this is its implementation; ADR-028 remains Proposed until reviews #2/#3 clear its evidence gate.",
         "am_i_done.py passes."
       ],
-      "reclassify_reason": "Reclassified to Phase 2. External adversarial review kit is net-new forward-capability NOT in Phase-1's sanctioned exception set (github-issues backend + workstream templates); ADR-028 stays Proposed pending reviews #2/#3."
+      "reclassify_reason": "Reclassified to Phase 2. External adversarial review kit is net-new forward-capability NOT in Phase-1's sanctioned exception set (github-issues backend + workstream templates); ADR-028 stays Proposed pending reviews #2/#3.",
+      "note": "RECONCILE 2026-05-30: also define the external-review markdown schema/contract — the gate currently EXEMPTS .work/reviews/external-*/ from review-report/review-agent validation (added in the reconcile PR) precisely because no external contract exists yet; this item must close that gap (a deliberately-loose schema that still gates the path)."
     },
     {
       "id": "WORK-0006",
