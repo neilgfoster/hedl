@@ -2,7 +2,21 @@
 
 ## Status
 
-Accepted — 2026-05-28 — Phase 0
+Superseded — 2026-05-30 — Phase 1 (was Accepted 2026-05-28, Phase 0)
+
+Superseded by the canonical definition of "workstream" in
+`skill/hedl/references/standards.md` (WORK-0027). In Hedl's shipped docs, state,
+and routing, a **workstream** is one of the four fixed work classifications
+(`WS-PLAN/REQ/TECH/ARCH`) — not the recursive primitive this ADR proposed. Two
+live definitions of one word was the contradiction WORK-0027 resolved, and the
+working four-category meaning won.
+
+The recursive-container model below is **deferred, not rejected**: its
+implementation is gated on demand (WORK-0010), and the 2026-05-29 dogfood insight
+found prose templates outperform it below ~5-7 concurrent workstreams. If
+WORK-0010 is ever built, a new ADR reintroduces the recursive primitive under a
+name that does not collide with the work classification. The original decision is
+preserved below for that context.
 
 ## Decision
 
