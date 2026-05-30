@@ -13,9 +13,10 @@ working four-category meaning won.
 
 The recursive-container model below is **deferred, not rejected**: its
 implementation is gated on demand (WORK-0010), and the 2026-05-29 dogfood insight
-found prose templates outperform it below ~5-7 concurrent workstreams. If
-WORK-0010 is ever built, a new ADR reintroduces the recursive primitive under a
-name that does not collide with the work classification. This is therefore **not
+found prose templates outperform it below ~5-7 concurrently-active work-trees (the
+deferred recursive units). If WORK-0010 is ever built, a new ADR reintroduces the
+recursive primitive under a name that does not collide with the work
+classification. This is therefore **not
 a deferred `WS-*` migration**: the four-category classification keeps its name
 regardless; only the (deferred) recursive primitive would take a new name. The
 original decision is preserved below for that context.

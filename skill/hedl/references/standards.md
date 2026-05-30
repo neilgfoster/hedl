@@ -122,10 +122,12 @@ work and `WS-ARCH` for any decision that affects the codebase structure.
 > **One meaning of "workstream."** A separate recursive-container model — a
 > single primitive subsuming phase and work item — was proposed in ADR-019 but
 > is **deferred and unbuilt**, gated on demand (WORK-0010); the 2026-05-29
-> dogfood found prose templates outperform it below ~5-7 concurrent workstreams.
-> Until WORK-0010 lands, "workstream" means the work classification defined
-> above — not a recursive container. ADR-019 is superseded by this definition
-> (see its Status note). This resolves the prior double-definition (WORK-0027).
+> dogfood found prose templates outperform it below ~5-7 concurrently-active
+> work-trees (the deferred recursive units). "Workstream" means the work
+> classification defined above and keeps that name regardless; if the recursive
+> model is ever built it takes a non-colliding name, not "workstream". ADR-019 is
+> superseded by this definition (see its Status note). This resolves the prior
+> double-definition (WORK-0027).
 
 ---
 
