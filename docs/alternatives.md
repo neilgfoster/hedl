@@ -50,7 +50,7 @@ status downgrades; two watchlist objectives sharpened.
 **Hedl evidence**: `skill/hedl/scripts/am_i_done.py:1`; check list spans
 `am_i_done.py:1-1300`; stack-agnostic dispatch via `hedl.toml` documented at
 `skill/hedl/references/tiers.md:41-63`; same script runs locally and in CI per
-`README.md:11-13`.
+`README.md:3-7`.
 **Closest alternative(s)**:
 - pre-commit (pre-commit.com)
 - GitHub Actions matrix + required status checks
