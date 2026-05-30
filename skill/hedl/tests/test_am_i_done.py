@@ -796,6 +796,32 @@ class TestCheckTemplate(unittest.TestCase):
             res = M.check_template(1)
         self.assertFalse(res.passed)
 
+    def test_dependabot_bot_bracket_login_exempt(self) -> None:
+        # The second login variant in _DEPENDABOT_LOGINS is also exempt.
+        payload = self._pr_json("Bumps foo.", login="dependabot[bot]", is_bot=True)
+        with mock.patch.object(M, "run", return_value=(0, payload, "")), \
+             mock.patch("subprocess.run") as sp_run:
+            res = M.check_template(1)
+            sp_run.assert_not_called()
+        self.assertTrue(res.passed)
+
+    def test_is_bot_non_bool_truthy_not_exempt(self) -> None:
+        # Security: `is True` rejects a non-bool truthy is_bot (e.g. integer 1);
+        # the exemption must not fire, so an empty body still fails.
+        import json as _json
+        payload = _json.dumps({"author": {"login": "app/dependabot", "is_bot": 1}, "body": ""})
+        with mock.patch.object(M, "run", return_value=(0, payload, "")):
+            res = M.check_template(1)
+        self.assertFalse(res.passed)
+
+    def test_null_author_not_exempt(self) -> None:
+        # Fail-closed: a null/absent author must not be exempt.
+        import json as _json
+        payload = _json.dumps({"author": None, "body": ""})
+        with mock.patch.object(M, "run", return_value=(0, payload, "")):
+            res = M.check_template(1)
+        self.assertFalse(res.passed)
+
 
 class TestToolAbsentHardening(unittest.TestCase):
     """check_lint, check_types, check_tests fail loudly when config present but tool absent."""

@@ -1105,6 +1105,10 @@ def check_pr_threads(pr_number: int) -> CheckResult:
 # "app/dependabot"; "dependabot[bot]" on other gh versions). The exemption keys
 # off this verified identity plus is_bot — never the PR body or branch name, both
 # of which a malicious PR could spoof to skip template enforcement (WORK-0041).
+# Safe identity basis: GitHub App slugs are globally unique (the "dependabot" app
+# is owned by GitHub, so no other app can present this slug) and is_bot reflects
+# the GitHub-verified account type, which a human/forked contributor cannot set.
+# `is True` is deliberate: a non-bool truthy is_bot must not grant the exemption.
 _DEPENDABOT_LOGINS = frozenset({"app/dependabot", "dependabot[bot]"})
 
 
