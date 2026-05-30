@@ -32,8 +32,11 @@
     },
     {
       "id": "review-report",
-      "description": "Synthesized review report files (report.md under any review run directory)",
+      "description": "Synthesized review report files (report.md under any review run directory). External reviews (.work/reviews/external-*/) are excluded — independent-format artifacts; WORK-0035 will define their contract.",
       "glob": ".work/reviews/**/report.md",
+      "exclude_globs": [
+        ".work/reviews/external-*/**"
+      ],
       "frontmatter": null,
       "required_headings": [
         "Dimension Scores",
@@ -52,13 +55,14 @@
     },
     {
       "id": "review-agent",
-      "description": "Individual agent output files under .work/reviews/ run directories",
+      "description": "Individual agent output files under .work/reviews/ run directories. External reviews (.work/reviews/external-*/) are excluded — see review-report.",
       "glob": ".work/reviews/**/*.md",
       "exclude_globs": [
         ".work/reviews/**/report.md",
         ".work/reviews/README.md",
         ".work/reviews/adversarial-review-*.md",
-        ".work/reviews/repo-health-*.md"
+        ".work/reviews/repo-health-*.md",
+        ".work/reviews/external-*/**"
       ],
       "frontmatter": null,
       "required_headings": ["Findings"],
