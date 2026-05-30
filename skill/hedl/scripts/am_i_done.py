@@ -1100,9 +1100,21 @@ def check_pr_threads(pr_number: int) -> CheckResult:
     return CheckResult("threads", True, f"no unresolved threads on PR #{pr_number}")
 
 
+# Dependabot's GitHub-verified author identity. `gh pr view --json author` returns
+# is_bot=true and one of these logins for Dependabot-raised PRs (observed:
+# "app/dependabot"; "dependabot[bot]" on other gh versions). The exemption keys
+# off this verified identity plus is_bot — never the PR body or branch name, both
+# of which a malicious PR could spoof to skip template enforcement (WORK-0041).
+# Safe identity basis: GitHub App slugs are globally unique (the "dependabot" app
+# is owned by GitHub, so no other app can present this slug) and is_bot reflects
+# the GitHub-verified account type, which a human/forked contributor cannot set.
+# `is True` is deliberate: a non-bool truthy is_bot must not grant the exemption.
+_DEPENDABOT_LOGINS = frozenset({"app/dependabot", "dependabot[bot]"})
+
+
 def check_template(pr_number: int) -> CheckResult:
-    code, body, err = run(
-        ["gh", "pr", "view", str(pr_number), "--json", "body", "--jq", ".body"]
+    code, out, err = run(
+        ["gh", "pr", "view", str(pr_number), "--json", "author,body"]
     )
     if code != 0:
         return CheckResult(
@@ -1111,7 +1123,25 @@ def check_template(pr_number: int) -> CheckResult:
             f"could not fetch PR #{pr_number}",
             err.strip(),
         )
+    try:
+        data = json.loads(out) if out.strip() else {}
+    except json.JSONDecodeError as exc:
+        return CheckResult(
+            "template", False, f"could not parse PR #{pr_number} metadata", str(exc)
+        )
 
+    # Exempt Dependabot-authored PRs: the bot's body never matches the template,
+    # and forcing a hand-rewrite on every dependency bump is pure friction. Gated
+    # on the verified author (is_bot AND the Dependabot app login), so a
+    # human/forked PR cannot spoof its way past the template check.
+    author = data.get("author") or {}
+    if author.get("is_bot") is True and author.get("login") in _DEPENDABOT_LOGINS:
+        return CheckResult(
+            "template", True,
+            f"PR #{pr_number} authored by Dependabot ({author.get('login')}) — template check exempt",
+        )
+
+    body = data.get("body") or ""
     env = os.environ.copy()
     env["PR_BODY"] = body.strip().replace("\x00", "")
     result = subprocess.run(

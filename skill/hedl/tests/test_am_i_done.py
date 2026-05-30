@@ -743,6 +743,11 @@ class TestCheckStateTemplateSync(unittest.TestCase):
 
 
 class TestCheckTemplate(unittest.TestCase):
+    @staticmethod
+    def _pr_json(body: str, *, login: str = "alice", is_bot: bool = False) -> str:
+        import json as _json
+        return _json.dumps({"author": {"login": login, "is_bot": is_bot}, "body": body})
+
     def test_valid_template_passes(self) -> None:
         good_body = (
             "## Summary\nFixed a bug.\n\n"
@@ -751,10 +756,8 @@ class TestCheckTemplate(unittest.TestCase):
             "## Changes\n- fixed it\n\n"
             "## Validation\nRan tests\n"
         )
-        with mock.patch.object(M, "shutil") as sh, \
-             mock.patch.object(M, "run", return_value=(0, good_body, "")), \
+        with mock.patch.object(M, "run", return_value=(0, self._pr_json(good_body), "")), \
              mock.patch("subprocess.run") as sp_run:
-            sh.which.return_value = "/usr/bin/gh"
             sp_result = mock.MagicMock()
             sp_result.returncode = 0
             sp_result.stdout = ""
@@ -764,6 +767,58 @@ class TestCheckTemplate(unittest.TestCase):
 
     def test_gh_unavailable_fails(self) -> None:
         with mock.patch.object(M, "run", return_value=(1, "", "not found")):
+            res = M.check_template(1)
+        self.assertFalse(res.passed)
+
+    def test_dependabot_pr_is_exempt(self) -> None:
+        # WORK-0041: a Dependabot-authored PR with a non-template body passes
+        # without invoking the template validator. (Fails before the fix.)
+        payload = self._pr_json("Bumps foo from 1.0 to 1.1.", login="app/dependabot", is_bot=True)
+        with mock.patch.object(M, "run", return_value=(0, payload, "")), \
+             mock.patch("subprocess.run") as sp_run:
+            res = M.check_template(1)
+            sp_run.assert_not_called()  # exemption short-circuits before the validator
+        self.assertTrue(res.passed)
+        self.assertIn("Dependabot", res.message)
+
+    def test_human_incomplete_body_still_fails(self) -> None:
+        # Human author + empty body must still FAIL — run the real validator.
+        with mock.patch.object(M, "run", return_value=(0, self._pr_json(""), "")):
+            res = M.check_template(1)
+        self.assertFalse(res.passed)
+
+    def test_dependabot_login_without_is_bot_not_exempt(self) -> None:
+        # Security: the login alone is not enough; is_bot (GitHub-verified) is
+        # required, so a non-bot account using that login is NOT exempt and an
+        # empty body still fails through the real validator.
+        payload = self._pr_json("", login="app/dependabot", is_bot=False)
+        with mock.patch.object(M, "run", return_value=(0, payload, "")):
+            res = M.check_template(1)
+        self.assertFalse(res.passed)
+
+    def test_dependabot_bot_bracket_login_exempt(self) -> None:
+        # The second login variant in _DEPENDABOT_LOGINS is also exempt.
+        payload = self._pr_json("Bumps foo.", login="dependabot[bot]", is_bot=True)
+        with mock.patch.object(M, "run", return_value=(0, payload, "")), \
+             mock.patch("subprocess.run") as sp_run:
+            res = M.check_template(1)
+            sp_run.assert_not_called()
+        self.assertTrue(res.passed)
+
+    def test_is_bot_non_bool_truthy_not_exempt(self) -> None:
+        # Security: `is True` rejects a non-bool truthy is_bot (e.g. integer 1);
+        # the exemption must not fire, so an empty body still fails.
+        import json as _json
+        payload = _json.dumps({"author": {"login": "app/dependabot", "is_bot": 1}, "body": ""})
+        with mock.patch.object(M, "run", return_value=(0, payload, "")):
+            res = M.check_template(1)
+        self.assertFalse(res.passed)
+
+    def test_null_author_not_exempt(self) -> None:
+        # Fail-closed: a null/absent author must not be exempt.
+        import json as _json
+        payload = _json.dumps({"author": None, "body": ""})
+        with mock.patch.object(M, "run", return_value=(0, payload, "")):
             res = M.check_template(1)
         self.assertFalse(res.passed)
 

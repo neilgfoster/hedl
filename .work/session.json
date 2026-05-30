@@ -1,6 +1,7 @@
 {
   "date": "2026-05-30",
   "completed": [
+    "WORK-0041: gate template check exempts Dependabot PRs (verified author is_bot+login, never body/branch); humans fully enforced. Panel PASS (2 BLOCKINGs rebutted: globally-unique app slug; PR-gate re-run handles TOCTOU); defensive fail-closed tests added. 413 tests.",
     "WORK-0048: install.py _load_tiers raises TiersConfigError (clean exit, no traceback) for missing/unreadable/invalid-JSON/non-UTF-8/wrong-shape tiers.json (WORK-0022 pattern). Panel caught 2 BLOCKING traceback paths (binary UnicodeDecodeError; valid-JSON-wrong-shape) — both fixed. 407 tests.",
     "WORK-0002: budget_manager no longer creates .work/ in gate-only tier — main() no-ops the mutating command set (module constant _MUTATING_COMMANDS) when .work/ absent; message to stderr; reads unaffected; team unchanged. 4-agent panel PASS (determinism clean; TOCTOU/helper-hardening rebutted). 402 tests.",
     "WORK-0003: corrected docs/versioning.md to match code — removed the phantom hedl.toml [hedl] schema_version read claim; fixed schema 1->2 and the 1->2 migration row. change_class fix->docs. Panel PASS (scope-auditor change_class BLOCKING + edge-case 'Relocates' wording, both fixed).",
@@ -33,7 +34,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0041",
+  "next_item": null,
   "blockers": [],
-  "notes": "WORK-0048 delivered via /iterate; PR raised, awaiting operator merge. active_item null. 10 Phase-1 items remain. Clean fixes done: BLIND-SPOT 0002/0003 + 0048. WORK-0001 STILL HELD (fix-approach a/b/c). Remaining clean item: WORK-0041 (gate exempts Dependabot PRs). The rest are /phase-complete-gated: WORK-0014/0015 (docs/positioning; 0015 depends on cluster decision), WORK-0010/0011 (MODEL cull-vs-keep), WORK-0032/0033 (github-issues go/no-go), WORK-0035 (external review kit), WORK-0018 (tracker, closes last). /phase-complete agenda unchanged (recursive cluster cull; github-issues limits + migration go/no-go; budget_manager culling)."
+  "notes": "WORK-0041 delivered via /iterate; PR raised, awaiting operator merge. active_item null. 9 Phase-1 items remain, and they are now ALL either held or /phase-complete-gated: WORK-0001 (held on a/b/c fix-approach), WORK-0014/0015 (docs/positioning; 0015 depends on cluster decision), WORK-0010/0011 (MODEL cull-vs-keep), WORK-0032/0033 (github-issues go/no-go), WORK-0035 (external review kit), WORK-0018 (tracker, closes last). RECOMMENDATION: the clean do-now items are exhausted; the next move is /phase-complete, which is where the cull / go-no-go / reclassification decisions for the remaining items get made (and several DoD criteria are already satisfiable). /phase-complete agenda: recursive-cluster cull (WORK-0010/0011/ADR-031); github-issues backend limits + WORK-0032/0033 go/no-go; budget_manager culling (alternatives.md); WORK-0001 approach; then reclassify/close the rest."
 }

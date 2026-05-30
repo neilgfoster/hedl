@@ -84,6 +84,13 @@ All PRs must use `.github/PULL_REQUEST_TEMPLATE.md`. The CI workflow
 
 The Checklist section is not CI-enforced but should still be considered.
 
+**Dependabot exemption:** PRs authored by Dependabot are exempt from the template
+check (their bodies never match the template, and rewriting each dependency bump
+by hand is pure friction). The exemption is keyed off the GitHub-verified author
+(`is_bot` plus the Dependabot app login from `gh pr view --json author`), never
+the PR body or branch name — both of which a PR could spoof. Human-authored PRs
+remain fully enforced (WORK-0041).
+
 **Documentation impact:** if a change alters a count, name, or behaviour that
 docs assert (e.g. agent/command counts, tier descriptions), update the affected
 docs in the same PR. This is a convention, not a gate — a gate-enforced form was
