@@ -774,6 +774,26 @@
   ],
   "completed": [
     {
+      "id": "WORK-0066",
+      "title": "docs: attribute the completion-gate concept to oven-sh/bun (prior art)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "complete",
+      "description": "Operator (2026-05-30): the am_i_done completion-gate IDEA came via a colleague from oven-sh/bun, whose CLAUDE.md (symlinked as AGENTS.md) instructs the agent under 'Important Development Notes': 'ONLY push up changes after running `bun bd test <file>` and ensuring your tests pass', alongside a `claude/`-prefixed branch CI requirement. That is the conceptual ancestor of am_i_done. Hedl currently overclaims: README.md:35 'Hedl's uncontested differentiator', docs/alternatives.md gate entry Status uniquely-hedl with no bun mention, ADR-011 'uncontested differentiator'. Principle (operator): Hedl is foremost honest — all prior art is acknowledged; unacknowledged prior art is theft (ADR-010). Attribute bun as the origin of the idea; narrow Hedl's honest contribution to the DETERMINISTIC, CI-symmetric, work-item-aware SCRIPT form (bun's is prose the agent is trusted to run, not an exit-code gate). Keep attribution in docs + ADR Prior-art (ADR-017), not a new process ADR.",
+      "acceptance_criteria": [
+        "README.md differentiator line no longer says 'uncontested'; it credits oven-sh/bun (CLAUDE.md/AGENTS.md, its 'Important Development Notes' completion instruction) as the origin of the completion-gate idea and frames Hedl's contribution as the deterministic/CI-symmetric/work-item-aware script form, with a link.",
+        "docs/alternatives.md 'Deterministic completion gate' entry adds oven-sh/bun to Closest alternative(s) and leads its rationale with the bun prior-art/origin before the narrowed differentiation claim.",
+        "ADR-011 softens 'uncontested' and carries a Prior-art entry citing oven-sh/bun per ADR-017, with a dated amendment note.",
+        "No remaining 'uncontested'/'no competitor ships'/'unique' claim about the GATE stands unattributed across README/docs/SKILL.md (grep-clean); the external review artifact is left unedited (independent record).",
+        "No new process ADR minted for the attribution. am_i_done.py passes (doc-facts / docs-index / schemas green)."
+      ],
+      "source": "Operator directive 2026-05-30; prior art oven-sh/bun CLAUDE.md/AGENTS.md. Ties to ADR-010 (honesty), ADR-011 (positioning), ADR-017 (prior-art).",
+      "resolution": "Attributed the completion-gate concept to oven-sh/bun (CLAUDE.md, symlinked as AGENTS.md) across README, docs/alternatives.md, and ADR-011 (softened 'uncontested'->'primary' + Prior-art per ADR-017 + dated amendment). 3-agent panel (historian, scope-auditor, evidence-checker): historian + scope clean; the EVIDENCE-CHECKER caught 2 SIGNIFICANT self-inflicted misquotes — my first WebFetch had invented a section heading and a tests-required line that do not exist in bun's file (0 grep matches for either; strings deliberately not reproduced here). Corrected to bun's verbatim text: heading 'Important Development Notes'; the 'ONLY push up changes after running bun bd test' instruction; the `claude/`-branch CI requirement. A later Copilot pass on #72 caught three more: status spelling ('completed'->'complete' to match the 30 existing completed items), and the two false strings still embedded in this item's own description/AC/resolution — all fixed here. Meta-lesson: source-verify the attribution AND scrub the false strings from tracked artifacts, even when describing the error. am_i_done.py green."
+    },
+    {
       "id": "WORK-0029",
       "title": "fix: gate-on-main is currently failing (report.md schema + alternatives.md line-length)",
       "phase": 1,
