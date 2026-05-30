@@ -1,0 +1,24 @@
+{
+  "strengths": [
+    {"observation":"Completion gate runs identical checks locally and in CI; self-validates MANDATORY_AGENTS vs agent files","evidence":"skill/hedl/scripts/am_i_done.py:579; .github/workflows/am-i-done.yml:40-44"},
+    {"observation":"413 tests pass across 11 files covering every consumer script","evidence":"skill/hedl/tests/test_am_i_done.py:1"},
+    {"observation":"PR-template parser hardened against documented adversarial findings","evidence":"skill/hedl/scripts/check_pr_template.py:29-118"},
+    {"observation":"Dependabot exemption keyed to GitHub-verified author identity, not spoofable body/branch","evidence":"skill/hedl/scripts/am_i_done.py:1112,1138"},
+    {"observation":"Actions SHA-pinned, minimal permissions, PR number via env, uv --frozen","evidence":".github/workflows/am-i-done.yml:14-39"},
+    {"observation":"Zero runtime deps; stdlib-only invariant AST-gated; dev deps exact-pinned","evidence":"skill/hedl/tests/test_stdlib_only.py:42-58; pyproject.toml:6-12"},
+    {"observation":"install.py validates path containment before any write, with escape tests","evidence":"skill/hedl/scripts/install.py:296-339"},
+    {"observation":"[verify] allowlist self-documents as defense-in-depth with interpreter denylist + metachar rejection; no shell=True","evidence":"skill/hedl/scripts/am_i_done.py:174-224"},
+    {"observation":"README leads disqualifiers-first and flags unbuilt features as planned","evidence":"README.md:10-30"}
+  ],
+  "scores": {"code_quality":8,"design_quality":7,"security":8,"supply_chain":9,"utility_claude_code":7,"accuracy":6,"maintenance":7,"utility_vs_complexity":5},
+  "score_rationale": {
+    "code_quality":"Clean, typed, dataclass-based; 413 tests incl. AST invariants. <9 because mypy/ruff strict not locally confirmed and am_i_done.py is 1703 lines.",
+    "design_quality":"Coherent CheckResult/Report abstraction, deterministic-over-inference applied. Held by monolithic gate module + heavy scaffolding around modest code.",
+    "security":"No shell=True/eval; list-form subprocess; verify-allowlist + path containment; honest scoping comments. Strong for the threat model.",
+    "supply_chain":"Zero runtime deps, AST-gated stdlib invariant, SHA-pinned actions, --frozen, Dependabot + weekly CodeQL. Reference-quality for this size.",
+    "utility_claude_code":"Real done-gate + commands + agents + persisted reviews + phase tracking, installable as a Skill. Value depends on adopting the ceremony; real-world adoption evidence thin.",
+    "accuracy":"Source-derived counts check out; README honest. 'every Phase-1 item has a persisted review' overstated: 16 of 30 completed items have dedicated reviews; rest covered by batch/phase reviews.",
+    "maintenance":"Active disciplined history, drift-detector, clean tree, 3.11-3.14 matrix. Held at 7: sustainability of 10.7k md lines of process by a small team unproven.",
+    "utility_vs_complexity":"Central tension: ~4.7k LOC Python carries 29 ADRs, 10.7k md lines, 8 agents, multi-cycle review at v0.1.0. Candidly acknowledged + opt-in gated, but apparatus-to-capability ratio is high; accretion concern well-founded."
+  }
+}

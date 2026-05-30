@@ -3,10 +3,216 @@
     "current_phase": 2,
     "active_item": null,
     "last_updated": "2026-05-30",
-    "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
+    "reconciliation_note": "Backlog re-shaped 2026-05-30 (Phase-2 entry) from two inputs: internal Full repo-health (.work/reviews/repo-health-2026-05-30-full/) and external 9-agent adversarial review (.work/reviews/external-2026-05-30/). Both converge: defensible surface is the gate + --streams + reversible installer; most surrounding framework is redundant with native Claude Code or out-competed; adoption value unproven. Minted WORK-0060..0065 (integrity/adoption-path fixes + substrate re-eval WORK-0065); reprioritized P0 integrity/adoption above forward-capability work; flagged 5 cull-or-prove candidates (WORK-0010/0011/0015/0004/0058 + budget_manager + self-improvement loop) for /phase-complete. Supersedes the 2026-05-28 reconciliation."
   },
   "active": [],
   "backlog": [
+    {
+      "id": "WORK-0060",
+      "title": "fix: correct branch-protection context names in docs + README advisory caveat",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (2026-05-30) finding, reproduced at HEAD 708ee36: docs/self-improvement.md:105 ships a branch-protection command with contexts ['am-i-done'] and :119 references the 'am-i-done' check, but the CI matrix publishes contexts 'am_i_done (3.11)'..'am_i_done (3.14)' (see completed WORK-0029 / WORK-0030). An adopter copying this wires protection to a context that never reports -> the gate is advisory/bypassable, the exact validation-theatre WORK-0029 found. The README headline ('decides whether a task is actually done', 'no inference') also never discloses the gate is advisory until branch protection is wired correctly.",
+      "acceptance_criteria": [
+        "docs/self-improvement.md branch-protection example uses the four matrix contexts 'am_i_done (3.11)'..'am_i_done (3.14)' with strict:true (match the WORK-0029 AC verbatim).",
+        "Any other doc/skill reference to an 'am-i-done' single-context name is corrected or removed (grep-clean).",
+        "README adds a one-line caveat that the gate is advisory until branch protection is configured with the correct contexts.",
+        "am_i_done.py passes (doc-facts / docs-index green)."
+      ],
+      "source": "external-2026-05-30 (Accuracy 8/10 defect); contradicts completed WORK-0029."
+    },
+    {
+      "id": "WORK-0001",
+      "title": "fix: install.py path resolves in consumer repos",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "BLIND-SPOT",
+      "description": "SKILL.md routes install operations to `python3 skill/hedl/scripts/install.py`. In this (self-hosted) repo `skill/hedl/` is at the root so the path resolves. In a consumer repo, the skill is symlinked to `.claude/skills/hedl/` and `install.py` is NOT projected by any tier in `tiers.json`. An agent in an installed consumer repo following SKILL.md verbatim will hit 'file not found' for every install operation: --status, --doctor, --tier change, --migrate. Fix options (TBD at implementation time): (a) project `install.py` under one of the tiers, (b) re-route SKILL.md to the symlinked skill location, (c) ship a thin shim that resolves the skill path. This finding came from an external review with consumer context; a self-hosted /repo-health run cannot detect it because the failing condition does not exist in this repo.",
+      "acceptance_criteria": [
+        "Install management instructions in SKILL.md resolve and execute successfully in an installed consumer repo (any tier).",
+        "A test simulates the consumer layout (skill symlinked to .claude/skills/hedl/) and exercises --status, --doctor, --tier change, and --migrate without 'file not found'.",
+        "am_i_done.py passes."
+      ],
+      "reclassify_reason": "Reclassified to Phase 2. BLIND-SPOT consumer-install-path fix; its a/b/c fix-approach decision (symlink projection breaks under --copy) is deferred with it and decided when built."
+    },
+    {
+      "id": "WORK-0061",
+      "title": "fix: check_docs_index skips adopter repos so the gate passes on first install",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "Internal Full repo-health (2026-05-30, new-engineer BLOCKING), verified against the clone: check_docs_index (am_i_done.py:1360) has no adopter/framework guard, unlike check_state_template_sync (am_i_done.py:677, returns None for adopter layout). It always runs (am_i_done.py:1623) and FAILs if any docs/**/*.md is unlinked from README. The lightweight tier projects docs/spec/{prd,epic,task}-template.md (tiers.json:36-38) into the adopter's docs/, which their README will not link, so the gate command getting-started.md:88-91 presents as the install-verification step goes red on a fresh adopter's very first run. Anticipated as finding (8) under the WORK-0050 manifest ADR, but that is a large speculative abstraction; this is the focused fix.",
+      "acceptance_criteria": [
+        "check_docs_index returns None (skip) in adopter repos using the same skill/hedl-at-root guard as check_state_template_sync, OR exempts installer-projected starter docs from the in_scope set.",
+        "A test simulating the adopter layout (skill under .claude/skills/hedl/, docs/spec/ templates present, adopter README) shows am_i_done.py green.",
+        "Framework-repo behaviour (docs-index still enforced) is unchanged, with a test.",
+        "am_i_done.py passes."
+      ],
+      "source": "repo-health-2026-05-30-full (new-engineer BLOCKING); cross-link WORK-0050 finding (8)."
+    },
+    {
+      "id": "WORK-0062",
+      "title": "chore: sync shipped workflow templates + requirements-ci.txt to source of truth and enforce in CI",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "chore",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (2026-05-30) Maintenance + supply-chain defects, reproduced at HEAD 708ee36. (1) Shipped workflow templates skill/hedl/workflows/am-i-done.yml and codeql.yml pin actions/checkout@...v5.0.1 while root .github/workflows/* pin v6.0.2 (WORK-0038 bumped root, the templates were not). GitHub forbids symlinking workflow files, so the templates are real copies that drifted. (2) requirements-ci.txt:322 pins ruff==0.15.14 while pyproject.toml/uv.lock pin 0.15.15 (WORK-0040 bumped the lock; the GENERATED/in-sync file was not regenerated). A --doctor drift detector exists but is not wired into CI, so a project selling a deterministic gate ships drifted copies of its own gate workflow undetected.",
+      "acceptance_criteria": [
+        "skill/hedl/workflows/*.yml SHA-pins match .github/workflows/*.yml for every shared action (checkout v6.0.2 and any others).",
+        "requirements-ci.txt is regenerated so its ruff pin matches uv.lock/pyproject.toml (0.15.15), and the regeneration command is documented.",
+        "CI gains a deterministic drift check: filecmp of skill/hedl/workflows/* against .github/workflows/* (modulo any documented exceptions) AND a uv export diff against requirements-ci.txt; both fail the build on drift.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30 (Maintenance 5/10, Supply-chain 7/10)."
+    },
+    {
+      "id": "WORK-0056",
+      "title": "fix: check_pr_template respects context.json work_item_prefix (not hardcoded WORK-)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "high",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (W-1), VERIFIED: check_pr_template.py:77 uses re.search(r'\\bWORK-\\d+\\b', ...) and ignores context.json.work_item_prefix. Wyrd's prefix is WYRD, so its first product PR ('WYRD-001: ...') will FAIL the gate's template check. ADOPTER-BLOCKING for any adopter not using the default WORK prefix. Fix: read work_item_prefix from context.json (default 'WORK') and build the reference regex from it; keep uppercase enforcement; downstream consumers (grep, am_i_done check_commands) must use the same prefix source.",
+      "acceptance_criteria": [
+        "check_pr_template derives the work-item reference pattern from context.json work_item_prefix (default WORK); a PR citing '<PREFIX>-NNNN' passes for that adopter.",
+        "check_commands / any other WORK-prefix consumer in am_i_done.py uses the same prefix source (no second hardcode).",
+        "Tests: WYRD-prefixed PR passes under work_item_prefix=WYRD; a WORK-prefixed PR still passes under the default; wrong-prefix fails.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0027"
+      ]
+    },
+    {
+      "id": "WORK-0063",
+      "title": "chore: robustness guards for config-supplied regex/JSON across the gate tooling",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "chore",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "Convergent cluster from the Full repo-health (security-auditor + edge-case-hunter + determinism-auditor, 2026-05-30). Config-supplied regex and valid-but-wrong-shape JSON reach re.* / dict subscripts without guards, so a malformed (PR-merged) config crashes the gate with a traceback instead of a clean FAIL. Sites: dispatch-rules.json pattern -> re.search at am_i_done.py:415 (no re.error catch; the JSON-load try does not cover it); markdown-schemas.json patterns at check_markdown_schema.py:180,205,220 (ReDoS-capable, no timeout); wrong-shape JSON KeyError/AttributeError at am_i_done.py:864, budget_manager.py:189,201; PR_BODY env unbounded at am_i_done.py:1144-1152; fcntl unconditional import at budget_manager.py:31 (ImportError on Windows, which install.py's copy-mode guard implies is a target). release.py portion overlaps existing WORK-0049.",
+      "acceptance_criteria": [
+        "All config-supplied regex (dispatch-rules.json, markdown-schemas.json) is validated at load with try/except re.error and surfaces a clean FAIL CheckResult naming the offending pattern; no uncaught re.error reaches main().",
+        "Valid-JSON-wrong-shape inputs to am_i_done.py (violation dicts) and budget_manager.py (budget/tier) yield a clean FAIL or default, not KeyError/AttributeError tracebacks; tests cover each.",
+        "fcntl import is guarded (no-op lock fallback) or Windows is explicitly declared unsupported with a clear startup error; budget_manager imports cleanly on a no-fcntl platform.",
+        "PR_BODY is truncated to a documented bound before entering the subprocess env.",
+        "am_i_done.py passes. Cross-link WORK-0049 for the release.py overlap."
+      ],
+      "source": "repo-health-2026-05-30-full (security + edge-case + determinism)."
+    },
+    {
+      "id": "WORK-0049",
+      "title": "fix: release.py guards empty phase item-set and unknown change_class",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "low",
+      "dependencies": [],
+      "description": "Surfaced by the WORK-0023 adversarial review (edge-case, 2026-05-29), out-of-scope for 0023 (which was --current-version) but real minor gaps in release.py: (1) a mistyped/empty --phase yields items=[] -> compute_bump returns 'patch' -> a 0.0.1 proposal emitted silently with exit 0, indistinguishable from a real no-change run; (2) group_by_class silently DROPS an item whose change_class is not in the fixed _ORDER list from the output groups, even though that item still influences compute_bump. Decide: surface an empty/unknown-phase result distinctly (e.g. a note/empty-groups flag), and either reject unknown change_class at load (CHANGE_CLASSES validation) or route it to an explicit 'other' bucket.",
+      "acceptance_criteria": [
+        "An empty phase item-set is distinguishable in the output (e.g. an explicit empty-groups indicator) rather than silently producing a patch bump as if it were a real release.",
+        "An unknown change_class is either rejected with an actionable error at load, or routed to a visible 'other' bucket — never silently dropped from the output groups.",
+        "Tests cover empty-phase and unknown-change_class paths.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0023"
+      ]
+    },
+    {
+      "id": "WORK-0057",
+      "title": "fix: branch-naming check is enforced in CI/--pr mode (currently skipped on detached HEAD)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "medium",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (W-2), VERIFIED: check_branch returns None on a detached HEAD (git branch --show-current is empty on the CI merge-ref checkout), so the branch-naming convention is enforced only on local runs, never in --pr/CI — quiet rule erosion. Fix: in --pr mode, derive the head branch name from the PR (e.g. gh pr view N --json headRefName) and validate THAT against the naming convention, rather than skipping on detached HEAD. Keep the local-run path. Preserve the legitimate skip when neither a branch nor a PR ref is available (true gate-only/standalone runs).",
+      "acceptance_criteria": [
+        "In --pr mode the branch-naming convention is validated against the PR head ref, not silently skipped.",
+        "Local (non-CI) runs keep validating the current branch; genuine no-branch/no-PR runs still skip cleanly.",
+        "Test covers a bad PR head-ref name FAILing in --pr mode.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": []
+    },
+    {
+      "id": "WORK-0054",
+      "title": "fix: gate flags leftover EDIT ME placeholders in seeded .work/ state files",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "backlog",
+      "priority_band": "medium",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (C-1): context.json EDIT ME placeholders survived BOTH the Lume and Wyrd seeds and the gate did not catch them, so both needed in-session patching after the seed PR. am_i_done.py should detect leftover 'EDIT ME' (or equivalent placeholder tokens) in the seeded state files (.work/context.json, work.json, phases/phase-0.json) and FAIL with an actionable message, so a half-seeded adopter cannot reach green. Deterministic string/grep check (ADR-003). The bootstrap-adopter template was already strengthened to call out context.json + a 'no EDIT ME remains' verify step (PR that raised this item); this is the gate-enforcement half.",
+      "acceptance_criteria": [
+        "am_i_done.py fails (actionable message) when a tracked .work/ state file still contains an unresolved placeholder token (e.g. 'EDIT ME'); deterministic, no inference.",
+        "Skips gracefully on gate-only installs (no .work/).",
+        "Test covers a placeholder-present FAIL and a fully-seeded PASS.",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0046"
+      ]
+    },
+    {
+      "id": "WORK-0064",
+      "title": "docs: adopter-install and accuracy sweep across reviews",
+      "phase": 2,
+      "workstream": "WS-PLAN",
+      "change_class": "docs",
+      "priority_band": "medium",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "Documentation defects from both 2026-05-30 reviews. Adopter-install confusion (internal new-engineer): tiers.md:104 Tier-2 'manual copy into .claude/skills/Hedl/' contradicts install.py's projection model (it never creates .claude/skills/); skill-dir casing 'Hedl' vs lowercase 'hedl'; 'tier' overloaded (adoption tier vs budget/review tier) in SKILL.md/README:75; tier display names inconsistent and not always adjacent to the --tier CLI value; --migrate/--version undocumented in getting-started/commands.md though --doctor instructs running --migrate; gate-only curl install is silently weaker than --tier gate; commands.md:217 conflates named agents with review-library prompts and miscounts review-dispatcher as a reviewer. Accuracy fixes (external): docs/alternatives.md:228 misattributes gh-sub-issue to k1LoW (maintained forks are yahsan2 / agbiotech); contribute.py docstring overclaims a 'privacy fail-closed scrub' when it is a filename-prefix check that reads no content; record_insights.py is declared a team projection but wired into no hook (wire it or drop it and the claim).",
+      "acceptance_criteria": [
+        "tiers.md install instructions match install.py's projection model; no '.claude/skills/' manual-copy guidance survives; casing standardised to lowercase 'hedl'.",
+        "Tier display names are consistent and always shown next to the literal --tier value; 'tier' overload is disambiguated (rename one axis or add a Vocabulary entry).",
+        "--migrate and --version are documented in getting-started.md and commands.md including the needs-migrate recovery loop; gate-only curl caveat stated.",
+        "commands.md labels reviewers by roster and clarifies review-dispatcher is a selector not a reviewer.",
+        "gh-sub-issue attribution corrected in docs/alternatives.md; contribute.py docstring no longer overclaims; record_insights.py is either wired into a hook or removed with its privacy claim.",
+        "am_i_done.py passes (doc-facts / docs-index / skill-meta green)."
+      ],
+      "source": "repo-health-2026-05-30-full (new-engineer) + external-2026-05-30 (Security/Accuracy/Competitive)."
+    },
+    {
+      "id": "WORK-0065",
+      "title": "arch: native-substrate re-evaluation (ADR-012/ADR-034) — gate-binding vs hand-rolled orchestration",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (2026-05-30) finding #9, the single most important for a plugin/extension: a majority of Hedl's surface is now native in current (2026) Claude Code. Adversarial panel+dispatcher -> native Dynamic Workflows (judge-panel / adversarial-verify) + Agent Teams (TaskCompleted/TeammateIdle blocking hooks, parallel PR review); the 28-row SKILL.md NL routing table -> native skill auto-activation from the description field; five slash commands -> native commands/skills + native /code-review //security-review; hooks -> the native primitive Hedl just wires. Genuinely additive residue: the deterministic no-inference completion gate (sees work-item state native gates do not), the --streams pre-merge overlap check (Agent Teams explicitly does NOT prevent overlap), and the reversible graduated installer + LLM-agnostic gate-only drop-in. Per ADR-012 (managed competitive lifecycle) / ADR-034, run a substrate re-evaluation and decide cull/keep per surface, repositioning Hedl as gate-binding + a curated subagent roster ON TOP OF native orchestration rather than a hand-rolled orchestrator. This decision GATES the panel/routing/commands/hooks cull-or-prove calls.",
+      "acceptance_criteria": [
+        "Each surface (review panel/dispatcher, NL routing table, slash commands, hooks) is evaluated against the named GA native capability with a recorded keep / cull / reposition verdict and evidence (cite current Claude Code docs).",
+        "A short ADR (or ADR-012/ADR-034 update) records the substrate decision and the repositioning (gate + curated roster over native orchestration).",
+        "Surfaces decided 'cull' produce follow-up work items or are removed; surfaces decided 'keep' carry a one-line non-native-value justification.",
+        "Output feeds /phase-complete as the resolution of the panel/routing/commands/hooks deferred bets.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30 (Redundancy 4/10, finding #9); ties to ADR-012/ADR-034."
+    },
     {
       "id": "WORK-0032",
       "title": "feat: state-backend migration script (local-file -> github-issues)",
@@ -62,81 +268,6 @@
       "reclassify_reason": "Reclassified to Phase 2. github-issues dogfood; depends on WORK-0032 which slipped to Phase 2."
     },
     {
-      "id": "WORK-0015",
-      "title": "docs: terminology audit — align surviving recursive-'workstream' usages to the canonical four-category meaning (post-WORK-0027)",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "POSITIONING",
-      "description": "Per WORK-0027, 'workstream' canonically means the four-category work classification (WS-PLAN/REQ/TECH/ARCH; standards.md), and ADR-019's recursive-container primitive is superseded/deferred (WORK-0010). This audit sweeps the surviving shipped usages that still use 'workstream' in the recursive/container sense and brings them into line: ADR-020, ADR-021, ADR-031, docs/alternatives.md, docs/templates/bootstrap-adopter.md (and any WORK-0010/0011 prose). Each either aligns to the canonical meaning or is explicitly annotated as referencing the deferred recursive model (gated on WORK-0010), so no shipped doc presents the recursive primitive as the current meaning of 'workstream'. Also review 'phase' / 'work item' usage for consistency. Add a glossary entry if helpful. Depends on WORK-0027 (done) — and on the /phase-complete decision on whether the recursive cluster (WORK-0010, ADR-031) is kept-deferred or culled, which determines whether surviving references get annotated or removed.",
-      "acceptance_criteria": [
-        "Surviving 'workstream' usages in the recursive/container sense (ADR-020, ADR-021, ADR-031, docs/alternatives.md, docs/templates/bootstrap-adopter.md) are each reviewed and either aligned to the canonical four-category meaning or explicitly annotated as referencing the deferred recursive model (WORK-0010).",
-        "No shipped doc presents the recursive primitive as the current meaning of 'workstream'; references to 'phase' / 'work item' are reviewed for consistency with the canonical model.",
-        "A glossary entry (standards.md or a new terminology.md) records the canonical meaning and the name reserved for the deferred recursive model.",
-        "am_i_done.py passes."
-      ],
-      "reframe": "Retargeted 2026-05-30 by WORK-0027. Originally 'workstream replaces phase/work-item where ADR-019 specifies' — i.e. it assumed ADR-019's recursive model was canonical and would replace 'work item'/'phase'. WORK-0027 reversed that (four-category meaning canonical; ADR-019 superseded), so the audit's job is now the opposite: sweep the surviving recursive-sense usages and align/annotate them, rather than migrate everything to the recursive primitive.",
-      "reclassify_reason": "Reclassified to Phase 2. Terminology sweep depends on the recursive-cluster decision; per /phase-complete the cluster is DEFERRED (not culled), so WORK-0015 ANNOTATES surviving recursive-sense 'workstream' references as deferred rather than removing them."
-    },
-    {
-      "id": "WORK-0010",
-      "title": "feat: implement recursive workstream data model + schema migration",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "MODEL",
-      "description": "Per the (now-superseded) ADR-019 design — retained here as the design reference; ADR-019 itself is superseded (WORK-0027) and this item is demand-gated (see reclassify_reason) — `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. Depends on WORK-0027 (canonical workstream definition) being settled. Forward-compatibility (ADR-031, Proposed-deferred): design the schema so dependency-edge fields (depends_on / parallel / conflicts_with) can be added without a further migration when ADR-031 is activated — do not foreclose them, but do not build them now (ADR-031 is gated on this item landing + real demand).",
-      "acceptance_criteria": [
-        "`.work/work.json` schema supports recursive workstreams (children: [workstream...]); flat work items remain valid as leaf workstreams.",
-        "`schema_version` increments; install.py --migrate converts existing flat state to recursive shape idempotently.",
-        "Pre-migration state is archived to `.work/archive/<timestamp>/` (mirroring existing archival pattern).",
-        "Per ADR-021 forward-compatibility: workstream IDs are globally unique enough to survive future cross-repo references (UUIDs or composite keys).",
-        "Lightweight-tier solo workflow is functionally unchanged.",
-        "am_i_done.py passes including all existing tests on the new shape.",
-        "Tests cover: leaf workstream (flat), nested workstreams (epic-of-stories), tier-graded behaviour, migration round-trip."
-      ],
-      "note": "Data-model-adoption threshold (dogfood 2026-05-29, N=2 adopters): the recursive model's benefit exceeds prose-template cost only when concurrently-active workstreams exceed ~5-7, OR >1 concurrent operator needs shared machine-readable state, OR a parallel-bootstrap-under-coordination-strain repeats. Below that, prose templates (docs/templates/bootstrap-adopter.md) are the right tool. See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
-      "reclassify_reason": "Reclassified to Phase 2 (operator decision at /phase-complete 2026-05-30: defer, not cull). Recursive workstream data model is demand-gated; the 2026-05-29 dogfood found the benefit exceeds prose-template cost only above ~5-7 concurrent workstreams, a threshold not met. ADR-019 superseded; kept deferred pending real demand."
-    },
-    {
-      "id": "WORK-0011",
-      "title": "feat: ship existential-review and problem-statement workstream templates",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "MODEL",
-      "description": "Per ADR-020, two prose-form reference templates ship in `skill/hedl/templates/workstreams/`. existential-review: iteration 1 = identify capability + competitors; iterations 2..N = investigate each competitor; final iteration = report and culling decision (consumed by ADR-012's managed competitive lifecycle). problem-statement: iteration 1 = broad problem + objective; iterations 2..N = discovery, planning, refinement; final iteration = deliverables (may spawn child workstreams). Workstream creation flow consults the template at start; the agent follows the iteration pattern. Adopter-authored templates live alongside the shipped ones; path configurable via hedl.toml. Templates are prose-form for v0.2; executable templates deferred. The first concrete use of existential-review template is the workstream that produced the 2026-05-28 alternatives.md.",
-      "acceptance_criteria": [
-        "`skill/hedl/templates/workstreams/existential-review.md` exists with the iteration pattern described above.",
-        "`skill/hedl/templates/workstreams/problem-statement.md` exists with the iteration pattern described above.",
-        "Workstream creation flow in references/commands.md describes consulting the template at start.",
-        "hedl.toml supports a `[workstreams] templates_path` override.",
-        "First concrete use: existential-review runs on Hedl itself, producing docs/alternatives.md (already committed in PR #10 — reference it as the worked example); problem-statement is used to bootstrap Lume.",
-        "am_i_done.py passes."
-      ],
-      "note": "When this ships workstream templates in data-form (ADR-020), fold in / supersede the prose docs/templates/bootstrap-adopter.md (authored 2026-05-29 from the Lume/Wyrd bootstraps). See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
-      "reclassify_reason": "Reclassified to Phase 2 (defer). Named forward-capability exception that did not ship as data-form templates; prose templates (docs/templates/bootstrap-adopter.md) serve below the recursive-model threshold. Carries to Phase 2 with WORK-0010."
-    },
-    {
-      "id": "WORK-0001",
-      "title": "fix: install.py path resolves in consumer repos",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLIND-SPOT",
-      "description": "SKILL.md routes install operations to `python3 skill/hedl/scripts/install.py`. In this (self-hosted) repo `skill/hedl/` is at the root so the path resolves. In a consumer repo, the skill is symlinked to `.claude/skills/hedl/` and `install.py` is NOT projected by any tier in `tiers.json`. An agent in an installed consumer repo following SKILL.md verbatim will hit 'file not found' for every install operation: --status, --doctor, --tier change, --migrate. Fix options (TBD at implementation time): (a) project `install.py` under one of the tiers, (b) re-route SKILL.md to the symlinked skill location, (c) ship a thin shim that resolves the skill path. This finding came from an external review with consumer context; a self-hosted /repo-health run cannot detect it because the failing condition does not exist in this repo.",
-      "acceptance_criteria": [
-        "Install management instructions in SKILL.md resolve and execute successfully in an installed consumer repo (any tier).",
-        "A test simulates the consumer layout (skill symlinked to .claude/skills/hedl/) and exercises --status, --doctor, --tier change, and --migrate without 'file not found'.",
-        "am_i_done.py passes."
-      ],
-      "reclassify_reason": "Reclassified to Phase 2. BLIND-SPOT consumer-install-path fix; its a/b/c fix-approach decision (symlink projection breaks under --copy) is deferred with it and decided when built."
-    },
-    {
       "id": "WORK-0035",
       "title": "feat: ship the external adversarial review kit (consistency + report contract)",
       "phase": 2,
@@ -157,21 +288,6 @@
         "am_i_done.py passes."
       ],
       "reclassify_reason": "Reclassified to Phase 2. External adversarial review kit is net-new forward-capability NOT in Phase-1's sanctioned exception set (github-issues backend + workstream templates); ADR-028 stays Proposed pending reviews #2/#3."
-    },
-    {
-      "id": "WORK-0004",
-      "title": "docs: retrospective Prior-art audit of ADR-001 through ADR-016",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "DEFERRED",
-      "description": "ADR-017 requires every ADR to include a `Prior art` section that names overlapping standards/practices and (if overlap exists) justifies Hedl's version. ADR-001 through ADR-016 were written before ADR-017 and do not include this section. Audit each one and add a Prior art section: name the overlapping practice (or state none), answer the three justification questions where overlap exists. Several of the early ADRs apply standard patterns (e.g. ADR-002 tiered adoption, ADR-007 naming convention, ADR-009 opinionated defaults) and should explicitly acknowledge this — being honest about not inventing is the point. ADR-017 does not block on this audit; ADR-001..016 remain Accepted but become more defensible with annotation. Deferred to Phase 2 because it is parallel-able and not on the critical path of any Phase-1 BLOCKING or governance closure.",
-      "acceptance_criteria": [
-        "Each of ADR-001 through ADR-016 includes a `Prior art` section that either names overlapping standards/practices or states that no relevant prior art exists.",
-        "For ADRs with overlap: the section answers (a) what is genuinely different about Hedl's version, (b) why the difference is worth the cost, (c) what would have to change for Hedl to delegate to the existing thing.",
-        "am_i_done.py passes."
-      ]
     },
     {
       "id": "WORK-0006",
@@ -385,26 +501,6 @@
       ]
     },
     {
-      "id": "WORK-0049",
-      "title": "fix: release.py guards empty phase item-set and unknown change_class",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "low",
-      "dependencies": [],
-      "description": "Surfaced by the WORK-0023 adversarial review (edge-case, 2026-05-29), out-of-scope for 0023 (which was --current-version) but real minor gaps in release.py: (1) a mistyped/empty --phase yields items=[] -> compute_bump returns 'patch' -> a 0.0.1 proposal emitted silently with exit 0, indistinguishable from a real no-change run; (2) group_by_class silently DROPS an item whose change_class is not in the fixed _ORDER list from the output groups, even though that item still influences compute_bump. Decide: surface an empty/unknown-phase result distinctly (e.g. a note/empty-groups flag), and either reject unknown change_class at load (CHANGE_CLASSES validation) or route it to an explicit 'other' bucket.",
-      "acceptance_criteria": [
-        "An empty phase item-set is distinguishable in the output (e.g. an explicit empty-groups indicator) rather than silently producing a patch bump as if it were a real release.",
-        "An unknown change_class is either rejected with an actionable error at load, or routed to a visible 'other' bucket — never silently dropped from the output groups.",
-        "Tests cover empty-phase and unknown-change_class paths.",
-        "am_i_done.py passes."
-      ],
-      "relates_to": [
-        "WORK-0023"
-      ]
-    },
-    {
       "id": "WORK-0050",
       "title": "feat(arch): installer projection model — adopt a tracked manifest (.hedl-manifest.json) as the Hedl<->adopter contract",
       "phase": 2,
@@ -527,26 +623,6 @@
       ]
     },
     {
-      "id": "WORK-0054",
-      "title": "fix: gate flags leftover EDIT ME placeholders in seeded .work/ state files",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "medium",
-      "dependencies": [],
-      "description": "seed-comparison 2026-05-29 (C-1): context.json EDIT ME placeholders survived BOTH the Lume and Wyrd seeds and the gate did not catch them, so both needed in-session patching after the seed PR. am_i_done.py should detect leftover 'EDIT ME' (or equivalent placeholder tokens) in the seeded state files (.work/context.json, work.json, phases/phase-0.json) and FAIL with an actionable message, so a half-seeded adopter cannot reach green. Deterministic string/grep check (ADR-003). The bootstrap-adopter template was already strengthened to call out context.json + a 'no EDIT ME remains' verify step (PR that raised this item); this is the gate-enforcement half.",
-      "acceptance_criteria": [
-        "am_i_done.py fails (actionable message) when a tracked .work/ state file still contains an unresolved placeholder token (e.g. 'EDIT ME'); deterministic, no inference.",
-        "Skips gracefully on gate-only installs (no .work/).",
-        "Test covers a placeholder-present FAIL and a fully-seeded PASS.",
-        "am_i_done.py passes."
-      ],
-      "relates_to": [
-        "WORK-0046"
-      ]
-    },
-    {
       "id": "WORK-0055",
       "title": "docs/feat: surface the PR-template requirement to a new adopter authoring their first PR",
       "phase": 2,
@@ -562,64 +638,6 @@
       ],
       "relates_to": [
         "WORK-0044"
-      ]
-    },
-    {
-      "id": "WORK-0056",
-      "title": "fix: check_pr_template respects context.json work_item_prefix (not hardcoded WORK-)",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "high",
-      "dependencies": [],
-      "description": "seed-comparison 2026-05-29 (W-1), VERIFIED: check_pr_template.py:77 uses re.search(r'\\bWORK-\\d+\\b', ...) and ignores context.json.work_item_prefix. Wyrd's prefix is WYRD, so its first product PR ('WYRD-001: ...') will FAIL the gate's template check. ADOPTER-BLOCKING for any adopter not using the default WORK prefix. Fix: read work_item_prefix from context.json (default 'WORK') and build the reference regex from it; keep uppercase enforcement; downstream consumers (grep, am_i_done check_commands) must use the same prefix source.",
-      "acceptance_criteria": [
-        "check_pr_template derives the work-item reference pattern from context.json work_item_prefix (default WORK); a PR citing '<PREFIX>-NNNN' passes for that adopter.",
-        "check_commands / any other WORK-prefix consumer in am_i_done.py uses the same prefix source (no second hardcode).",
-        "Tests: WYRD-prefixed PR passes under work_item_prefix=WYRD; a WORK-prefixed PR still passes under the default; wrong-prefix fails.",
-        "am_i_done.py passes."
-      ],
-      "relates_to": [
-        "WORK-0027"
-      ]
-    },
-    {
-      "id": "WORK-0057",
-      "title": "fix: branch-naming check is enforced in CI/--pr mode (currently skipped on detached HEAD)",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "medium",
-      "dependencies": [],
-      "description": "seed-comparison 2026-05-29 (W-2), VERIFIED: check_branch returns None on a detached HEAD (git branch --show-current is empty on the CI merge-ref checkout), so the branch-naming convention is enforced only on local runs, never in --pr/CI — quiet rule erosion. Fix: in --pr mode, derive the head branch name from the PR (e.g. gh pr view N --json headRefName) and validate THAT against the naming convention, rather than skipping on detached HEAD. Keep the local-run path. Preserve the legitimate skip when neither a branch nor a PR ref is available (true gate-only/standalone runs).",
-      "acceptance_criteria": [
-        "In --pr mode the branch-naming convention is validated against the PR head ref, not silently skipped.",
-        "Local (non-CI) runs keep validating the current branch; genuine no-branch/no-PR runs still skip cleanly.",
-        "Test covers a bad PR head-ref name FAILing in --pr mode.",
-        "am_i_done.py passes."
-      ],
-      "relates_to": []
-    },
-    {
-      "id": "WORK-0058",
-      "title": "docs: decide WS-SPIKE — codify, define an adopter-extension contract, or fold into WS-TECH",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "low",
-      "dependencies": [],
-      "description": "seed-comparison 2026-05-29 (W-3), VERIFIED: standards.md lists only WS-PLAN/REQ/TECH/ARCH (WS-TECH's description already covers 'spikes, proof-of-concept'). Wyrd introduced WS-SPIKE, not in the canonical set. Decide one of: (a) codify WS-SPIKE into standards.md; (b) define an explicit adopter-extension contract (adopters MAY add their own WS-* workstream-classes, documented how); (c) push back to the canonical four since WS-TECH already covers spikes. Pairs with WORK-0027 (workstream double-definition reconcile) — resolve the canonical-vs-extensible question once.",
-      "acceptance_criteria": [
-        "Decision recorded (codify / adopter-extension contract / fold into WS-TECH) with rationale.",
-        "standards.md reflects the decision (canonical set + whether adopters may extend).",
-        "am_i_done.py passes."
-      ],
-      "relates_to": [
-        "WORK-0027",
-        "WORK-0015"
       ]
     },
     {
@@ -651,6 +669,105 @@
         "ADR-018",
         "ADR-022"
       ]
+    },
+    {
+      "id": "WORK-0015",
+      "title": "docs: terminology audit — align surviving recursive-'workstream' usages to the canonical four-category meaning (post-WORK-0027)",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "POSITIONING",
+      "description": "Per WORK-0027, 'workstream' canonically means the four-category work classification (WS-PLAN/REQ/TECH/ARCH; standards.md), and ADR-019's recursive-container primitive is superseded/deferred (WORK-0010). This audit sweeps the surviving shipped usages that still use 'workstream' in the recursive/container sense and brings them into line: ADR-020, ADR-021, ADR-031, docs/alternatives.md, docs/templates/bootstrap-adopter.md (and any WORK-0010/0011 prose). Each either aligns to the canonical meaning or is explicitly annotated as referencing the deferred recursive model (gated on WORK-0010), so no shipped doc presents the recursive primitive as the current meaning of 'workstream'. Also review 'phase' / 'work item' usage for consistency. Add a glossary entry if helpful. Depends on WORK-0027 (done) — and on the /phase-complete decision on whether the recursive cluster (WORK-0010, ADR-031) is kept-deferred or culled, which determines whether surviving references get annotated or removed.",
+      "acceptance_criteria": [
+        "Surviving 'workstream' usages in the recursive/container sense (ADR-020, ADR-021, ADR-031, docs/alternatives.md, docs/templates/bootstrap-adopter.md) are each reviewed and either aligned to the canonical four-category meaning or explicitly annotated as referencing the deferred recursive model (WORK-0010).",
+        "No shipped doc presents the recursive primitive as the current meaning of 'workstream'; references to 'phase' / 'work item' are reviewed for consistency with the canonical model.",
+        "A glossary entry (standards.md or a new terminology.md) records the canonical meaning and the name reserved for the deferred recursive model.",
+        "am_i_done.py passes."
+      ],
+      "reframe": "Retargeted 2026-05-30 by WORK-0027. Originally 'workstream replaces phase/work-item where ADR-019 specifies' — i.e. it assumed ADR-019's recursive model was canonical and would replace 'work item'/'phase'. WORK-0027 reversed that (four-category meaning canonical; ADR-019 superseded), so the audit's job is now the opposite: sweep the surviving recursive-sense usages and align/annotate them, rather than migrate everything to the recursive primitive.",
+      "reclassify_reason": "Reclassified to Phase 2. Terminology sweep depends on the recursive-cluster decision; per /phase-complete the cluster is DEFERRED (not culled), so WORK-0015 ANNOTATES surviving recursive-sense 'workstream' references as deferred rather than removing them.",
+      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
+    },
+    {
+      "id": "WORK-0010",
+      "title": "feat: implement recursive workstream data model + schema migration",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "MODEL",
+      "description": "Per the (now-superseded) ADR-019 design — retained here as the design reference; ADR-019 itself is superseded (WORK-0027) and this item is demand-gated (see reclassify_reason) — `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. Depends on WORK-0027 (canonical workstream definition) being settled. Forward-compatibility (ADR-031, Proposed-deferred): design the schema so dependency-edge fields (depends_on / parallel / conflicts_with) can be added without a further migration when ADR-031 is activated — do not foreclose them, but do not build them now (ADR-031 is gated on this item landing + real demand).",
+      "acceptance_criteria": [
+        "`.work/work.json` schema supports recursive workstreams (children: [workstream...]); flat work items remain valid as leaf workstreams.",
+        "`schema_version` increments; install.py --migrate converts existing flat state to recursive shape idempotently.",
+        "Pre-migration state is archived to `.work/archive/<timestamp>/` (mirroring existing archival pattern).",
+        "Per ADR-021 forward-compatibility: workstream IDs are globally unique enough to survive future cross-repo references (UUIDs or composite keys).",
+        "Lightweight-tier solo workflow is functionally unchanged.",
+        "am_i_done.py passes including all existing tests on the new shape.",
+        "Tests cover: leaf workstream (flat), nested workstreams (epic-of-stories), tier-graded behaviour, migration round-trip."
+      ],
+      "note": "Data-model-adoption threshold (dogfood 2026-05-29, N=2 adopters): the recursive model's benefit exceeds prose-template cost only when concurrently-active workstreams exceed ~5-7, OR >1 concurrent operator needs shared machine-readable state, OR a parallel-bootstrap-under-coordination-strain repeats. Below that, prose templates (docs/templates/bootstrap-adopter.md) are the right tool. See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
+      "reclassify_reason": "Reclassified to Phase 2 (operator decision at /phase-complete 2026-05-30: defer, not cull). Recursive workstream data model is demand-gated; the 2026-05-29 dogfood found the benefit exceeds prose-template cost only above ~5-7 concurrent workstreams, a threshold not met. ADR-019 superseded; kept deferred pending real demand.",
+      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
+    },
+    {
+      "id": "WORK-0011",
+      "title": "feat: ship existential-review and problem-statement workstream templates",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "MODEL",
+      "description": "Per ADR-020, two prose-form reference templates ship in `skill/hedl/templates/workstreams/`. existential-review: iteration 1 = identify capability + competitors; iterations 2..N = investigate each competitor; final iteration = report and culling decision (consumed by ADR-012's managed competitive lifecycle). problem-statement: iteration 1 = broad problem + objective; iterations 2..N = discovery, planning, refinement; final iteration = deliverables (may spawn child workstreams). Workstream creation flow consults the template at start; the agent follows the iteration pattern. Adopter-authored templates live alongside the shipped ones; path configurable via hedl.toml. Templates are prose-form for v0.2; executable templates deferred. The first concrete use of existential-review template is the workstream that produced the 2026-05-28 alternatives.md.",
+      "acceptance_criteria": [
+        "`skill/hedl/templates/workstreams/existential-review.md` exists with the iteration pattern described above.",
+        "`skill/hedl/templates/workstreams/problem-statement.md` exists with the iteration pattern described above.",
+        "Workstream creation flow in references/commands.md describes consulting the template at start.",
+        "hedl.toml supports a `[workstreams] templates_path` override.",
+        "First concrete use: existential-review runs on Hedl itself, producing docs/alternatives.md (already committed in PR #10 — reference it as the worked example); problem-statement is used to bootstrap Lume.",
+        "am_i_done.py passes."
+      ],
+      "note": "When this ships workstream templates in data-form (ADR-020), fold in / supersede the prose docs/templates/bootstrap-adopter.md (authored 2026-05-29 from the Lume/Wyrd bootstraps). See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
+      "reclassify_reason": "Reclassified to Phase 2 (defer). Named forward-capability exception that did not ship as data-form templates; prose templates (docs/templates/bootstrap-adopter.md) serve below the recursive-model threshold. Carries to Phase 2 with WORK-0010.",
+      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
+    },
+    {
+      "id": "WORK-0004",
+      "title": "docs: retrospective Prior-art audit of ADR-001 through ADR-016",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "DEFERRED",
+      "description": "ADR-017 requires every ADR to include a `Prior art` section that names overlapping standards/practices and (if overlap exists) justifies Hedl's version. ADR-001 through ADR-016 were written before ADR-017 and do not include this section. Audit each one and add a Prior art section: name the overlapping practice (or state none), answer the three justification questions where overlap exists. Several of the early ADRs apply standard patterns (e.g. ADR-002 tiered adoption, ADR-007 naming convention, ADR-009 opinionated defaults) and should explicitly acknowledge this — being honest about not inventing is the point. ADR-017 does not block on this audit; ADR-001..016 remain Accepted but become more defensible with annotation. Deferred to Phase 2 because it is parallel-able and not on the critical path of any Phase-1 BLOCKING or governance closure.",
+      "acceptance_criteria": [
+        "Each of ADR-001 through ADR-016 includes a `Prior art` section that either names overlapping standards/practices or states that no relevant prior art exists.",
+        "For ADRs with overlap: the section answers (a) what is genuinely different about Hedl's version, (b) why the difference is worth the cost, (c) what would have to change for Hedl to delegate to the existing thing.",
+        "am_i_done.py passes."
+      ],
+      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
+    },
+    {
+      "id": "WORK-0058",
+      "title": "docs: decide WS-SPIKE — codify, define an adopter-extension contract, or fold into WS-TECH",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "backlog",
+      "priority_band": "low",
+      "dependencies": [],
+      "description": "seed-comparison 2026-05-29 (W-3), VERIFIED: standards.md lists only WS-PLAN/REQ/TECH/ARCH (WS-TECH's description already covers 'spikes, proof-of-concept'). Wyrd introduced WS-SPIKE, not in the canonical set. Decide one of: (a) codify WS-SPIKE into standards.md; (b) define an explicit adopter-extension contract (adopters MAY add their own WS-* workstream-classes, documented how); (c) push back to the canonical four since WS-TECH already covers spikes. Pairs with WORK-0027 (workstream double-definition reconcile) — resolve the canonical-vs-extensible question once.",
+      "acceptance_criteria": [
+        "Decision recorded (codify / adopter-extension contract / fold into WS-TECH) with rationale.",
+        "standards.md reflects the decision (canonical set + whether adopters may extend).",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "WORK-0027",
+        "WORK-0015"
+      ],
+      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
     }
   ],
   "completed": [

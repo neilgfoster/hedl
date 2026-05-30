@@ -34,6 +34,9 @@
       "id": "review-report",
       "description": "Synthesized review report files (report.md under any review run directory)",
       "glob": ".work/reviews/**/report.md",
+      "exclude_globs": [
+        ".work/reviews/external-*/**"
+      ],
       "frontmatter": null,
       "required_headings": [
         "Dimension Scores",
@@ -58,7 +61,8 @@
         ".work/reviews/**/report.md",
         ".work/reviews/README.md",
         ".work/reviews/adversarial-review-*.md",
-        ".work/reviews/repo-health-*.md"
+        ".work/reviews/repo-health-*.md",
+        ".work/reviews/external-*/**"
       ],
       "frontmatter": null,
       "required_headings": ["Findings"],
