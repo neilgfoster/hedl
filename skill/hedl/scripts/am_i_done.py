@@ -711,7 +711,10 @@ def check_state_template_sync() -> Optional[CheckResult]:
             with open(path, "rb") as fh:
                 return fh.read()
         except OSError as exc:
-            problems.append(f"  unreadable ({label}): {rel} ({exc})")
+            # errno/strerror only — str(exc) embeds the absolute filename, which
+            # would leak the runner's filesystem layout into gate output.
+            reason = exc.strerror or type(exc).__name__
+            problems.append(f"  unreadable ({label}): {rel} ({reason})")
             return None
 
     for rel in _STATE_SYNC_GUARDED:
