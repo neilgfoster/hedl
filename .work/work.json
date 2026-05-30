@@ -181,22 +181,6 @@
       ]
     },
     {
-      "id": "WORK-0003",
-      "title": "fix: versioning.md schema_version claim matches actual code",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "BLIND-SPOT",
-      "description": "docs/versioning.md (around lines 69-70 and 108-118) claims that Hedl reads `schema_version` from `hedl.toml` under `[hedl] schema_version`. The actual code: install.py reads `schema_version` only from `.work/context.json` (see install.py:47-85); am_i_done.py reads `hedl.toml` only for `[verify]` (see am_i_done.py:151-152, 170-196). Neither reads `[hedl] schema_version` from hedl.toml. Either implement the `hedl.toml` read (treat the doc as the spec) or correct the doc to describe what the code actually does. Discovered via external review; self-hosted /repo-health cannot spot this because there is no spec-vs-code consistency check in the gate.",
-      "acceptance_criteria": [
-        "Documentation in docs/versioning.md matches code behaviour exactly — either the read is implemented or the doc is corrected.",
-        "If the read is implemented: install.py and/or am_i_done.py read `[hedl] schema_version` from hedl.toml with documented precedence relative to `.work/context.json`, covered by tests.",
-        "If the doc is corrected: `change_class` is `docs` instead of `fix`; the doc states clearly where schema_version is stored and read from.",
-        "am_i_done.py passes"
-      ]
-    },
-    {
       "id": "WORK-0035",
       "title": "feat: ship the external adversarial review kit (consistency + report contract)",
       "phase": 1,
@@ -1245,6 +1229,25 @@
       "started_date": "2026-05-30",
       "completed_date": "2026-05-30",
       "resolution": "Audited the github-issues state backend (AC1) and documented it in skill/hedl/references/backends.md: read paths (the one wired stale-WORK-ID query), write paths (all unbuilt — read-only backend), the proposed label scheme (AC7/8/9), and a Known-limitations section. Cheap fixes the audit found: the silent --limit 200 cap (dropped live IDs) is now a higher cap that FAILs loudly on an incomplete read; a null-title TypeError crash fixed. AC4 (--streams cross-operator conflict) verified already covered by TestCheckStreams (backend-agnostic). Per AC5, gaps deferred with clear scope: multi-operator assignee/claim layer -> WORK-0059 (new); hedl:work label-scoped + paginated read, label-on-migration, empty-set/stderr handling -> added to WORK-0032. Operator approved the audit+document+defer scope. 5-agent panel (security, determinism, scope, edge-case, future-engineer): no BLOCKING; findings either fixed or confirmed-and-deferred. 400 tests. WORK-0007 unblocks WORK-0032/0033."
+    },
+    {
+      "id": "WORK-0003",
+      "title": "fix: versioning.md schema_version claim matches actual code",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "complete",
+      "priority_band": "BLIND-SPOT",
+      "description": "docs/versioning.md (around lines 69-70 and 108-118) claims that Hedl reads `schema_version` from `hedl.toml` under `[hedl] schema_version`. The actual code: install.py reads `schema_version` only from `.work/context.json` (see install.py:47-85); am_i_done.py reads `hedl.toml` only for `[verify]` (see am_i_done.py:151-152, 170-196). Neither reads `[hedl] schema_version` from hedl.toml. Either implement the `hedl.toml` read (treat the doc as the spec) or correct the doc to describe what the code actually does. Discovered via external review; self-hosted /repo-health cannot spot this because there is no spec-vs-code consistency check in the gate.",
+      "acceptance_criteria": [
+        "Documentation in docs/versioning.md matches code behaviour exactly — either the read is implemented or the doc is corrected.",
+        "If the read is implemented: install.py and/or am_i_done.py read `[hedl] schema_version` from hedl.toml with documented precedence relative to `.work/context.json`, covered by tests.",
+        "If the doc is corrected: `change_class` is `docs` instead of `fix`; the doc states clearly where schema_version is stored and read from.",
+        "am_i_done.py passes"
+      ],
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "resolution": "Corrected docs/versioning.md to match code (external-review finding): removed the false claim that Hedl reads schema_version from hedl.toml [hedl] schema_version and the section describing a non-existent gate/--doctor read of it. install.py reads schema_version only from .work/context.json; am_i_done.py reads hedl.toml only for [verify]. Per AC1 'matches code exactly', also fixed two adjacent mismatches in the same section: current schema 1->2 (CURRENT_STATE_SCHEMA), and added the 1->2 migration row (accurately: drops state_backend from context.json, writes hedl.toml only if non-default; ADR-022). change_class moved fix->docs per AC. Panel (scope-auditor, edge-case-hunter): scope-auditor BLOCKING (change_class) resolved here; edge-case-hunter SIGNIFICANT (the 'Relocates' wording) fixed. Pre-existing --doctor status-table nuances flagged out-of-scope for a future pass."
     }
   ]
 }
