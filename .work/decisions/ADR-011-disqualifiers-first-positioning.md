@@ -48,9 +48,9 @@ feedback, and bounce less.
 
 The completion-gate concept is not original to Hedl. It comes from
 [oven-sh/bun](https://github.com/oven-sh/bun)'s `CLAUDE.md` (symlinked as
-`AGENTS.md`) "Critical Completion Requirements" — "ONLY push up changes after
-running `bun bd test <file>` and ensuring your tests pass", "untested code is
-incomplete", and a `claude/`-prefixed branch convention. That is the direct
+`AGENTS.md`), whose "Important Development Notes" instruct: "ONLY push up changes
+after running `bun bd test <file>` and ensuring your tests pass", alongside a
+`claude/`-prefixed branch CI requirement. That is the direct
 inspiration for `am_i_done` (reached Hedl via a contributor). bun's gate is
 prose the agent is trusted to follow; Hedl's refinement is the *deterministic*
 script form (no inference; one exit code; run identically in CI; work-item

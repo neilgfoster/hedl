@@ -55,13 +55,15 @@ status downgrades; two watchlist objectives sharpened.
 - pre-commit (pre-commit.com)
 - GitHub Actions matrix + required status checks
 - task / just / Make declarative runners
-- oven-sh/bun — `CLAUDE.md` / `AGENTS.md` "Critical Completion Requirements"
-  (the origin of the agent completion-gate idea: prose the agent is told to run
-  before finishing, not a deterministic script)
+- oven-sh/bun — `CLAUDE.md` (symlinked as `AGENTS.md`), the "Important
+  Development Notes" completion instruction (the origin of the agent
+  completion-gate idea: prose the agent is told to run before finishing, not a
+  deterministic script)
 **Prior art / origin**: the completion-gate *concept* is not Hedl's. It comes from
-oven-sh/bun's `CLAUDE.md`/`AGENTS.md` "Critical Completion Requirements" ("ONLY push up
-changes after running ... your tests pass"; "untested code is incomplete"; a
-`claude/`-branch convention) — the direct inspiration for `am_i_done`, via a contributor.
+oven-sh/bun's `CLAUDE.md` (symlinked as `AGENTS.md`), whose "Important Development Notes"
+instruct: "ONLY push up changes after running `bun bd test <file>` and ensuring your tests
+pass", alongside a `claude/`-prefixed branch CI requirement — the direct inspiration for
+`am_i_done`, via a contributor.
 What remains Hedl-specific is the *deterministic* form: bun's gate is prose the agent is
 trusted to follow (inference); Hedl packages the bundle as a single pass/fail: clean tree,
 branch naming, PR-template validity, stale work-item IDs, unresolved review
