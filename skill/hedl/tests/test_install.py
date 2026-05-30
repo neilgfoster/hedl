@@ -1166,7 +1166,28 @@ class TestTiersManifestErrors(unittest.TestCase):
             with mock.patch.object(M, "TIERS_FILE", corrupt):
                 with self.assertRaises(M.TiersConfigError) as ctx:
                     M._load_tiers()
-            self.assertIn("not valid JSON", str(ctx.exception))
+            self.assertIn("not valid", str(ctx.exception))
+
+    def test_binary_tiers_raises_clean_error(self) -> None:
+        # A non-UTF-8 file raises UnicodeDecodeError (a ValueError, not OSError/
+        # JSONDecodeError) — must still surface as a clean TiersConfigError.
+        with tempfile.TemporaryDirectory() as tmp:
+            binary = pathlib.Path(tmp) / "tiers.json"
+            binary.write_bytes(b"\xff\xfe\x00\x01")
+            with mock.patch.object(M, "TIERS_FILE", binary):
+                with self.assertRaises(M.TiersConfigError):
+                    M._load_tiers()
+
+    def test_wrong_shape_tiers_raises_clean_error(self) -> None:
+        # Valid JSON but not an object with a 'tiers' table would otherwise crash
+        # a caller with TypeError/KeyError; must be a clean TiersConfigError.
+        for content in ("[]", "42", '"x"', '{"no_tiers_key": 1}'):
+            with self.subTest(content=content), tempfile.TemporaryDirectory() as tmp:
+                bad = pathlib.Path(tmp) / "tiers.json"
+                bad.write_text(content)
+                with mock.patch.object(M, "TIERS_FILE", bad):
+                    with self.assertRaises(M.TiersConfigError):
+                        M._load_tiers()
 
     def test_valid_tiers_still_loads(self) -> None:
         # Regression: the real manifest still parses unchanged.
