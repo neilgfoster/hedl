@@ -2,7 +2,7 @@
   "meta": {
     "current_phase": 1,
     "active_item": null,
-    "last_updated": "2026-05-29",
+    "last_updated": "2026-05-30",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."
   },
   "active": [],
@@ -20,21 +20,6 @@
         "Every other Phase-1 item is closed before this one.",
         "Repo-health re-run after Phase 1 close shows the goal-displacement and validation-theatre findings resolved (process-to-code ratio improved or the surplus process retired; reviews directory contains at least one real run produced inside Phase 1).",
         ".work/reviews/ contains at least the 2026-05-28 run plus the Phase-1-close existential cycle.",
-        "am_i_done.py passes."
-      ]
-    },
-    {
-      "id": "WORK-0009",
-      "title": "docs: update Principle 4 in CLAUDE.md from 'one work item at a time' to 'one per operator'",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Per ADR-018, Principle 4 in CLAUDE.md (`One work item at a time — finish and validate before starting the next.`) is clarified as **one per operator**, not one per repo. Repo-health 2026-05-28 confirms the wording at CLAUDE.md:35 is unchanged. Update the wording and every reference doc that quotes the principle.",
-      "acceptance_criteria": [
-        "CLAUDE.md Principle 4 reads 'One work item per operator at a time'.",
-        "Any other reference docs that quote the principle (SKILL.md, references/) are updated consistently.",
         "am_i_done.py passes."
       ]
     },
@@ -1196,6 +1181,24 @@
       "started_date": "2026-05-29",
       "completed_date": "2026-05-29",
       "resolution": "install.py ships an idempotent, delimited, Hedl-managed .gitignore block protecting insights DATA (.work/insights/*.jsonl, metrics.json, proposals/) + Python caches, leaving .md notes/README trackable; read-guarded; self-contained (not a projection — WORK-0050 owns versioned updates). Adversarial review (2 cycles) corrected a false ADR-005 citation (now: privacy principle + operational practice flagged for /phase-complete), completed coverage, removed an over-broad pattern, guarded a directory-read crash, and aligned Hedl own .gitignore (dogfood)."
+    },
+    {
+      "id": "WORK-0009",
+      "title": "docs: update Principle 4 in CLAUDE.md from 'one work item at a time' to 'one per operator'",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "Per ADR-018, Principle 4 in CLAUDE.md (`One work item at a time — finish and validate before starting the next.`) is clarified as **one per operator**, not one per repo. Repo-health 2026-05-28 confirms the wording at CLAUDE.md:35 is unchanged. Update the wording and every reference doc that quotes the principle.",
+      "acceptance_criteria": [
+        "CLAUDE.md Principle 4 reads 'One work item per operator at a time'.",
+        "Any other reference docs that quote the principle (SKILL.md, references/) are updated consistently.",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "resolution": "Per ADR-018, CLAUDE.md Principle 4 updated from 'One work item at a time' to 'One work item per operator at a time', resolving the historian + contradiction-finder findings from repo-health 2026-05-28. README.md feature bullet paraphrase aligned to the same wording. Kept 'work item' (not 'workstream') deliberately: the workstream-terminology migration is WORK-0027/WORK-0015 scope and still open. SKILL.md and references/ carry no copy of the principle (grep-verified), so no further edits. docs/getting-started.md's terse '/iterate supervised # work one item at a time' comment left as-is — describes a single-operator command mode, not the principle."
     }
   ]
 }

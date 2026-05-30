@@ -33,7 +33,7 @@ Completion gate: `.github/scripts/am_i_done.py` — run before declaring any tas
 1. **Deterministic over inference** — if a function can do it, don't use an LLM.
 2. **Validation loops** — every agent output is validated before downstream work proceeds.
 3. **Token efficiency** — compress context; escalate models only when needed.
-4. **One work item at a time** — finish and validate before starting the next.
+4. **One work item per operator at a time** — finish and validate before starting the next.
 5. **Phase discipline** — nothing built outside the current phase scope.
 
 ---
