@@ -87,7 +87,7 @@ Applies to every operator on this project — human or agent.
 
 ## Current state
 
-- Phase: 1 — Discipline restoration (see `.work/phases/phase-1.json`)
+- Phase: 2 — Adoption readiness & deferred-bet resolution (see `.work/phases/phase-2.json`)
 - Active item: check `.work/work.json` → `meta.active_item`
 
 ---

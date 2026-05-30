@@ -1,0 +1,43 @@
+{
+  "phase": 2,
+  "name": "Adoption readiness & deferred-bet resolution",
+  "goal": "Make Hedl genuinely adoptable by external repos, dogfood the github-issues backend (answering LG3), and FORCE the deferred cull-or-build decisions from Phase 1 rather than carry scaffolding further. Phase 2 biases toward cutting deferred scaffolding over building it.",
+  "status": "active",
+  "started": "2026-05-30",
+  "completed": null,
+  "definition_of_done": [
+    "Consumer-install path works in an installed repo across all tiers: SKILL.md install ops (--status/--doctor/--tier/--migrate) resolve and execute, with a test simulating the .claude/skills/hedl/ layout. The held a/b/c fix-approach decision is made and recorded (WORK-0001).",
+    "The github-issues backend is dogfooded on Hedl's own queue end-to-end (issue created -> branch references closes #N -> PR merged -> issue auto-closes), with the WORK-0007 read-path hardening (hedl:work label-scoped + paginated read), OR the backend is explicitly culled if the dogfood does not earn it. LG3 (does dogfooding expose hidden gaps?) is answered either way (WORK-0032/0033/0012).",
+    "Every Phase-1 culling-candidate is CUT or PROVEN with no third deferral: self-improvement loop (>=1 /contribute PR end-to-end or cut), multi-operator coordination (a real --streams save or fold to CCPM), budget_manager (a rescued-deferral case or retire the tier machinery), recursive cluster (WORK-0010/0011/ADR-031 built on real demand or culled). LG2 answered only if WORK-0010 is built.",
+    "Adopter operating docs exist: upgrade workflow (WORK-0044) and the distribution decision (WORK-0045 pip/pipx ADR), and install drift detection (WORK-0043).",
+    "am_i_done.py passes, and every net-new artefact in Phase 2 is justified against shipped code (the Phase-1 anti-accretion discipline carries forward)."
+  ],
+  "constraints": [
+    "Anti-accretion watch (carried from the Phase-1 retro): bias toward cutting deferred scaffolding over building it; every culling-candidate has a decision DATE this phase, not another deferral.",
+    "am_i_done.py remains deterministic — no inference added to the gate (ADR-003).",
+    "ADR reconciliations either implement the ADR or supersede it explicitly via historian review — no silent divergence.",
+    "Existing pytest suite must pass throughout."
+  ],
+  "workstreams": [
+    {
+      "id": "WS-ARCH",
+      "name": "Architecture",
+      "items": []
+    },
+    {
+      "id": "WS-PLAN",
+      "name": "Planning",
+      "items": []
+    }
+  ],
+  "learning_goals": [
+    "INHERITED from Phase 1 (LG2): can WORK-0010's recursive-workstream model preserve solo/flat usage unchanged? — answered only if WORK-0010 is built; otherwise lapses with the cull decision.",
+    "INHERITED from Phase 1 (LG3): does dogfooding the github-issues backend on Hedl's own queue expose gaps the local-file backend hid?",
+    "Does forcing cull-or-prove on the deferred bets reduce net process volume, or do the bets re-justify themselves on real demand?"
+  ],
+  "assumptions_to_validate": [
+    "The github-issues backend earns its keep when dogfooded on a real queue, rather than the local-file backend remaining sufficient.",
+    "The consumer-install path defect (WORK-0001) is fixable cleanly without breaking the --copy projection model or SKILL_ROOT resolution."
+  ],
+  "next_phase_trigger": "All DoD items verified. Run /phase-complete."
+}

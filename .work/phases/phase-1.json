@@ -2,9 +2,9 @@
   "phase": 1,
   "name": "Discipline restoration",
   "goal": "Bring implementation, ADRs, docs, and security posture back into alignment after Phase-0 process-over-product drift. Close the BLOCKING and governance backlog, fix the gate/installer RCE surface, reconcile every ADR-vs-code divergence to a single source of truth, and re-establish that each workstream ends in a shipped, gate-verified capability rather than more process.",
-  "status": "active",
+  "status": "complete",
   "started": "2026-05-28",
-  "completed": null,
+  "completed": "2026-05-30",
   "definition_of_done": [
     "Every Phase-1 BLOCKING-band item is closed and the deterministic gate is green on main with required status checks enforced (the four am_i_done matrix contexts).",
     "The Phase-1 security RCE fixes (startup.sh format string, install.py SKILL_ROOT/repo containment, am_i_done verify allow-list, install.py .hedl-tier parsing and include-cycle guards, release.py version validation) have landed, each with a regression test that fails before the fix.",

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "current_phase": 1,
+    "current_phase": 2,
     "active_item": null,
     "last_updated": "2026-05-30",
     "reconciliation_note": "Backlog re-shaped 2026-05-28 from three inputs: external adversarial review (~/github/scratch/eval.md), internal repo-health 2026-05-28 (.work/reviews/repo-health-2026-05-28/report.md), and the existential alternatives.md draft (docs/alternatives.md). Backlog ordered top-down by Phase-1 priority. See PR chore/reconcile-phase-1 for rationale."

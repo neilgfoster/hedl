@@ -3,19 +3,25 @@
   "meta": {
     "project": "hedl",
     "work_item_prefix": "WORK",
-    "phase": 1,
-    "last_updated": "2026-05-28",
+    "phase": 2,
+    "last_updated": "2026-05-30",
     "description": "Disciplined Claude Code workflow with a deterministic completion gate, adversarial review, and phase-based work tracking."
   },
-  "project_version": "0.0.0",
-  "releases": {},
+  "project_version": "0.1.0",
+  "releases": {
+    "0.1.0": {
+      "bump": "minor",
+      "date": "2026-05-30",
+      "phase": 1
+    }
+  },
   "state": {
     "phase_0_complete": true
   },
   "structure": {
-    "CLAUDE.md": "primary project context \u2014 read every session",
+    "CLAUDE.md": "primary project context — read every session",
     ".work/work.json": "backlog and active work items",
-    ".work/context.json": "this file \u2014 repo state",
+    ".work/context.json": "this file — repo state",
     ".work/session.json": "last session summary",
     ".work/phases/": "phase definitions and registry",
     ".work/decisions/": "architecture decision records (ADRs)",
