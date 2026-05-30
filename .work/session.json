@@ -1,6 +1,7 @@
 {
-  "date": "2026-05-29",
+  "date": "2026-05-30",
   "completed": [
+    "WORK-0009: CLAUDE.md Principle 4 -> 'One work item per operator at a time' (ADR-018); README bullet aligned; SKILL.md/references grep-clean. Adversarial panel (scope-auditor, historian, contradiction-finder) PASS — 2 SIGNIFICANT downgraded to MINOR on rebuttal, contradiction-finder empty. Kept 'work item' (workstream migration = WORK-0027/0015).",
     "WORK-0017: phase definitions + Phase 0->1 transition (PR #20).",
     "WORK-0016: .hedl-tier no hardcoded absolute path (PR #21).",
     "WORK-0019: startup.sh printf RCE verified false positive; regression guard (PR #22).",
@@ -26,7 +27,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0009",
+  "next_item": "WORK-0025",
   "blockers": [],
-  "notes": "WORK-0042 (high) delivered via /iterate. active_item null. Flagged for /phase-complete: 'insights are local-only' lacks its own ADR (ADR-005 is /contribute privacy); whether to formalise. Source/template divergence theme continues (WORK-0025). Next per priority: WORK-0009 (Principle 4 in CLAUDE.md) or WORK-0025."
+  "notes": "WORK-0009 delivered via /iterate; PR raised, awaiting operator merge. active_item null. 16 Phase-1 items remain open before /phase-complete can transition. Two MINOR review notes (getting-started.md:62 comment; ADR-018 cross-link) fold into the open WORK-0015 terminology audit. Next per priority: WORK-0025 (reconcile .work/ vs skill/hedl/work-state/) or the GOVERNANCE pair WORK-0027."
 }
