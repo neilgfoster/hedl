@@ -1,5 +1,5 @@
 {
-  "current_phase": 1,
+  "current_phase": 2,
   "phases": [
     {
       "phase": 0,
@@ -10,11 +10,16 @@
     {
       "phase": 1,
       "name": "Discipline restoration",
-      "status": "active",
+      "status": "complete",
       "file": ".work/phases/phase-1.json"
+    },
+    {
+      "phase": 2,
+      "name": "Adoption readiness & deferred-bet resolution",
+      "status": "active",
+      "file": ".work/phases/phase-2.json"
     }
   ],
-
   "transition_log": [
     {
       "from": 0,
@@ -22,8 +27,14 @@
       "date": "2026-05-28",
       "via": "/phase-complete (WORK-0017)",
       "note": "Phase 0 (Setup) authored and closed retroactively: its definition was the byte-identical EDIT-ME stub while seven Phase-1-scoped PRs had already merged. Phase-0 DoD verified against the seeded bootstrap (gate, skill tiers, commands, named agents + library, ADR foundation, work-tracking machinery). Phase review panel: historian + scope-auditor (dispatch floor for .work/phases/) and existential-challenger (mandatory at /phase-complete per ADR-013, run from the review library pending its WORK-0005 promotion to a named agent). Retro and panel verdicts under .work/reviews/phase-0-complete-2026-05-28/."
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "date": "2026-05-30",
+      "via": "/phase-complete",
+      "note": "Phase 1 (Discipline restoration) complete: 30 items closed, 7 reclassified to Phase 2. 5-agent phase existential review (phase-1-complete-2026-05-30) verdict CONDITIONAL->resolved; repo-health re-run confirmed both 2026-05-28 BLOCKING findings resolved (process/code ratio flipped; validation loop closes). Release 0.1.0. Operator decisions: recursive cluster deferred (not culled); budget_manager kept (window extended); 2 watchlist culling-candidates carried with Phase-2 decision dates. LG2/LG3 inherited unanswered; assumption 1 partially validated (discipline preserved, surplus carried not retired)."
     }
   ],
-
   "direction_changes": []
 }

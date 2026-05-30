@@ -410,3 +410,36 @@ skipped. If Phase 1 closes without that case, the tier machinery is cut
 and a single-counter display takes its place.
 
 This document is re-evaluated at every phase boundary per ADR-013.
+
+## Phase-1 boundary verdicts (2026-05-30)
+
+Per ADR-013, the watchlist objectives (measurement window: end of Phase 1) were
+forced at the Phase-1 close. Verdicts:
+
+- **Adversarial review panel** (non-overlapping signal per agent) — **RETAIN**:
+  ~11 Phase-1 runs show distinct per-lens findings (edge-case-hunter caught crashes
+  security/scope missed); re-confirm rigor in Phase 2.
+- **ADR / decision-log discipline** (MADR, or a feature adr-tools can't replicate) —
+  **RETAIN**: ADR-017 existential-challenge + supersede-via-historian (WORK-0027) is
+  not an adr-tools feature.
+- **PR-template enforcement** (justify local+CI symmetry or replace with Danger) —
+  **RETAIN**: the same check runs locally and in CI; WORK-0041 refined it.
+- **Routing table (SKILL.md)** (shrink to genuinely-Hedl flows) — **EXTEND to
+  Phase 2**: not shrunk in Phase 1.
+- **Hooks** (one behavior-changing instance per hook per phase) — **EXTEND to
+  Phase 2**: not rigorously demonstrated per-hook.
+- **Budget tier accounting** (show one rescued-deferral case) — **EXTEND to Phase 2**
+  (operator decision): Phase-1 window closed with no case; kept rather than cut,
+  window extended to the Phase-2 boundary.
+- **Self-improvement loop** (land ≥1 /contribute PR end-to-end) —
+  **CULLING-CANDIDATE**: zero such PRs by window end; per the stated rule, demoted;
+  decide cull-or-prove in Phase 2.
+- **Multi-operator coordination** (a real `--streams` save or fold to CCPM) —
+  **CULLING-CANDIDATE**: no real multi-operator save (single operator); carried by
+  WORK-0006/0059, decide in Phase 2.
+- **Workstream templates** (ship both templates as real files) — **EXTEND to
+  Phase 2**: not shipped (WORK-0011 deferred); prose `docs/templates/bootstrap-adopter.md`
+  serves below the threshold.
+
+Two items (self-improvement loop, multi-operator coordination) are now explicit
+culling-candidates carried with a Phase-2 decision date; the rest retain or extend.

@@ -35,7 +35,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": null,
+  "next_item": "WORK-0001",
   "blockers": [],
-  "notes": "WORK-0014 delivered via /iterate; PR raised, awaiting operator merge. active_item null. 8 Phase-1 items remain, ALL held or /phase-complete-gated: WORK-0001 (held a/b/c), WORK-0015 (terminology sweep; depends on cluster decision), WORK-0010/0011 (MODEL cull-vs-keep), WORK-0032/0033 (github-issues go/no-go), WORK-0035 (external review kit), WORK-0018 (tracker, closes last). The clean do-now queue is exhausted again. STRONG RECOMMENDATION: /phase-complete next — it makes the cull / go-no-go / reclassification decisions for the remaining 8. Agenda: recursive-cluster cull (WORK-0010/0011/ADR-031); github-issues limits + WORK-0032/0033 go/no-go; budget_manager culling; WORK-0001 approach; then reclassify/close the rest."
+  "notes": "Phase 1 COMPLETE -> Phase 2 (Adoption readiness & deferred-bet resolution). Release 0.1.0. active_item null. First task: WORK-0001 (consumer install path) — needs the held a/b/c fix-approach pick. Phase-2 DoD forces cull-or-prove on the deferred bets (github-issues dogfood, recursive cluster, budget_manager, self-improvement loop, multi-operator) — no third deferral. LG2/LG3 inherited."
 }
