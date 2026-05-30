@@ -24,23 +24,6 @@
       ]
     },
     {
-      "id": "WORK-0027",
-      "title": "docs: reconcile workstream double-definition (recursive container vs WS-PLAN/REQ/TECH/ARCH categories)",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "docs",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — `standards.md` and `iterate.md` define workstream as one of four fixed categories (WS-PLAN/WS-REQ/WS-TECH/WS-ARCH); ADR-019 redefines workstream as a recursive container subsuming phase and work-item. Both meanings are live in shipped files; the contradiction will confuse any reader. Pick one canonical meaning and rename the other. Recommended: keep ADR-019's recursive workstream as the canonical primitive, and rename the four-category taxonomy to something narrower (e.g., 'work-class' or 'workstream-class') across standards.md, iterate.md, work.json, and any code paths that read the WS-* prefix. Pair with WORK-0015 (terminology audit) if helpful, but resolve the double-definition first so the audit has a target.",
-      "acceptance_criteria": [
-        "A single canonical meaning of 'workstream' is established and anchored in standards.md (the four-category work classification) with ADR-019 superseded to match; repo-wide prose alignment of surviving recursive-sense usages (ADR-020/021/031, alternatives.md, bootstrap-adopter.md) is tracked by WORK-0015. (Original wording 'across all shipped docs and code' tightened — see reframe.)",
-        "The competing meaning is resolved consistently. Chosen direction: the live four-category work classification (WS-PLAN/REQ/TECH/ARCH) is canonical and retained unchanged in standards.md, iterate.md routing, and the work.json `workstream` field (no data migration; no am_i_done.py/install.py logic reads WS-*). The recursive-container meaning is deferred (WORK-0010), not renamed.",
-        "ADR-019 reads as the source of truth for the recursive primitive (or, if the four-category meaning wins, ADR-019 is superseded with rationale).",
-        "am_i_done.py passes."
-      ],
-      "reframe": "AC2 originally read 'The other meaning is renamed consistently ... rename the four-category taxonomy to work-class ... across standards.md, iterate.md, work.json, and any code paths that read the WS-* prefix', per a recommendation to make ADR-019's recursive workstream canonical. Reversed 2026-05-30 (operator-approved): the four-category meaning is LIVE and behaviour-driving (58 work items, /iterate routing) while the recursive model is unbuilt and demand-gated (WORK-0010, below its own threshold per the 2026-05-29 dogfood). Renaming 58 data items + routing to serve an unbuilt model is the goal-displacement Phase 1 is unwinding. Resolved instead by keeping the four-category meaning canonical (standards.md) and superseding ADR-019 (AC3's explicit alternative). Full prose sweep of downstream usages (ADR-020/021, alternatives.md, bootstrap-adopter.md) is WORK-0015's terminology-audit scope, which depends on this decision."
-    },
-    {
       "id": "WORK-0007",
       "title": "feat: audit and harden the github-issues state backend",
       "phase": 1,
@@ -1205,6 +1188,26 @@
       "started_date": "2026-05-30",
       "completed_date": "2026-05-30",
       "resolution": "Reconciled .work/ vs skill/hedl/work-state/ as template-vs-projection, not duplicated state (see reframe field). Delivered the retain-and-guard model: new am_i_done.py `state-sync` check byte-compares the guarded framework-config subset (config/dispatch-rules.json, config/markdown-schemas.json, decisions/README.md, reviews/README.md) between live .work/ and the work-state seed; framework-repo-scoped (skill/hedl/ at root), no-op for adopters; reads are containment-checked, isfile-guarded, size-capped and OSError-wrapped (no raw traceback). Docs in getting-started.md; AC4 covered by a fresh-install reproduction test. Adversarial panel (security, determinism, scope, edge-case): cycle 1 found a BLOCKING (unhandled read crash) + a scope BLOCKING (AC4 unmet) + SIGNIFICANTs (false-green on missing tree, AC2 reframe unrecorded); all fixed in cycle 2 (PASS), then 4 residual MINORs closed (realpath containment, empty-set guard, test scope). 398 tests."
+    },
+    {
+      "id": "WORK-0027",
+      "title": "docs: reconcile workstream double-definition (recursive container vs WS-PLAN/REQ/TECH/ARCH categories)",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "docs",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — `standards.md` and `iterate.md` define workstream as one of four fixed categories (WS-PLAN/WS-REQ/WS-TECH/WS-ARCH); ADR-019 redefines workstream as a recursive container subsuming phase and work-item. Both meanings are live in shipped files; the contradiction will confuse any reader. Pick one canonical meaning and rename the other. Recommended: keep ADR-019's recursive workstream as the canonical primitive, and rename the four-category taxonomy to something narrower (e.g., 'work-class' or 'workstream-class') across standards.md, iterate.md, work.json, and any code paths that read the WS-* prefix. Pair with WORK-0015 (terminology audit) if helpful, but resolve the double-definition first so the audit has a target.",
+      "acceptance_criteria": [
+        "A single canonical meaning of 'workstream' is established and anchored in standards.md (the four-category work classification) with ADR-019 superseded to match; repo-wide prose alignment of surviving recursive-sense usages (ADR-020/021/031, alternatives.md, bootstrap-adopter.md) is tracked by WORK-0015. (Original wording 'across all shipped docs and code' tightened — see reframe.)",
+        "The competing meaning is resolved consistently. Chosen direction: the live four-category work classification (WS-PLAN/REQ/TECH/ARCH) is canonical and retained unchanged in standards.md, iterate.md routing, and the work.json `workstream` field (no data migration; no am_i_done.py/install.py logic reads WS-*). The recursive-container meaning is deferred (WORK-0010), not renamed.",
+        "ADR-019 reads as the source of truth for the recursive primitive (or, if the four-category meaning wins, ADR-019 is superseded with rationale).",
+        "am_i_done.py passes."
+      ],
+      "reframe": "AC2 originally read 'The other meaning is renamed consistently ... rename the four-category taxonomy to work-class ... across standards.md, iterate.md, work.json, and any code paths that read the WS-* prefix', per a recommendation to make ADR-019's recursive workstream canonical. Reversed 2026-05-30 (operator-approved): the four-category meaning is LIVE and behaviour-driving (58 work items, /iterate routing) while the recursive model is unbuilt and demand-gated (WORK-0010, below its own threshold per the 2026-05-29 dogfood). Renaming 58 data items + routing to serve an unbuilt model is the goal-displacement Phase 1 is unwinding. Resolved instead by keeping the four-category meaning canonical (standards.md) and superseding ADR-019 (AC3's explicit alternative). Full prose sweep of downstream usages (ADR-020/021, alternatives.md, bootstrap-adopter.md) is WORK-0015's terminology-audit scope, which depends on this decision.",
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "resolution": "Resolved the 'workstream' double-definition by keeping the live four-category work classification (WS-PLAN/REQ/TECH/ARCH) canonical (standards.md) and superseding ADR-019 (recursive-container model deferred to WORK-0010, not rejected; WS-* never renamed). No data migration. Reversed the work item's original 'rename the taxonomy' recommendation (operator-approved); reframe recorded. Adversarial panel (historian, scope-auditor, existential-challenger, contradiction-finder, devil-advocate): CONDITIONAL -> fixed the 3 convergent SIGNIFICANTs (retargeted the now-zombie WORK-0015, tightened AC1, made the no-WS-migration explicit) -> PASS. Recorded for /phase-complete: keep-deferred vs cull of the recursive cluster (WORK-0010, ADR-031). Downstream prose sweep is WORK-0015 scope."
     }
   ]
 }
