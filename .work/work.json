@@ -24,23 +24,6 @@
       ]
     },
     {
-      "id": "WORK-0025",
-      "title": "refactor: reconcile .work/ and skill/hedl/work-state/ duplicated state",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "refactor",
-      "status": "backlog",
-      "priority_band": "GOVERNANCE",
-      "description": "Repo-health 2026-05-28 — `.work/config/` and `skill/hedl/work-state/config/` are byte-identical committed twins (same shape for `phases/`, `session.json`, `work.json`). No doc explains the relationship; editing one silently drifts. Decide which is the source of truth (the installable template lives in `skill/hedl/work-state/` and the live repo state lives in `.work/`, which is the most likely intent), then enforce that: either delete the duplicate, or generate one from the other at install time, and add a gate check that catches future drift. Document the relationship in docs/getting-started.md.",
-      "acceptance_criteria": [
-        "Single source of truth chosen and documented: which directory is the installable template, which is live state, and how install.py relates them.",
-        "Duplicate files are eliminated (deleted, generated, or symlinked, per the chosen model).",
-        "Gate check exists for drift between any retained duplicates.",
-        "Tests cover the chosen relationship (fresh install reproduces .work/ from the template).",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0027",
       "title": "docs: reconcile workstream double-definition (recursive container vs WS-PLAN/REQ/TECH/ARCH categories)",
       "phase": 1,
@@ -1199,6 +1182,27 @@
       "started_date": "2026-05-30",
       "completed_date": "2026-05-30",
       "resolution": "Per ADR-018, CLAUDE.md Principle 4 updated from 'One work item at a time' to 'One work item per operator at a time', resolving the historian + contradiction-finder findings from repo-health 2026-05-28. README.md feature bullet paraphrase aligned to the same wording. Kept 'work item' (not 'workstream') deliberately: the workstream-terminology migration is WORK-0027/WORK-0015 scope and still open. SKILL.md and references/ carry no copy of the principle (grep-verified), so no further edits. docs/getting-started.md's terse '/iterate supervised # work one item at a time' comment left as-is — describes a single-operator command mode, not the principle."
+    },
+    {
+      "id": "WORK-0025",
+      "title": "refactor: reconcile .work/ and skill/hedl/work-state/ duplicated state",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "refactor",
+      "status": "complete",
+      "priority_band": "GOVERNANCE",
+      "description": "Repo-health 2026-05-28 — `.work/config/` and `skill/hedl/work-state/config/` are byte-identical committed twins (same shape for `phases/`, `session.json`, `work.json`). No doc explains the relationship; editing one silently drifts. Decide which is the source of truth (the installable template lives in `skill/hedl/work-state/` and the live repo state lives in `.work/`, which is the most likely intent), then enforce that: either delete the duplicate, or generate one from the other at install time, and add a gate check that catches future drift. Document the relationship in docs/getting-started.md.",
+      "acceptance_criteria": [
+        "Single source of truth chosen and documented: which directory is the installable template, which is live state, and how install.py relates them.",
+        "Genuine duplicates are reconciled per the chosen model. Chosen model: retain-and-guard. The two trees are template-vs-projection (skill/hedl/work-state/ seed projected to .work/ live state per tiers.json on_exists:skip), so most files diverge by design (work.json/context.json/session.json/phases/* and the scout-populated config/project-registry.json); only the byte-identical framework-config subset is guarded. No files are deleted or symlinked.",
+        "Gate check exists for drift between any retained duplicates.",
+        "Tests cover the chosen relationship (fresh install reproduces .work/ from the template).",
+        "am_i_done.py passes."
+      ],
+      "reframe": "AC2 originally read 'Duplicate files are eliminated (deleted, generated, or symlinked, per the chosen model).' Reconciled 2026-05-30 during implementation: the premise that the two trees are duplicated state was a misdiagnosis. They are template (skill/hedl/work-state/) vs projection (.work/); deleting/symlinking would break the projection model and per-project state divergence. The chosen model is retain-and-guard, which AC3 already anticipated ('drift between any retained duplicates'). Delivered as the am_i_done.py state-sync check + tests + docs/getting-started.md.",
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "resolution": "Reconciled .work/ vs skill/hedl/work-state/ as template-vs-projection, not duplicated state (see reframe field). Delivered the retain-and-guard model: new am_i_done.py `state-sync` check byte-compares the guarded framework-config subset (config/dispatch-rules.json, config/markdown-schemas.json, decisions/README.md, reviews/README.md) between live .work/ and the work-state seed; framework-repo-scoped (skill/hedl/ at root), no-op for adopters; reads are containment-checked, isfile-guarded, size-capped and OSError-wrapped (no raw traceback). Docs in getting-started.md; AC4 covered by a fresh-install reproduction test. Adversarial panel (security, determinism, scope, edge-case): cycle 1 found a BLOCKING (unhandled read crash) + a scope BLOCKING (AC4 unmet) + SIGNIFICANTs (false-green on missing tree, AC2 reframe unrecorded); all fixed in cycle 2 (PASS), then 4 residual MINORs closed (realpath containment, empty-set guard, test scope). 398 tests."
     }
   ]
 }

@@ -193,6 +193,27 @@ class TestLightweightTierInstall(unittest.TestCase):
         M.cmd_install(self._args())
         self.assertTrue((self.tmp / "docs/spec/prd-template.md").exists())
 
+    def test_fresh_install_reproduces_work_state_from_template(self) -> None:
+        """AC4 (WORK-0025): a fresh install materialises .work/ as a faithful
+        byte-for-byte copy of the skill/hedl/work-state/ template."""
+        import os as _os
+        M.cmd_install(self._args())
+        template_root = M.SKILL_ROOT / "work-state"
+        live_root = self.tmp / ".work"
+        compared = 0
+        for dirpath, _dirs, filenames in _os.walk(template_root):
+            for fn in filenames:
+                src = pathlib.Path(dirpath) / fn
+                rel = src.relative_to(template_root)
+                dst = live_root / rel
+                self.assertTrue(dst.exists(), f"{rel} not reproduced in .work/")
+                self.assertEqual(
+                    src.read_bytes(), dst.read_bytes(),
+                    f"{rel} differs between template and fresh .work/",
+                )
+                compared += 1
+        self.assertGreater(compared, 0, "no template files compared")
+
 
 class TestStatusAndDoctor(unittest.TestCase):
     def setUp(self) -> None:
