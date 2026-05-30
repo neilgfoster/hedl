@@ -14,6 +14,7 @@ import sys
 import tempfile
 import unittest
 from typing import Any
+from unittest import mock
 
 _SCRIPT = pathlib.Path(__file__).resolve().parent.parent / "scripts" / "budget_manager.py"
 
@@ -119,6 +120,52 @@ class TestTierLogic(unittest.TestCase):
                 mod._save_budget(budget)
                 self.assertEqual(mod.get_tier(), expected,
                     msg=f"At {n} invocations expected {expected}")
+
+
+class TestGateOnlyTier(unittest.TestCase):
+    """WORK-0002: a state-mutating budget op must not create .work/ in a
+    gate-only repo (no .work/ by design). Read commands are unaffected."""
+
+    def _run_main(self, mod: Any, argv: list[str]) -> int:
+        with mock.patch.object(sys, "argv", ["budget_manager.py", *argv]):
+            return int(mod.main())
+
+    # Every state-mutating command, with representative args.
+    _MUTATING_INVOCATIONS = {
+        "record": ["record", "5"],
+        "reset": ["reset"],
+        "defer": ["defer", "--pr", "1", "--branch", "b", "--agents", "x"],
+        "drain": ["drain", "1"],
+        "record-panel": ["record-panel", "--pr", "1", "--agents", "x"],
+    }
+
+    def test_no_mutating_command_creates_work_dir_when_absent(self) -> None:
+        # Covers the whole _MUTATING set so a new writer not added to the guard
+        # (or a member removed from it) is caught here.
+        mod_probe = _load_module(pathlib.Path("/nonexistent-probe"))
+        self.assertEqual(
+            set(self._MUTATING_INVOCATIONS), mod_probe._MUTATING_COMMANDS,
+            "test invocation table is out of sync with budget_manager._MUTATING_COMMANDS")
+        for cmd, argv in self._MUTATING_INVOCATIONS.items():
+            with self.subTest(cmd=cmd), tempfile.TemporaryDirectory() as tmp:
+                tmp_root = pathlib.Path(tmp)
+                mod = _load_module(tmp_root)
+                rc = self._run_main(mod, argv)
+                self.assertEqual(rc, 0, f"{cmd} should no-op (exit 0)")
+                self.assertFalse(
+                    (tmp_root / ".work").exists(),
+                    f"{cmd} created .work/ in a gate-only repo")
+
+    def test_record_writes_when_work_dir_exists(self) -> None:
+        # Team/lightweight behaviour unchanged: .work/ present -> record writes.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = pathlib.Path(tmp)
+            (tmp_root / ".work").mkdir()
+            mod = _load_module(tmp_root)
+            rc = self._run_main(mod, ["record", "5"])
+            self.assertEqual(rc, 0)
+            self.assertTrue((tmp_root / ".work" / "budget.json").exists(),
+                            "budget.json should be written when .work/ exists")
 
 
 if __name__ == "__main__":
