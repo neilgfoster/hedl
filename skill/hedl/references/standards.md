@@ -104,9 +104,10 @@ source-derived counts is instead caught by WORK-0028's drift-detector.
 
 ## Work item workstreams
 
-Each work item belongs to one workstream. The workstream appears in `work.json`
-as the `workstream` field and is used by `/iterate` to select appropriate tools
-and context.
+A **workstream** is one of four fixed work classifications, and each work item
+belongs to exactly one. This is the canonical meaning of "workstream" across
+Hedl's docs, state, and routing: it appears in `work.json` as the `workstream`
+field and is used by `/iterate` to select appropriate tools and context.
 
 | ID | Name | When to use |
 |---|---|---|
@@ -117,6 +118,16 @@ and context.
 
 If the work does not clearly fit one category, prefer `WS-PLAN` for process
 work and `WS-ARCH` for any decision that affects the codebase structure.
+
+> **One meaning of "workstream."** A separate recursive-container model — a
+> single primitive subsuming phase and work item — was proposed in ADR-019 but
+> is **deferred and unbuilt**, gated on demand (WORK-0010); the 2026-05-29
+> dogfood found prose templates outperform it below ~5-7 concurrently-active
+> work-trees (the deferred recursive units). "Workstream" means the work
+> classification defined above and keeps that name regardless; if the recursive
+> model is ever built it takes a non-colliding name, not "workstream". ADR-019 is
+> superseded by this definition (see its Status note). This resolves the prior
+> double-definition (WORK-0027).
 
 ---
 

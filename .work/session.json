@@ -1,6 +1,7 @@
 {
   "date": "2026-05-30",
   "completed": [
+    "WORK-0027: resolved the 'workstream' double-definition — four-category work classification is canonical (standards.md); ADR-019 superseded, recursive model deferred to WORK-0010 (WS-* never renamed). Reversed the work item's original recommendation (operator-approved). 5-agent panel PASS after fixing 3 SIGNIFICANTs (retargeted zombie WORK-0015, tightened AC1, explicit no-WS-migration). Review records persisted.",
     "WORK-0025: reconciled .work/ vs skill/hedl/work-state/ as template-vs-projection (not duplicated state). Added am_i_done.py `state-sync` gate check (byte-compare guarded framework-config subset, framework-repo-scoped, hardened reads) + getting-started.md docs + AC4 install-reproduction test. Reframed AC2 from 'eliminate the duplicate' to retain-and-guard (recorded on the work item). Adversarial panel PASS after 1 fix cycle; 4 residual MINORs closed. 398 tests.",
     "WORK-0009: CLAUDE.md Principle 4 -> 'One work item per operator at a time' (ADR-018); README bullet aligned; SKILL.md/references grep-clean. Adversarial panel (scope-auditor, historian, contradiction-finder) PASS — 2 SIGNIFICANT downgraded to MINOR on rebuttal, contradiction-finder empty. Kept 'work item' (workstream migration = WORK-0027/0015).",
     "WORK-0017: phase definitions + Phase 0->1 transition (PR #20).",
@@ -28,7 +29,7 @@
     "cmd[0] must be a bare name (closes abs-path bypass without breaking .venv/node_modules PATH resolution); denylist enforced in two layers.",
     "WORK-0037 scope-auditor FAIL (net-new artefact vs phase-1 anti-goal-displacement) overridden: operator deems a hand-maintained ADOPTERS.md a justified OSS convention, not process accretion."
   ],
-  "next_item": "WORK-0027",
+  "next_item": "WORK-0007",
   "blockers": [],
-  "notes": "WORK-0025 delivered via /iterate; PR raised, awaiting operator merge. active_item null. 15 Phase-1 items remain. Recorded follow-up: unify realpath-contained reads across check_config + check_state_template_sync (codebase-wide hardening, out of WORK-0025 scope). Next per priority: WORK-0027 (workstream double-definition) then WORK-0007 (github-issues backend)."
+  "notes": "WORK-0027 delivered via /iterate+/pr-ready; PR raised, awaiting operator merge. active_item null. 14 Phase-1 items remain. FLAGGED FOR /phase-complete existential review: decide keep-deferred vs cull of the recursive-workstream cluster (WORK-0010 MODEL, ADR-031 Proposed) — that decision also sets WORK-0015's final shape. Standing follow-up: shared realpath-contained read helper across check_config + check_state_template_sync. Next per priority: WORK-0007 (github-issues backend audit)."
 }
