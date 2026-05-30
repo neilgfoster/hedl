@@ -292,24 +292,6 @@
       ]
     },
     {
-      "id": "WORK-0041",
-      "title": "fix: gate PR-template check exempts bot-authored (Dependabot) PRs",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "status": "backlog",
-      "priority_band": "normal",
-      "dependencies": [],
-      "description": "Observed 2026-05-29 while triaging Dependabot PRs #39/#41/#42: am_i_done's --pr template check (check_pr_template.py) fails on every Dependabot PR because the bot's body does not match PULL_REQUEST_TEMPLATE.md. The operator had to hand-rewrite each PR body to satisfy Summary/Work item/Type/Changes/Validation and then `gh pr update-branch` to re-run the gate before the bot PR could go green and merge — three times in one session. Remove the friction: the template check should exempt (or minimally auto-satisfy) PRs authored by the Dependabot app. Security note (this is gate code, ADR-003 / RCE-area discipline): the exemption MUST key off the verified PR author login being the Dependabot bot (e.g. `gh pr view --json author`), never a body marker or branch-name string, both of which a malicious PR could spoof to skip template enforcement.",
-      "acceptance_criteria": [
-        "am_i_done.py --pr N template check skips (or auto-passes) when the PR author is the Dependabot app, verified via the GitHub author login (gh pr view --json author), not body text or branch name.",
-        "Human-authored PRs remain fully enforced: an incomplete human PR body still FAILs the template check.",
-        "Regression test: a Dependabot-authored PR context passes the template check with an unmodified bot body; a human PR with a placeholder/empty body still fails. Test fails before the fix, passes after.",
-        "Behaviour documented where the template check is described (pr-ready.md / references/commands.md or check_pr_template docstring).",
-        "am_i_done.py passes."
-      ]
-    },
-    {
       "id": "WORK-0043",
       "title": "feat: install.py --copy mode detects and warns on local drift to projected files",
       "phase": 2,
@@ -1255,6 +1237,27 @@
       "started_date": "2026-05-30",
       "completed_date": "2026-05-30",
       "resolution": "install.py _load_tiers now raises TiersConfigError (caught by main() -> clean exit 1, no traceback) for a missing, unreadable, invalid-JSON, non-UTF-8, or wrong-shape tiers.json, mirroring WORK-0022. 4-agent panel (security, determinism, scope, edge-case): edge-case-hunter caught two BLOCKING traceback paths the first cut missed (UnicodeDecodeError on a binary file = a ValueError, not OSError/JSONDecodeError; and valid-JSON-wrong-shape crashing a caller); both fixed with a ValueError catch + a shape guard, plus split OSError/JSON clauses and strerror to avoid a misleading message / path duplication. Tests cover missing, corrupt, binary, wrong-shape, and valid-still-loads. 407 tests."
+    },
+    {
+      "id": "WORK-0041",
+      "title": "fix: gate PR-template check exempts bot-authored (Dependabot) PRs",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "status": "complete",
+      "priority_band": "normal",
+      "dependencies": [],
+      "description": "Observed 2026-05-29 while triaging Dependabot PRs #39/#41/#42: am_i_done's --pr template check (check_pr_template.py) fails on every Dependabot PR because the bot's body does not match PULL_REQUEST_TEMPLATE.md. The operator had to hand-rewrite each PR body to satisfy Summary/Work item/Type/Changes/Validation and then `gh pr update-branch` to re-run the gate before the bot PR could go green and merge — three times in one session. Remove the friction: the template check should exempt (or minimally auto-satisfy) PRs authored by the Dependabot app. Security note (this is gate code, ADR-003 / RCE-area discipline): the exemption MUST key off the verified PR author login being the Dependabot bot (e.g. `gh pr view --json author`), never a body marker or branch-name string, both of which a malicious PR could spoof to skip template enforcement.",
+      "acceptance_criteria": [
+        "am_i_done.py --pr N template check skips (or auto-passes) when the PR author is the Dependabot app, verified via the GitHub author login (gh pr view --json author), not body text or branch name.",
+        "Human-authored PRs remain fully enforced: an incomplete human PR body still FAILs the template check.",
+        "Regression test: a Dependabot-authored PR context passes the template check with an unmodified bot body; a human PR with a placeholder/empty body still fails. Test fails before the fix, passes after.",
+        "Behaviour documented where the template check is described (pr-ready.md / references/commands.md or check_pr_template docstring).",
+        "am_i_done.py passes."
+      ],
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "resolution": "Gate's --pr template check (am_i_done.py check_template) now exempts Dependabot-authored PRs, keyed off the GitHub-verified author (is_bot AND login in {app/dependabot, dependabot[bot]}, confirmed against PR #39) — never body/branch (spoofable). Human PRs stay fully enforced; fails closed for any non-Dependabot/missing-author case. Documented in standards.md. 4-agent panel (security, determinism, scope, edge-case): determinism+scope clean; two BLOCKINGs rebutted with reasoning (App slugs are globally unique so the login is not spoofable; TOCTOU handled by the PR-gate re-run on synchronize); defensive tests added (is_bot=1 not exempt, null author not exempt, dependabot[bot] variant exempt). 413 tests. Optional future hardening noted: App-ID pinning; verified-bot allowlist if Renovate adopted."
     }
   ]
 }
