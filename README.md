@@ -32,19 +32,18 @@ tracker you already use, not in place of it. Distributed as an Agent Skill.
 
 ## The gate
 
-Hedl's differentiator is a **deterministic completion gate**: `am_i_done.py`
-runs the same pass/fail checks locally and in CI — clean tree, branch naming, PR template,
-stale work-item IDs, lint, types, tests, unresolved review threads, Dependabot alerts. No
-inference; a task is done when the gate says so. Everything else is opt-in scaffolding
-around that gate.
+The completion gate — a checklist an agent must satisfy before it declares a change done —
+is **not Hedl's idea**. It comes from [oven-sh/bun](https://github.com/oven-sh/bun)'s
+`CLAUDE.md` (symlinked as `AGENTS.md`), which instructs the agent under *Important Development
+Notes*: "ONLY push up changes after running `bun bd test <file>` and ensuring your tests
+pass." That is where Hedl got it.
 
-The *idea* of a completion gate in agent instructions is not Hedl's: it comes from
-[oven-sh/bun](https://github.com/oven-sh/bun)'s `CLAUDE.md` (symlinked as `AGENTS.md`),
-which instructs the agent under *Important Development Notes*: "ONLY push up changes after
-running `bun bd test <file>` and ensuring your tests pass." That is where Hedl got it.
-Hedl's contribution is the *deterministic* form — a standalone script (the script decides,
-not the agent) that bundles the checks above into one exit code, runs identically on the
-desk and in CI, and is aware of work-item state. See [Alternatives](docs/alternatives.md).
+What Hedl adds is making the gate **deterministic**: `am_i_done.py` runs the same pass/fail
+checks locally and in CI — clean tree, branch naming, PR template, stale work-item IDs, lint,
+types, tests, unresolved review threads, Dependabot alerts. No inference; the script decides,
+not the agent; a task is done when the gate says so. That deterministic, CI-symmetric,
+work-item-aware form — not the idea of a gate — is what differentiates Hedl. Everything else
+is opt-in scaffolding around that gate. See [Alternatives](docs/alternatives.md).
 
 Three opt-in tiers:
 
