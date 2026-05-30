@@ -187,8 +187,31 @@ MIGRATIONS: list[tuple[str | None, str, Callable[[Path], None]]] = [
 
 
 def _load_tiers() -> Any:
-    with TIERS_FILE.open() as f:
-        return json.load(f)
+    # A missing, unreadable, or structurally-invalid bundled manifest must surface
+    # as a clean non-zero exit (TiersConfigError, caught in main()), never a raw
+    # traceback (WORK-0048, mirroring the includes-path handling from WORK-0022).
+    try:
+        with TIERS_FILE.open(encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError as exc:
+        raise TiersConfigError(
+            f"tier manifest not found at {TIERS_FILE} — the Hedl install is incomplete"
+        ) from exc
+    except OSError as exc:
+        raise TiersConfigError(
+            f"tier manifest {TIERS_FILE} could not be read: {exc.strerror or exc}"
+        ) from exc
+    except ValueError as exc:  # json.JSONDecodeError and UnicodeDecodeError both subclass ValueError
+        raise TiersConfigError(
+            f"tier manifest {TIERS_FILE} is not valid UTF-8 JSON: {exc}"
+        ) from exc
+    # Parseable but wrong shape (e.g. a list or scalar) would otherwise crash a
+    # caller with an unhandled TypeError/KeyError; reject it as a clean error too.
+    if not isinstance(data, dict) or not isinstance(data.get("tiers"), dict):
+        raise TiersConfigError(
+            f"tier manifest {TIERS_FILE} must be a JSON object with a 'tiers' table"
+        )
+    return data
 
 
 class TiersConfigError(Exception):
