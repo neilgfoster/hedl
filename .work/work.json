@@ -24,27 +24,6 @@
       ]
     },
     {
-      "id": "WORK-0007",
-      "title": "feat: audit and harden the github-issues state backend",
-      "phase": 1,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "DEFERRED",
-      "description": "Per ADR-018, team tier inherits multi-operator semantics from the chosen state backend (GitHub Issues today). Audit the existing github-issues backend in install.py / am_i_done.py: does Hedl read GitHub assignees correctly? How are concurrent claims handled? Does the gate detect file-level conflicts across PRs from different operators? Fix or document any gaps found. Reactive trigger: the operator asked how to move Hedl's own work queue to GitHub Issues. Per ADR-022, this is the architectural commitment Hedl is most expected to deliver on. Current depth: am_i_done.py reads open issues for the stale-WORK-ID gate check; everything else (write-back on status change, label scheme, multi-operator integration) is unverified or unbuilt. WORK-0007 is the prerequisite for WORK-0032 and WORK-0033.",
-      "acceptance_criteria": [
-        "Audit report committed (e.g. as a /repo-health-style review).",
-        "GitHub assignees are read into Hedl's view of work-item state.",
-        "Two operators claiming the same issue is detected and surfaced.",
-        "File-level conflict across operator PRs is caught by `--streams` (verify with a test).",
-        "Gaps are either fixed or documented as separate backlog items with clear scope.",
-        "am_i_done.py passes.",
-        "Document the read paths in skill/hedl/references/backends.md (or equivalent): which gate checks consult the backend, what queries they issue, what schema they expect.",
-        "Document the write paths that NEED to exist: status transitions on /finish-task, assignee updates, /phase-complete close-out, etc. Distinguish 'wired and working' from 'not yet built'.",
-        "Propose a label scheme: phase-N, change-class:X, workstream:WS-Y, priority_band:Z, and a hedl:work scope label. Open for refinement in WORK-0032."
-      ]
-    },
-    {
       "id": "WORK-0032",
       "title": "feat: state-backend migration script (local-file -> github-issues)",
       "phase": 1,
@@ -1242,6 +1221,30 @@
       "started_date": "2026-05-30",
       "completed_date": "2026-05-30",
       "resolution": "Resolved the 'workstream' double-definition by keeping the live four-category work classification (WS-PLAN/REQ/TECH/ARCH) canonical (standards.md) and superseding ADR-019 (recursive-container model deferred to WORK-0010, not rejected; WS-* never renamed). No data migration. Reversed the work item's original 'rename the taxonomy' recommendation (operator-approved); reframe recorded. Adversarial panel (historian, scope-auditor, existential-challenger, contradiction-finder, devil-advocate): CONDITIONAL -> fixed the 3 convergent SIGNIFICANTs (retargeted the now-zombie WORK-0015, tightened AC1, made the no-WS-migration explicit) -> PASS. Recorded for /phase-complete: keep-deferred vs cull of the recursive cluster (WORK-0010, ADR-031). Downstream prose sweep is WORK-0015 scope."
+    },
+    {
+      "id": "WORK-0007",
+      "title": "feat: audit and harden the github-issues state backend",
+      "phase": 1,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "complete",
+      "priority_band": "DEFERRED",
+      "description": "Per ADR-018, team tier inherits multi-operator semantics from the chosen state backend (GitHub Issues today). Audit the existing github-issues backend in install.py / am_i_done.py: does Hedl read GitHub assignees correctly? How are concurrent claims handled? Does the gate detect file-level conflicts across PRs from different operators? Fix or document any gaps found. Reactive trigger: the operator asked how to move Hedl's own work queue to GitHub Issues. Per ADR-022, this is the architectural commitment Hedl is most expected to deliver on. Current depth: am_i_done.py reads open issues for the stale-WORK-ID gate check; everything else (write-back on status change, label scheme, multi-operator integration) is unverified or unbuilt. WORK-0007 is the prerequisite for WORK-0032 and WORK-0033.",
+      "acceptance_criteria": [
+        "Audit report committed (e.g. as a /repo-health-style review).",
+        "GitHub assignees are read into Hedl's view of work-item state.",
+        "Two operators claiming the same issue is detected and surfaced.",
+        "File-level conflict across operator PRs is caught by `--streams` (verify with a test).",
+        "Gaps are either fixed or documented as separate backlog items with clear scope.",
+        "am_i_done.py passes.",
+        "Document the read paths in skill/hedl/references/backends.md (or equivalent): which gate checks consult the backend, what queries they issue, what schema they expect.",
+        "Document the write paths that NEED to exist: status transitions on /finish-task, assignee updates, /phase-complete close-out, etc. Distinguish 'wired and working' from 'not yet built'.",
+        "Propose a label scheme: phase-N, change-class:X, workstream:WS-Y, priority_band:Z, and a hedl:work scope label. Open for refinement in WORK-0032."
+      ],
+      "started_date": "2026-05-30",
+      "completed_date": "2026-05-30",
+      "resolution": "Audited the github-issues state backend (AC1) and documented it in skill/hedl/references/backends.md: read paths (the one wired stale-WORK-ID query), write paths (all unbuilt — read-only backend), the proposed label scheme (AC7/8/9), and a Known-limitations section. Cheap fixes the audit found: the silent --limit 200 cap (dropped live IDs) is now a higher cap that FAILs loudly on an incomplete read; a null-title TypeError crash fixed. AC4 (--streams cross-operator conflict) verified already covered by TestCheckStreams (backend-agnostic). Per AC5, gaps deferred with clear scope: multi-operator assignee/claim layer -> WORK-0059 (new); hedl:work label-scoped + paginated read, label-on-migration, empty-set/stderr handling -> added to WORK-0032. Operator approved the audit+document+defer scope. 5-agent panel (security, determinism, scope, edge-case, future-engineer): no BLOCKING; findings either fixed or confirmed-and-deferred. 400 tests. WORK-0007 unblocks WORK-0032/0033."
     }
   ]
 }
