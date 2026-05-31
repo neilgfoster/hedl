@@ -33,12 +33,19 @@ jobs:
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd  # v5.0.1
 
-      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b  # v8.1.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
-          enable-cache: true
+          python-version: ${{ matrix.python-version }}
 
+      # Gate-tier adopters get requirements-ci.txt but NOT pyproject.toml/uv.lock,
+      # so this installs the gate's dev toolchain from the one projected manifest
+      # (WORK-0068). Hedl's own .github/workflows/am-i-done.yml is a separate copy
+      # that keeps `uv sync --frozen` because the framework repo ships the lockfile.
       - name: Install dev dependencies
-        run: uv sync --frozen --only-group dev --python ${{ matrix.python-version }}
+        # --require-hashes enforces the sha256 pins uv export wrote into the file
+        # (every package is hashed), so the gate-tier adopter install is verified,
+        # not just version-pinned.
+        run: pip install --require-hashes -r requirements-ci.txt
 
       - name: Run am_i_done
-        run: uv run --python ${{ matrix.python-version }} python .github/scripts/am_i_done.py --pr "$PR_NUMBER"
+        run: python .github/scripts/am_i_done.py --pr "$PR_NUMBER"
