@@ -22,6 +22,14 @@ pattern-wide, or AC-sanctioned design choices, recorded as follow-ups).
 | Test coverage | PASS — skip-in-adopter + enforced-in-framework added; existing docs-index fixtures updated with the framework marker |
 | Test isolation | PASS after fix — `_run` now uses `mock.patch.object` (matches test_docs_index.py) |
 
+## Strengths
+
+- Mirrors the established `check_state_template_sync` adopter-skip pattern rather
+  than inventing a new framework-detection signal — the AC-required, consistent choice.
+- Fixes a verified adopter-blocking bug (fresh lightweight-tier install's first gate
+  run went red on the projected docs/spec/ templates) with a 12-line guard + tests.
+- Keeps framework-repo enforcement intact, with an explicit regression test.
+
 ## Blocking Findings
 
 None.
