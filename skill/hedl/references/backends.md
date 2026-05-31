@@ -15,6 +15,41 @@ proposed for the migration (WORK-0032/0033).
 
 ---
 
+## `.work/` as the cross-harness work-item layer (WORK-0076)
+
+ADR-036 (DIRECTION-2) positions `.work/` as **"the substrate that makes the gate
+work-item-aware"** — a work-item state layer, not a competing task tracker. Two
+properties make it cross-harness:
+
+- **Stdlib-readable, tool-independent (capability).** It is plain JSON on disk
+  (`work.json`, `context.json`, `phases/*.json`), read with the standard library —
+  no Hedl runtime or LLM in the read path. So *any* harness that can read a file
+  could consume it; the gate (`am_i_done.py`) is itself one such stdlib reader.
+  (Projecting Hedl into non-Claude harnesses is a separate, unbuilt item —
+  WORK-0047; this is the layer's portability, not shipped multi-harness support.)
+- **What makes the gate "work-item-aware" is what it reads from this layer:** the
+  stale-WORK-ID check (`check_commands`) and the work-item read (`_load_work_items`)
+  consult `work.json` (see Read paths below); `check_config` reads
+  `.work/config/dispatch-rules.json`; `check_markdown_schemas` reads
+  `.work/config/markdown-schemas.json`; `check_state_template_sync` guards the
+  framework-config subset. The layer is the *input*; the gate is a consumer.
+- **No lock-in — the gate-only tier's default run needs no `.work/`.** The gate
+  tier projects no `.work/`, and every `.work/`-reading check in the **default
+  run** skips cleanly when it is absent rather than failing: `check_config` → skip,
+  `check_commands` → skip, `check_markdown_schemas` → skip, `check_state_template_sync`
+  → skip (adopter layout), `_load_work_items_local` → empty set, and the gate's own
+  `_append_gate_insight` no-ops without creating `.work/` (cf. `budget_manager`,
+  WORK-0002). So an adopter runs the bare gate with zero `.work/` adoption; native
+  plan-mode / TodoWrite / memory serve ad-hoc tracking. (`check_dispatch` is the
+  one exception: it requires `dispatch-rules.json` and is opt-in via `--panel` /
+  the team tier, never part of a gate-only default run.) Guarded by
+  `TestGateOnlyNoWorkDir` in `test_am_i_done.py`.
+- **Pluggable (ADR-022).** The same work-item layer is consumable via
+  `[state] backend = "local-file"` (`.work/work.json`) or `"github-issues"` — the
+  rest of this document audits the github-issues backend.
+
+---
+
 ## Read paths (what the gate consults)
 
 | Consumer | Backend call | Expected schema | Status |

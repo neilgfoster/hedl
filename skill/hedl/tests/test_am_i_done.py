@@ -785,6 +785,47 @@ class TestCheckDocsIndexAdopterGuard(unittest.TestCase):
         self.assertFalse(res.passed, "an unlinked framework doc must fail docs-index")
 
 
+class TestGateOnlyNoWorkDir(unittest.TestCase):
+    """WORK-0076: the gate-only tier ships no .work/, so every .work/-reading
+    check must skip cleanly (no lock-in) — proven in one place. The .work/ layer
+    is an input the gate consults, not a dependency it requires."""
+
+    def test_work_item_aware_checks_skip_without_work_dir(self) -> None:
+        # REPO_ROOT = an empty repo: no .work/ and no skill/hedl/ (adopter layout).
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with mock.patch.object(M, "REPO_ROOT", tmpdir):
+                self.assertIsNone(M.check_config(), "check_config must skip with no .work/")
+                self.assertIsNone(M.check_commands(), "check_commands must skip with no work.json")
+                self.assertIsNone(
+                    M.check_state_template_sync(),
+                    "state-template-sync must skip in a no-.work/ adopter layout",
+                )
+                ids, err = M._load_work_items_local()
+                self.assertEqual(ids, set(), "local work-items must be empty with no work.json")
+                self.assertIsNone(err, "absent work.json is not an error — it is no lock-in")
+
+    def test_schemas_check_skips_when_schemas_file_absent(self) -> None:
+        # _SCHEMAS_FILE is a frozen module constant; in a real gate-only adopter it
+        # resolves to an absent .work/config/markdown-schemas.json. Mock that.
+        with mock.patch.object(M, "_SCHEMAS_FILE", "/nonexistent/markdown-schemas.json"):
+            self.assertIsNone(
+                M.check_markdown_schemas(),
+                "schemas check must skip when .work/config/markdown-schemas.json is absent",
+            )
+
+    def test_gate_insight_does_not_create_work_dir(self) -> None:
+        # With insights enabled but no .work/, the gate must NOT create .work/.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with open(os.path.join(tmpdir, "hedl.toml"), "w", encoding="utf-8") as f:
+                f.write("[insights]\nenabled = true\n")
+            with mock.patch.object(M, "REPO_ROOT", tmpdir):
+                M._append_gate_insight(M.Report())
+            self.assertFalse(
+                os.path.isdir(os.path.join(tmpdir, ".work")),
+                "gate must not create .work/ in a gate-only repo (no lock-in)",
+            )
+
+
 class TestCheckTemplate(unittest.TestCase):
     @staticmethod
     def _pr_json(body: str, *, login: str = "alice", is_bot: bool = False) -> str:
