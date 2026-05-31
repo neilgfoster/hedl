@@ -750,6 +750,34 @@ class TestGithubParsedCopies(unittest.TestCase):
         src = (M.SKILL_ROOT / "workflows/am-i-done.yml").resolve()
         self.assertEqual(wf.read_bytes(), src.read_bytes())
 
+    def test_shipped_workflow_install_uses_only_projected_files(self) -> None:
+        # WORK-0068: a fresh gate-tier install must yield a CI workflow whose
+        # dev-toolchain install references only artifacts the gate tier projects.
+        # pyproject.toml / uv.lock are NOT projected, so a `uv sync --frozen`
+        # install step would fail on a fresh adopter repo before the gate runs.
+        M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
+        wf = self.tmp / ".github/workflows/am-i-done.yml"
+        # Scan all non-comment, non-blank lines (so multi-line run: blocks are
+        # covered, while comments — which may mention uv to document the
+        # framework-repo-vs-shipped divergence — are excluded).
+        body = "\n".join(
+            ln for ln in wf.read_text().splitlines()
+            if ln.strip() and not ln.strip().startswith("#")
+        )
+        # The install step must use the one projected manifest, which exists post-install.
+        self.assertIn("requirements-ci.txt", body)
+        self.assertTrue(
+            (self.tmp / "requirements-ci.txt").exists(),
+            "requirements-ci.txt must be projected for the install step to resolve",
+        )
+        # No dependency on unprojected manifests/lockfiles or on uv.
+        for forbidden in ("uv sync", "uv.lock", "pyproject.toml", "uv run"):
+            self.assertNotIn(
+                forbidden,
+                body,
+                f"shipped gate workflow must not run on unprojected artifact: {forbidden}",
+            )
+
     def test_rerun_migrates_existing_symlink_to_copy(self) -> None:
         M.cmd_install(_ns(tier="gate", repo=str(self.tmp), copy=False))
         wf = self.tmp / ".github/workflows/am-i-done.yml"
