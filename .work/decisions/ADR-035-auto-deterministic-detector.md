@@ -81,7 +81,7 @@ passes the current path-only scrub).
 ### Finding 5 — harness-agnostic alignment
 
 A deterministic detector would read stdlib JSON and emit stdlib Python, harness-
-independent — aligning with ADR-034 DIRECTION-2 **if** ratified (ADR-034 is
+independent — aligning with ADR-036 DIRECTION-2 **if** ratified (ADR-036 is
 Proposed). Under DIRECTION-1 the adopter draw is unclear.
 
 ### Finding 6 — goal-displacement
@@ -139,13 +139,44 @@ proves the loop or goes with it.
   Phase-2 decision without building speculative inference machinery, and refuses
   the ADR-003 loophole.
 
+## Prior art
+
+Mandatory per [[ADR-017-adrs-existentially-challenged]]. Overlapping prior art for
+"detect places where inference replaced a deterministic function, and enforce
+deterministically":
+
+- **Internal:** WORK-0028's drift detector (`check_doc_generated_facts`) already
+  catches one ADR-003 violation class (doc-vs-code count drift) with regex +
+  arithmetic, no LLM. It is the model any future detector must follow.
+- **Static analysis / linters:** ruff, mypy, semgrep, AST-based custom checks —
+  the established deterministic way to flag code anti-patterns. A pattern-matcher
+  for ADR-003 anti-patterns (hardcoded lists where an authoritative source exists,
+  dict iteration without explicit sort, timestamp-dependence) is squarely in this
+  lane.
+- **LLM-as-judge:** the pattern this ADR's *rejected* option would have used. Well
+  known (e.g. eval harnesses), but it is the opposite of ADR-003 when placed in an
+  enforcement path.
+
+**What is different / what is uniquely Hedl:** nothing — and that is the point.
+Detection of these anti-patterns is a *solved, deterministic* problem (linters +
+WORK-0028). There is no Hedl-unique reason to introduce an LLM classifier; doing so
+would be strictly worse (anti-ADR-003, token cost, non-reproducible).
+
+**Why the difference is worth the cost:** it is not, today — hence REJECT. If
+demand ever appears, the deterministic pattern-matcher reuses the existing
+linter/WORK-0028 lane rather than inventing anything.
+
+**What would make Hedl delegate:** if ruff/semgrep (or an off-the-shelf rule
+engine) can express the ADR-003 anti-patterns directly, Hedl should add rules to
+those tools rather than ship its own detector at all.
+
 ## Consequences
 
 - **No follow-up work item is drafted** (the spec requires one only "if
   Accepted"). The reopen preconditions and the loop's prove-or-cull date are
   recorded here and surfaced at the next `/phase-complete` existential cycle.
 - ADR-005 (self-improvement, human-gated): its *principle* is untouched; only the
-  *egress implementation* is on a prove-or-cull trigger — consistent with ADR-034's
+  *egress implementation* is on a prove-or-cull trigger — consistent with ADR-036's
   ADR-005 re-evaluation.
 - Two pre-existing code findings surfaced by the panel are **out of scope for this
   docs-only ADR** and routed accordingly: reflect.py's determinism test masks
@@ -157,7 +188,7 @@ proves the loop or goes with it.
 
 - [[ADR-003-deterministic-over-inference]] — the policy; its scope covers the whole toolchain, not just outputs.
 - [[ADR-005-self-improvement-human-gated]] — the loop on a prove-or-cull trigger.
-- `.work/decisions/ADR-034-phase-2-scope-narrowing.md` — deferred reflect/contribute to this unit.
+- `.work/decisions/ADR-036-phase-2-scope-narrowing.md` — deferred reflect/contribute to this unit.
 - WORK-0028 — the deterministic drift detector; the model any future detector must follow.
 - WORK-0069 — record_insights roster drift (the determinism-auditor's collection-layer finding).
 - `.work/insights/events.jsonl` — the 682-event, gate-only corpus the investigation mined.

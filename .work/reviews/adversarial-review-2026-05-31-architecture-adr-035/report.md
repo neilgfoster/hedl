@@ -22,7 +22,7 @@ DEFER to **REJECT** and removed an ADR-003 loophole.
 | ADR-003 integrity (determinism-auditor) | PASS after fix — artefact-level loophole removed; deterministic pattern-matcher (extending WORK-0028) made the only acceptable form |
 | Anti-zombie / honest decision (existential) | PASS after fix — DEFER → REJECT; false "measurement substrate" rationale removed; reflect/contribute one honest prove-or-cull |
 | Factual accuracy (existential) | PASS after fix — gate_run attributed to am_i_done.py, not record_insights.py |
-| Scope containment (scope-auditor) | PASS — docs-only; reflect/contribute fate in scope (ADR-034 deferred it here); review records written so references resolve |
+| Scope containment (scope-auditor) | PASS — docs-only; reflect/contribute fate in scope (ADR-036 deferred it here); review records written so references resolve |
 
 ## Strengths
 
