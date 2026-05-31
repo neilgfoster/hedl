@@ -1699,6 +1699,10 @@ def _append_gate_insight(report: Report) -> None:
         return
     if not config.get("insights", {}).get("enabled", False):
         return
+    # No lock-in (WORK-0076): never CREATE .work/ in a gate-only repo that ships
+    # none — only record if the .work/ layer already exists (cf. WORK-0002).
+    if not os.path.isdir(os.path.join(REPO_ROOT, ".work")):
+        return
 
     import datetime as _dt
     insights_dir = os.path.join(REPO_ROOT, ".work", "insights")

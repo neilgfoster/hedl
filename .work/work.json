@@ -8,24 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0076",
-      "title": "feat: document and guard .work/ as the cross-harness work-item state layer",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "priority_band": "high",
-      "dependencies": [],
-      "status": "backlog",
-      "description": "DIRECTION-2 pillar (.work/ cross-harness). Establish .work/ as the stdlib-readable, harness-independent work-item state layer the gate reads to be work-item-aware (not a competing tracker). Per ADR-036 the gate-only tier runs without it; native plan-mode/TodoWrite serve ad-hoc tracking. Multi-PM-system pluggability per ADR-022.",
-      "acceptance_criteria": [
-        ".work/ documented as the cross-harness work-item layer; the gate's work-item-awareness traced to it.",
-        "The gate-only tier is shown to run without .work/ (no lock-in).",
-        "am_i_done.py passes."
-      ],
-      "source": "ADR-036 DIRECTION-2 pillar (.work/ cross-harness); ADR-022 pluggability.",
-      "notes": "Minted by Unit C to make the .work/-cross-harness pillar a top item (operator named it; no item existed). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
-    },
-    {
       "id": "WORK-0075",
       "title": "feat: graduate bootstrap-adopter from prose to a documented first-class capability",
       "phase": 2,
@@ -1611,6 +1593,27 @@
       "started_date": "2026-05-31",
       "completed_date": "2026-05-31",
       "resolution": "check_docs_index skips adopter repos (no skill/hedl/ at root), mirroring check_state_template_sync — docs-reachability is a framework-self invariant, so a fresh adopter's projected docs/spec/ templates no longer red-light the gate. Framework enforcement unchanged + tests. Panel PASS. PR #81 (merged). Status transition deferred from #81; recorded here."
+    },
+    {
+      "id": "WORK-0076",
+      "title": "feat: document and guard .work/ as the cross-harness work-item state layer",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "priority_band": "high",
+      "dependencies": [],
+      "status": "complete",
+      "description": "DIRECTION-2 pillar (.work/ cross-harness). Establish .work/ as the stdlib-readable, harness-independent work-item state layer the gate reads to be work-item-aware (not a competing tracker). Per ADR-036 the gate-only tier runs without it; native plan-mode/TodoWrite serve ad-hoc tracking. Multi-PM-system pluggability per ADR-022.",
+      "acceptance_criteria": [
+        ".work/ documented as the cross-harness work-item layer; the gate's work-item-awareness traced to it.",
+        "The gate-only tier is shown to run without .work/ (no lock-in).",
+        "am_i_done.py passes."
+      ],
+      "source": "ADR-036 DIRECTION-2 pillar (.work/ cross-harness); ADR-022 pluggability.",
+      "notes": "Minted by Unit C to make the .work/-cross-harness pillar a top item (operator named it; no item existed). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted.",
+      "started_date": "2026-05-31",
+      "completed_date": "2026-05-31",
+      "resolution": "Documented .work/ as the cross-harness work-item layer in backends.md (stdlib-readable; traced the gate's work-item-awareness to check_commands/_load_work_items, check_config dispatch-rules, check_markdown_schemas, check_state_template_sync) and proved no-lock-in: TestGateOnlyNoWorkDir asserts the default-run .work/-reading checks skip with no .work/, and a new guard makes _append_gate_insight no-op rather than create .work/ in a gate-only repo (cf. WORK-0002). Panel (edge-case-hunter/scope-auditor/historian) CONDITIONAL->PASS: scoped the no-lock-in claim to the default run (check_dispatch is panel-only), added the insight guard + schemas coverage, fixed an ADR-036 attribution. This PR (feat/work-state-cross-harness)."
     }
   ]
 }
