@@ -13,8 +13,8 @@ ran as an independent step; the ADR does not pre-claim a passed challenge.
 Scope: `.work/decisions/ADR-036-phase-2-scope-narrowing.md` (Phase-2 strategic
 direction; DIRECTION-1 vs DIRECTION-2).
 
-Verdict: **CONDITIONAL → PASS after one revision cycle.** First pass surfaced 3
-BLOCKING + 8 SIGNIFICANT; all addressed in the revised ADR (decision unchanged,
+Verdict: **CONDITIONAL → PASS after one revision cycle.** First pass surfaced 4
+BLOCKING + 7 SIGNIFICANT; all addressed in the revised ADR (decision unchanged,
 overselling removed).
 
 ## Dimension Scores
@@ -36,7 +36,7 @@ overselling removed).
 
 ## Blocking Findings
 
-Three on first pass; all resolved in the revised ADR:
+Four on first pass; all resolved in the revised ADR:
 
 - **MADR adoption was a binding architectural decision** (scope-auditor) — beyond
   direction-picking. Resolved: MADR is now a recommended candidate, decided
@@ -47,13 +47,15 @@ Three on first pass; all resolved in the revised ADR:
 - **Single-operator validation theatre** (existential) — "Lume+Wyrd proved it" is
   one operator, two own-repos. Resolved: "proved" dropped; promotion gated on an
   independent adopter.
+- **Goal displacement** (existential) — DIRECTION-2 is maintainer-decided in
+  response to a competitive score, not adopter demand (existential-challenger.md
+  marks this BLOCKING). Resolved: the adopter-serving claim was dropped; the ADR's
+  goal-displacement weighing and "Honest risks" section state this plainly.
 
 ## Significant Findings
 
-Eight on first pass; all resolved:
+Seven on first pass; all resolved:
 
-- Goal displacement — adopter-demand claim dropped; honest maintainer-decision
-  framing (existential).
 - Self-validation — embedded challenge section removed; recorded separately
   (existential, scope-auditor).
 - Process-over-product — ADR ships no code while install broken; mitigated by Unit

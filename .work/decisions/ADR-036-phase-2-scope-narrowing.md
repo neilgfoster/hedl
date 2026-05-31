@@ -165,8 +165,9 @@ it sets up — not a claim that most code is deleted in v0.2.0.
 - **ADR-005 (self-improvement, human-gated)** — the *principle* survives; only if
   Unit D culls reflect/contribute is the *one implementation* removed. The ADR
   itself is not superseded unless the principle is abandoned.
-- **ADR-012 (native substrate)** — WORK-0065 (high) owns the
-  gate-binding-vs-hand-rolled-orchestration re-eval; DIRECTION-2 is consistent
+- **ADR-012 (managed competitive lifecycle)** — WORK-0065 (high), the
+  native-substrate re-evaluation that *applies* ADR-012, owns the
+  gate-binding-vs-hand-rolled-orchestration question; DIRECTION-2 is consistent
   (keep the gate; lean native for orchestration).
 - **ADR-016 (preserved decisions)** — unchanged: the SKILL.md NL-routing fallback
   is retained; only its feature-pitch is dropped.
@@ -183,6 +184,41 @@ it sets up — not a claim that most code is deleted in v0.2.0.
   a coherent answer to "what is unique about Hedl?" given the bun/mcp-cli
   attribution and the crowded field — *contingent on the roadmap differentiator
   shipping*, which is why the cross-harness build is spike-gated, not assumed.
+
+## Prior art
+
+Mandatory per [[ADR-017-adrs-existentially-challenged]]. The crowded field this
+decision narrows against:
+
+- **Whole-framework / spec-driven competitors** — Spec Kit (~107k★), OpenSpec
+  (~51k★), BMAD (~48k★), Taskmaster (~27k★), Agent OS, Kiro. These define the
+  framework lane DIRECTION-2 deliberately *exits*.
+- **The completion-gate primitive** — bun (upstream) and theshadow27/mcp-cli
+  (direct origin of the `am-i-done` name + CI-symmetric deterministic design;
+  PRs #72/#74). Hedl did **not** invent the gate concept.
+- **Native Claude Code** — Agent Teams, Dynamic Workflows, Outcomes, native skill
+  activation, `.claudeignore` (the external review's redundancy baseline).
+- **Focused single-purpose tools** — pre-commit, just (check runners);
+  CodeRabbit / Greptile / PR-Agent (hosted review); danger-python (PR-template).
+
+**What is different:** the residual that survives all of the above is the
+*work-item-aware binding* — one no-inference exit code that ties work-item state +
+PR-template + review threads + dependabot, runnable identically local and in CI —
+which the external review confirmed no focused tool currently does (report.md §4,
+gate row), plus the intent to keep it harness-agnostic where the native
+competitors are Claude-Code-only.
+
+**Why the difference is worth the cost:** the field is crowded precisely at the
+framework lane and at the gate-concept lane; the only uncontested ground is the
+*portable, work-item-aware binding*. Defending the framework lane (DIRECTION-1)
+costs feature-parity work against a 107k★ incumbent with no winning
+differentiator.
+
+**What would make Hedl delegate (drop its own version):** if a focused tool ships
+a work-item-aware, harness-agnostic deterministic gate with local/CI symmetry —
+or if the native platforms make that binding GA across the non-Claude harnesses —
+the binding stops being a residual and Hedl should adopt the substitute. This is
+the standing ADR-012 re-evaluation (WORK-0065).
 
 ## Honest risks and caveats (from the existential/simplicity challenge)
 
