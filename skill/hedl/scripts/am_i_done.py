@@ -1357,7 +1357,7 @@ def check_skill_metadata() -> Optional[CheckResult]:
     )
 
 
-def check_docs_index() -> CheckResult:
+def check_docs_index() -> Optional[CheckResult]:
     """Fail if any human-facing markdown doc is not reachable by link from README.md.
 
     Scope: docs/**/*.md, skill/hedl/references/*.md, skill/hedl/SKILL.md, CHANGELOG.md.
@@ -1365,7 +1365,17 @@ def check_docs_index() -> CheckResult:
     file counts as one entry -- linking either path satisfies both.
     Operational trees (.github/, .claude/, .work/, skill/hedl/agents|commands|templates|
     workflows|scripts|integrations) are excluded.
+
+    Returns None (skip) in adopter repos (skill under .claude/skills/, no skill/hedl/
+    at the repo root) — the docs-reachability invariant is framework-self only. The
+    lightweight tier projects docs/spec/*-template.md into an adopter's docs/, which
+    their README does not link; enforcing reachability there would red-light a fresh
+    adopter's first gate run (WORK-0061). Same framework-repo guard as
+    check_state_template_sync.
     """
+    if not os.path.isdir(os.path.join(REPO_ROOT, "skill", "hedl")):
+        return None  # adopter repo layout — docs-index is a framework-self invariant
+
     readme_path = os.path.join(REPO_ROOT, "README.md")
     if not os.path.exists(readme_path):
         return CheckResult("docs-index", False, "README.md not found")

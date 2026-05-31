@@ -742,6 +742,46 @@ class TestCheckStateTemplateSync(unittest.TestCase):
         self.assertIn("state tree missing", res.message)
 
 
+class TestCheckDocsIndexAdopterGuard(unittest.TestCase):
+    """check_docs_index (WORK-0061): docs-reachability is a framework-self
+    invariant, so it must skip in adopter repos (no skill/hedl/ at root) where the
+    installer projects unlinked docs/spec/ starter templates, but stay enforced in
+    the framework source repo."""
+
+    def _run(self, tmpdir: str) -> Any:
+        with mock.patch.object(M, "REPO_ROOT", tmpdir):
+            return M.check_docs_index()
+
+    def test_skips_adopter_layout(self) -> None:
+        # Adopter: skill under .claude/skills/hedl/, installer-projected
+        # docs/spec/ template NOT linked from the adopter README, NO skill/hedl/.
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.makedirs(os.path.join(tmpdir, ".claude", "skills", "hedl"))
+            os.makedirs(os.path.join(tmpdir, "docs", "spec"))
+            with open(os.path.join(tmpdir, "docs", "spec", "prd-template.md"), "w") as f:
+                f.write("# PRD template\n")
+            with open(os.path.join(tmpdir, "README.md"), "w") as f:
+                f.write("# Adopter project\n\nNo link to the projected template.\n")
+            res = self._run(tmpdir)
+        self.assertIsNone(res, "docs-index must skip in an adopter repo (no skill/hedl/)")
+
+    def test_enforced_in_framework_repo(self) -> None:
+        # Framework repo: skill/hedl/ present + an unlinked docs/ markdown must FAIL.
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            os.makedirs(os.path.join(tmpdir, "skill", "hedl"))
+            os.makedirs(os.path.join(tmpdir, "docs"))
+            with open(os.path.join(tmpdir, "docs", "orphan.md"), "w") as f:
+                f.write("# Orphan doc not linked from README\n")
+            with open(os.path.join(tmpdir, "README.md"), "w") as f:
+                f.write("# Hedl\n\nNo link to docs/orphan.md.\n")
+            res = self._run(tmpdir)
+        self.assertIsNotNone(res, "docs-index must stay enforced in the framework repo")
+        assert res is not None
+        self.assertFalse(res.passed, "an unlinked framework doc must fail docs-index")
+
+
 class TestCheckTemplate(unittest.TestCase):
     @staticmethod
     def _pr_json(body: str, *, login: str = "alice", is_bot: bool = False) -> str:
