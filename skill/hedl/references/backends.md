@@ -18,8 +18,8 @@ proposed for the migration (WORK-0032/0033).
 ## `.work/` as the cross-harness work-item layer (WORK-0076)
 
 ADR-036 (DIRECTION-2) positions `.work/` as **"the substrate that makes the gate
-work-item-aware"** — a work-item state layer, not a competing task tracker. Two
-properties make it cross-harness:
+work-item-aware"** — a work-item state layer, not a competing task tracker. Its
+key properties:
 
 - **Stdlib-readable, tool-independent (capability).** It is plain JSON on disk
   (`work.json`, `context.json`, `phases/*.json`), read with the standard library —
@@ -27,10 +27,11 @@ properties make it cross-harness:
   could consume it; the gate (`am_i_done.py`) is itself one such stdlib reader.
   (Projecting Hedl into non-Claude harnesses is a separate, unbuilt item —
   WORK-0047; this is the layer's portability, not shipped multi-harness support.)
-- **What makes the gate "work-item-aware" is what it reads from this layer:** the
-  stale-WORK-ID check (`check_commands`) and the work-item read (`_load_work_items`)
-  consult `work.json` (see Read paths below); `check_config` reads
-  `.work/config/dispatch-rules.json`; `check_markdown_schemas` reads
+- **What makes the gate "work-item-aware" is what it reads from this layer:** under
+  the default `local-file` backend the stale-WORK-ID check (`check_commands`, via
+  `_load_work_items_local`) reads `.work/work.json` (the `github-issues` backend
+  reads the same item set from issues instead — see Read paths below); `check_config`
+  reads `.work/config/dispatch-rules.json`; `check_markdown_schemas` reads
   `.work/config/markdown-schemas.json`; `check_state_template_sync` guards the
   framework-config subset. The layer is the *input*; the gate is a consumer.
 - **No lock-in — the gate-only tier's default run needs no `.work/`.** The gate

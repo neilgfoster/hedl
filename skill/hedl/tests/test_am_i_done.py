@@ -792,10 +792,20 @@ class TestGateOnlyNoWorkDir(unittest.TestCase):
 
     def test_work_item_aware_checks_skip_without_work_dir(self) -> None:
         # REPO_ROOT = an empty repo: no .work/ and no skill/hedl/ (adopter layout).
+        # Create a populated .claude/commands/ so check_commands reaches its
+        # work.json-absent skip path (not the no-commands-dir early return) —
+        # that is the no-.work/ behaviour this test means to prove.
         with tempfile.TemporaryDirectory() as tmpdir:
+            cmd_dir = os.path.join(tmpdir, ".claude", "commands")
+            os.makedirs(cmd_dir)
+            with open(os.path.join(cmd_dir, "iterate.md"), "w", encoding="utf-8") as f:
+                f.write("# /iterate\nSee WORK-9999 for context.\n")
             with mock.patch.object(M, "REPO_ROOT", tmpdir):
                 self.assertIsNone(M.check_config(), "check_config must skip with no .work/")
-                self.assertIsNone(M.check_commands(), "check_commands must skip with no work.json")
+                self.assertIsNone(
+                    M.check_commands(),
+                    "check_commands must skip with commands present but no .work/work.json",
+                )
                 self.assertIsNone(
                     M.check_state_template_sync(),
                     "state-template-sync must skip in a no-.work/ adopter layout",
