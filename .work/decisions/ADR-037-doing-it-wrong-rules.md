@@ -5,7 +5,7 @@
 Proposed — 2026-05-31 — Phase 2 — recommends **adopt the pattern via the existing
 `[verify]` mechanism; DEFER any rules-framework with a trigger.**
 
-The mandatory existential challenge (ADR-017) ran independently and FAILed the
+The mandatory existential challenge (ADR-017) ran independently and failed the
 first draft (which proposed building a rules-framework MVP) as premature
 accretion; this revision folds in that panel + simplicity-enforcer + historian.
 Records: `.work/reviews/adversarial-review-2026-05-31-architecture-adr-037/`.

@@ -11,7 +11,7 @@ Panel: [existential-challenger](existential-challenger.md),
 Scope: `.work/decisions/ADR-037-doing-it-wrong-rules.md` (first draft proposed
 building a minimal rules-framework MVP).
 
-Verdict: **FAIL (first draft) → revised.** The panel convergently found the
+Verdict: **FAIL (first draft) → PASS (revised).** The panel convergently found the
 framework MVP was premature accretion; the pattern is sound and adoptable today
 via the existing `[verify]` mechanism. ADR rewritten to: adopt via `[verify]`,
 defer the framework with a trigger.
