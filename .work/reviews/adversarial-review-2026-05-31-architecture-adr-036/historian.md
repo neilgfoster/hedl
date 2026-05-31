@@ -12,7 +12,7 @@
 | SIGNIFICANT | Contradicts ADR-016, which preserves "NL routing through SKILL.md is the cross-harness fallback". ADR-036 said "drop the routing table". | ADR-016:20-22. | ACCEPTED — reworded: the NL-routing fallback is RETAINED per ADR-016; only the headline-feature pitch is dropped. No contradiction. |
 | MINOR | ADR-008 cherry-pickable test is a per-change review gate, not a direction-level test; the alignment claim is loose. | ADR-008:9-16. | ACCEPTED — claim softened; ADR-011/013 cited as the more directly relevant gates; ADR-008 cited in spirit. |
 | MINOR | ADR-005 is a principle (human-gated self-improvement); culling reflect/contribute supersedes the implementation, not the principle. | ADR-005. | ACCEPTED — reworded to "the one implementation is removed; the principle survives unless abandoned." |
-| MINOR | ADR-032 numbering gap (031, then 033/034). | file listing. | NOTED — pre-existing cosmetic gap; 034 is the correct next number (highest existing is 033). |
+| MINOR | ADR numbering. | file listing + ADR-013:9,52. | RESOLVED — this ADR is **036**, not 034: ADR-013 records a rejected "standalone ADR-034" (substrate trigger), so 034 is spoken-for in the decision log; 035 is the sibling Unit D ADR. The 032 gap is pre-existing/cosmetic. |
 | MINOR | ADR-011 disqualifiers may need reframing under focused-tool scope. | ADR-011. | NOTED — downstream README/disqualifier doc work; tracked as a Unit-C-adjacent consequence, not this docs-only ADR PR. |
 
 ## Recommendations

@@ -14,8 +14,9 @@ Scope: `.work/decisions/ADR-036-phase-2-scope-narrowing.md` (Phase-2 strategic
 direction; DIRECTION-1 vs DIRECTION-2).
 
 Verdict: **CONDITIONAL → PASS after one revision cycle.** First pass surfaced 4
-BLOCKING + 7 SIGNIFICANT; all addressed in the revised ADR (decision unchanged,
-overselling removed).
+BLOCKING and (synthesized) 7 SIGNIFICANT — the per-agent logs hold additional
+overlapping rows that this report dedupes; all addressed in the revised ADR
+(decision unchanged, overselling removed).
 
 ## Dimension Scores
 
@@ -54,7 +55,10 @@ Four on first pass; all resolved in the revised ADR:
 
 ## Significant Findings
 
-Seven on first pass; all resolved:
+Synthesized to the seven below; all resolved. (The per-agent logs hold additional
+overlapping rows — e.g. the same goal-displacement/positioning concern appears in
+more than one agent's table — which this synthesis dedupes, so raw row counts
+across the logs exceed these seven.)
 
 - Self-validation — embedded challenge section removed; recorded separately
   (existential, scope-auditor).
@@ -73,7 +77,9 @@ Seven on first pass; all resolved:
 - ADR-008 alignment softened to "spirit"; ADR-011/013 cited as the relevant gates
   (historian).
 - ADR-005 principle-vs-implementation precision fixed (historian).
-- ADR-032 numbering gap is pre-existing/cosmetic; 034 is correct (historian).
+- ADR numbering: this ADR is **036** (034 is spoken-for by ADR-013's rejected
+  "standalone ADR-034"; 035 is the sibling Unit D ADR); the 032 gap is cosmetic
+  (historian).
 - Pillar 3 (.work/) load-bearing role clarified (simplicity).
 - Consequences split into immediate vs downstream (scope-auditor).
 - Drops reframed as Unit-C intent, not final decisions (scope-auditor).

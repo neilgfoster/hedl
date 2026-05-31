@@ -46,9 +46,10 @@ survives), ADR-021 (Proposed, deferred), ADR-033 (Proposed) — plus WORK-0047.
 Under *what the design intends*, a feature being native to Claude Code is not a
 strike, because it is absent in Copilot / OpenCode / Cursor / Aider / Devin, so
 redundancy should be scored against the *intersection* of native features across
-target harnesses. (Recorded forensically in Unit A,
-`.work/insights/external-review-framing-gap-2026-05-30.md`, delivered in sibling
-PR #76.)
+target harnesses. (The forensic record of this correction is *added by* the
+sibling Unit A PR #76, which precedes this ADR in the bundle's merge order
+A→B→C; the argument is restated self-contained above, so this ADR does not depend
+on that file being present in its own checkout.)
 
 **But the correction has a hard limit, stated honestly:** WORK-0047 is unbuilt and
 Hedl is operationally Claude-Code-only today. So *today* the target-harness set is
@@ -272,6 +273,8 @@ Phase 2.
 - [[ADR-011-disqualifiers-first-positioning]] — the focused-tool positioning extends it; disqualifiers to be reframed downstream.
 - [[ADR-016-preserved-decisions]] — SKILL.md NL-routing fallback retained; only the pitch dropped.
 - [[ADR-021-beyond-single-repo-orchestration]] — deferred; not load-bearing for v0.2.0.
-- `.work/insights/external-review-framing-gap-2026-05-30.md` — the framing correction (Unit A, PR #76).
+- `.work/insights/external-review-framing-gap-2026-05-30.md` — the framing
+  correction; *added by* the sibling Unit A PR #76 (merge order A→B→C); pointer
+  only, the argument is restated inline above.
 - `.work/reviews/external-2026-05-30-1/report.md` §3–§4 — the verdict this ADR responds to.
 - `.work/reviews/adversarial-review-2026-05-31-architecture-adr-036/` — the existential + panel challenge.
