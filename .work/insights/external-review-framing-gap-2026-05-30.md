@@ -14,7 +14,7 @@ Hedl's harness-agnostic intent is foundational and ADR-set-wide:
 
 - ADR-001: "reach across harnesses (Claude Code today, others later)"
 - ADR-011: "stdlib, LLM-agnostic, distributable tiered Skill"
-- ADR-016: "NL routing through SKILL.md is the cross-harness fallback"
+- ADR-016: "NL routing through `SKILL.md` is the cross-harness fallback"
 - ADR-019 (Status: Superseded — the recursive-workstream primitive was
   superseded by WORK-0027; the cross-harness portability rationale below
   survives the supersession): "workstream state is consumable from any
