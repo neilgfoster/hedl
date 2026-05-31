@@ -2,11 +2,110 @@
   "meta": {
     "current_phase": 2,
     "active_item": null,
-    "last_updated": "2026-05-30",
-    "reconciliation_note": "Backlog re-shaped 2026-05-30 (Phase-2 entry) from two inputs: internal Full repo-health (.work/reviews/repo-health-2026-05-30-full/) and external 9-agent adversarial review (.work/reviews/external-2026-05-30/). Both converge: defensible surface is the gate + --streams + reversible installer; most surrounding framework is redundant with native Claude Code or out-competed; adoption value unproven. Minted WORK-0060..0065 (integrity/adoption-path fixes + substrate re-eval WORK-0065); reprioritized P0 integrity/adoption above forward-capability work; flagged 5 cull-or-prove candidates (WORK-0010/0011/0015/0004/0058 + budget_manager + self-improvement loop) for /phase-complete. Supersedes the 2026-05-28 reconciliation. | Re-reconciled 2026-05-30 against external-2026-05-30-1 (third review, 8-agent): confirmed WORK-0060..0065 already cover the bulk (install break check_docs_index=0061, template/lockfile drift+CI guard=0062, native substrate=0065, gh-sub-issue/contribute-docstring/record_insights disposition=0064, branch-naming detached-HEAD=0057, config-regex ReDoS=0063). Minted WORK-0068 (gate-tier CI break — uv sync vs unprojected pyproject/uv.lock, verified), 0069 (record_insights roster drift omits existential-challenger), 0070 (alternatives.md stale --streams citations + citation guard), 0071 (hook trust model), 0072 (LOW quality/robustness nits), 0073 (am_i_done.py monolith split, operator-approved Phase 2). Folded the 'same checks local+CI is a superset' reword into WORK-0064. No-create: bus factor 1 (inherent), no push trigger (branch-protection-mitigated), _BRANCH_RE dup (accepted by stdlib/no-shared-pkg design), ADR-number gaps (cosmetic), remove-vaporware-from-pitch (WORK-0014 already flags planned)."
+    "last_updated": "2026-05-31",
+    "reconciliation_note": "Backlog re-shaped 2026-05-30 (Phase-2 entry) from two inputs: internal Full repo-health (.work/reviews/repo-health-2026-05-30-full/) and external 9-agent adversarial review (.work/reviews/external-2026-05-30/). Both converge: defensible surface is the gate + --streams + reversible installer; most surrounding framework is redundant with native Claude Code or out-competed; adoption value unproven. Minted WORK-0060..0065 (integrity/adoption-path fixes + substrate re-eval WORK-0065); reprioritized P0 integrity/adoption above forward-capability work; flagged 5 cull-or-prove candidates (WORK-0010/0011/0015/0004/0058 + budget_manager + self-improvement loop) for /phase-complete. Supersedes the 2026-05-28 reconciliation. | Re-reconciled 2026-05-30 against external-2026-05-30-1 (third review, 8-agent): confirmed WORK-0060..0065 already cover the bulk (install break check_docs_index=0061, template/lockfile drift+CI guard=0062, native substrate=0065, gh-sub-issue/contribute-docstring/record_insights disposition=0064, branch-naming detached-HEAD=0057, config-regex ReDoS=0063). Minted WORK-0068 (gate-tier CI break — uv sync vs unprojected pyproject/uv.lock, verified), 0069 (record_insights roster drift omits existential-challenger), 0070 (alternatives.md stale --streams citations + citation guard), 0071 (hook trust model), 0072 (LOW quality/robustness nits), 0073 (am_i_done.py monolith split, operator-approved Phase 2). Folded the 'same checks local+CI is a superset' reword into WORK-0064. No-create: bus factor 1 (inherent), no push trigger (branch-protection-mitigated), _BRANCH_RE dup (accepted by stdlib/no-shared-pkg design), ADR-number gaps (cosmetic), remove-vaporware-from-pitch (WORK-0014 already flags planned). | Unit C reconciliation 2026-05-31 (CONTINGENT on ADR-036 DIRECTION-2 + ADR-035 ratification, both Proposed; B numbered 036 because ADR-013 already records a rejected 'standalone ADR-034'). DIRECTION-2 = narrow to a portable, work-item-aware completion gate. Five v0.2.0 pillars set to band 'high' and ORDERED FIRST as the critical path: WORK-0068 (install fix, first execution item), WORK-0074 (--streams hardening, minted), WORK-0076 (.work/ cross-harness, minted), WORK-0075 (bootstrap-adopter graduation, minted, rescoped phase-completable), WORK-0047 (harness projections, promoted from normal; full build spike-gated). WORK-0010/0011 DEFERRED with trigger (consistent with the 2026-05-30 /phase-complete defer-not-cull decision; ADR-019 supersession). WORK-0050 high->normal; 0050/0051/0052/0035 reframed adjacent (not v0.2.0 critical path). The five REJECT'd features have NO open backlog items to supersede: budget_manager cull, adversarial-panel thin-to-floor, bespoke-ADR-schema->MADR candidate, and SKILL.md routing-table de-pitch are code/scope dispositions owned by ADR-036 + the Phase-2 /phase-complete; reflect/contribute prove-or-cull is owned by ADR-035. Nothing was extended; no orphan supersedes were fabricated. Three items minted (0074/0075/0076) to make the operator-named pillars top items."
   },
   "active": [],
   "backlog": [
+    {
+      "id": "WORK-0068",
+      "title": "fix: gate-tier CI fails on fresh install — shipped am-i-done.yml runs uv sync but the tier projects no pyproject/uv.lock",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "backlog",
+      "description": "External review (external-2026-05-30-1, Utility 5/10) finding, verified first-hand. The gate tier projects workflows/am-i-done.yml — which runs `uv sync --frozen --only-group dev --python ...` (skill/hedl/workflows/am-i-done.yml:41) — and requirements-ci.txt, but NOT pyproject.toml or uv.lock (verified: tiers.json gate.projections lists am_i_done.py/budget_manager.py/check_pr_template.py/check_markdown_schema.py, the three workflow files, PR template, and requirements-ci.txt only). On a fresh gate-tier adopter repo `uv sync --frozen` has no manifest/lockfile, so the CI install step fails before the gate runs, breaking the README:39-41 'local pass = green PR' promise. The documented pip fallback (`pip install -r requirements-ci.txt`) is not what the shipped workflow uses. Distinct from WORK-0061 (check_docs_index adopter guard) and WORK-0062 (template/lockfile drift).",
+      "acceptance_criteria": [
+        "A fresh gate-tier install yields a CI workflow whose dev-toolchain install uses only artifacts the gate tier actually projects (e.g. switch the shipped am-i-done.yml to `pip install -r requirements-ci.txt`, OR project pyproject.toml + uv.lock into the gate tier); the chosen approach is recorded.",
+        "A test simulates the gate-tier projection set and asserts the shipped am-i-done.yml install step references only projected files (no dependency on an unprojected pyproject.toml/uv.lock).",
+        "The README 'local pass = green PR' claim holds for a gate-tier adopter, or is scoped to tiers that project the toolchain.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30-1 (Utility 5/10; verified tiers.json gate.projections vs skill/hedl/workflows/am-i-done.yml:41)",
+      "notes": "DIRECTION-2 pillar 1 (kept high; ordered first). Per ADR-036 the broken adopter install is the FIRST execution item — the gate must produce a passing adopter repo before any positioning claim. Install-correctness cluster: WORK-0061, WORK-0001 realize the same pillar. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
+    },
+    {
+      "id": "WORK-0074",
+      "title": "feat: harden --streams cross-stream conflict refusal and exercise it with a second operator",
+      "phase": 2,
+      "workstream": "WS-TECH",
+      "change_class": "feat",
+      "priority_band": "high",
+      "dependencies": [],
+      "status": "backlog",
+      "description": "DIRECTION-2 pillar (--streams). The external review confirmed --streams is uniquely additive (pre-merge overlap refusal) but flagged it unproven — never exercised by a second operator. Exercise it across two concurrently-active streams and harden the refusal path so the honest caveat in ADR-036 can be retired.",
+      "acceptance_criteria": [
+        "--streams exercised across two concurrently-active streams (Lume + Wyrd dogfood or equivalent), with the refusal behaviour documented.",
+        "Regression tests cover overlap detection and the refuse-to-merge exit code.",
+        "am_i_done.py passes."
+      ],
+      "source": "ADR-036 DIRECTION-2 pillar; external-2026-05-30-1 §4 (--streams ADOPT, unproven caveat).",
+      "notes": "Minted by Unit C to make the --streams pillar a top item (the operator named it a pillar but no item existed). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
+    },
+    {
+      "id": "WORK-0076",
+      "title": "feat: document and guard .work/ as the cross-harness work-item state layer",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "priority_band": "high",
+      "dependencies": [],
+      "status": "backlog",
+      "description": "DIRECTION-2 pillar (.work/ cross-harness). Establish .work/ as the stdlib-readable, harness-independent work-item state layer the gate reads to be work-item-aware (not a competing tracker). Per ADR-036 the gate-only tier runs without it; native plan-mode/TodoWrite serve ad-hoc tracking. Multi-PM-system pluggability per ADR-022.",
+      "acceptance_criteria": [
+        ".work/ documented as the cross-harness work-item layer; the gate's work-item-awareness traced to it.",
+        "The gate-only tier is shown to run without .work/ (no lock-in).",
+        "am_i_done.py passes."
+      ],
+      "source": "ADR-036 DIRECTION-2 pillar (.work/ cross-harness); ADR-022 pluggability.",
+      "notes": "Minted by Unit C to make the .work/-cross-harness pillar a top item (operator named it; no item existed). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
+    },
+    {
+      "id": "WORK-0075",
+      "title": "feat: graduate bootstrap-adopter from prose to a documented first-class capability",
+      "phase": 2,
+      "workstream": "WS-PLAN",
+      "change_class": "feat",
+      "priority_band": "high",
+      "dependencies": [],
+      "status": "backlog",
+      "description": "DIRECTION-2 pillar (bootstrap-adopter). In-phase deliverable: graduate docs/templates/bootstrap-adopter.md from prose to a documented first-class capability. The external/marketing 'proven bootstrap-adopter' CLAIM is held behind a gate (see AC2) and is NOT a completion criterion of this item, so the item is phase-completable (CLAUDE.md Principle 5). Per ADR-036's honest caveat the 'proved' claim is not yet earned: Lume + Wyrd are the maintainer's own repos (one operator).",
+      "acceptance_criteria": [
+        "docs/templates/bootstrap-adopter.md graduated to a documented first-class capability (the in-phase deliverable).",
+        "A documented GATE is recorded (not a blocker on this item): the README/marketing 'proven' claim is made only after >=1 INDEPENDENT adopter (not the maintainer) completes a bootstrap unaided.",
+        "am_i_done.py passes."
+      ],
+      "source": "ADR-036 DIRECTION-2 pillar (bootstrap-adopter); existential-challenger single-operator caveat.",
+      "notes": "Minted by Unit C. Rescoped after the historian flagged a phase-discipline violation: item completion no longer depends on an external adopter event; only the marketing claim is gated. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
+    },
+    {
+      "id": "WORK-0047",
+      "title": "feat: harness-agnostic adoption — Hedl works with GitHub Copilot, OpenCode, and other AI coding tools",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "feat",
+      "status": "backlog",
+      "priority_band": "high",
+      "dependencies": [],
+      "description": "Lume bootstrap 2026-05-29 framing: Hedl should work not just with Claude Code but with GitHub Copilot, OpenCode, and any equivalent AI coding tool. Today the deterministic gate (am_i_done.py), .work/ state, hedl.toml, and the SKILL.md natural-language routing table are already harness-agnostic (plain Python/CI + readable NL), while the .claude/ projections (slash commands, named agents, settings/hooks) are Claude-Code-specific adapters. Define the multi-harness strategy: a harness-agnostic core plus thin per-tool adapter projection sets (e.g. GitHub Copilot .github/copilot-instructions.md; OpenCode AGENTS.md/config) rather than Claude-only assumptions baked into the core. Relates to ADR-016 (NL routing as the cross-harness fallback) and ADR-023 (invisible mode).",
+      "acceptance_criteria": [
+        "Audit which parts of Hedl are Claude-Code-specific (.claude/ projections, slash commands, agents, settings hooks) vs harness-agnostic (am_i_done.py gate, .work/ state, hedl.toml, SKILL.md NL routing); document in an insights note.",
+        "ADR drafted (Proposed) on the multi-harness model: per-tool projection sets (tiers.json gains harness-specific projections, e.g. a 'copilot' / 'opencode' adapter) vs a single agnostic core + thin adapters; existentially challenged per ADR-017 (does the gate + NL routing already suffice for non-Claude tools, or is adapter code justified?).",
+        "Define explicitly what 'works with tool X' means: the gate runs unchanged (tool-agnostic Python/CI); the NL workflow in SKILL.md is consumable by any agent; tool-specific command/agent files are the per-harness adapter.",
+        "If accepted: at least one non-Claude adapter shipped as a real example (GitHub Copilot recommended) with an install path, mirroring the Claude-Code projection contract.",
+        "README/tiers docs state the supported harnesses and the agnostic-core guarantee; counts stay consistent (doc-facts check passes).",
+        "am_i_done.py passes."
+      ],
+      "relates_to": [
+        "ADR-016",
+        "ADR-023",
+        "ADR-001",
+        "WORK-0013"
+      ],
+      "notes": "DIRECTION-2 pillar (promoted normal->high; ordered into the top-five v0.2.0 critical path). Harness projections + the .work/ cross-harness layer. Per ADR-036 the FULL multi-harness build is spike-gated: ship one real non-Claude projection that passes its own gate before promoting the entire projection set. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
+    },
     {
       "id": "WORK-0060",
       "title": "fix: correct branch-protection context names in docs + README advisory caveat",
@@ -290,7 +389,8 @@
         "am_i_done.py passes."
       ],
       "reclassify_reason": "Reclassified to Phase 2. External adversarial review kit is net-new forward-capability NOT in Phase-1's sanctioned exception set (github-issues backend + workstream templates); ADR-028 stays Proposed pending reviews #2/#3.",
-      "note": "RECONCILE 2026-05-30: also define the external-review markdown schema/contract — the gate currently EXEMPTS .work/reviews/external-*/ from review-report/review-agent validation (added in the reconcile PR) precisely because no external contract exists yet; this item must close that gap (a deliberately-loose schema that still gates the path)."
+      "note": "RECONCILE 2026-05-30: also define the external-review markdown schema/contract — the gate currently EXEMPTS .work/reviews/external-*/ from review-report/review-agent validation (added in the reconcile PR) precisely because no external contract exists yet; this item must close that gap (a deliberately-loose schema that still gates the path).",
+      "notes": "Adjacent (DIRECTION-2): the external-review kit is internal tooling, not a v0.2.0 pillar (the operator's plan placed it in the framework-feature direction). Unit A already amended the review prompt (ADR-survey). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
     },
     {
       "id": "WORK-0006",
@@ -479,38 +579,13 @@
       ]
     },
     {
-      "id": "WORK-0047",
-      "title": "feat: harness-agnostic adoption — Hedl works with GitHub Copilot, OpenCode, and other AI coding tools",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "feat",
-      "status": "backlog",
-      "priority_band": "normal",
-      "dependencies": [],
-      "description": "Lume bootstrap 2026-05-29 framing: Hedl should work not just with Claude Code but with GitHub Copilot, OpenCode, and any equivalent AI coding tool. Today the deterministic gate (am_i_done.py), .work/ state, hedl.toml, and the SKILL.md natural-language routing table are already harness-agnostic (plain Python/CI + readable NL), while the .claude/ projections (slash commands, named agents, settings/hooks) are Claude-Code-specific adapters. Define the multi-harness strategy: a harness-agnostic core plus thin per-tool adapter projection sets (e.g. GitHub Copilot .github/copilot-instructions.md; OpenCode AGENTS.md/config) rather than Claude-only assumptions baked into the core. Relates to ADR-016 (NL routing as the cross-harness fallback) and ADR-023 (invisible mode).",
-      "acceptance_criteria": [
-        "Audit which parts of Hedl are Claude-Code-specific (.claude/ projections, slash commands, agents, settings hooks) vs harness-agnostic (am_i_done.py gate, .work/ state, hedl.toml, SKILL.md NL routing); document in an insights note.",
-        "ADR drafted (Proposed) on the multi-harness model: per-tool projection sets (tiers.json gains harness-specific projections, e.g. a 'copilot' / 'opencode' adapter) vs a single agnostic core + thin adapters; existentially challenged per ADR-017 (does the gate + NL routing already suffice for non-Claude tools, or is adapter code justified?).",
-        "Define explicitly what 'works with tool X' means: the gate runs unchanged (tool-agnostic Python/CI); the NL workflow in SKILL.md is consumable by any agent; tool-specific command/agent files are the per-harness adapter.",
-        "If accepted: at least one non-Claude adapter shipped as a real example (GitHub Copilot recommended) with an install path, mirroring the Claude-Code projection contract.",
-        "README/tiers docs state the supported harnesses and the agnostic-core guarantee; counts stay consistent (doc-facts check passes).",
-        "am_i_done.py passes."
-      ],
-      "relates_to": [
-        "ADR-016",
-        "ADR-023",
-        "ADR-001",
-        "WORK-0013"
-      ]
-    },
-    {
       "id": "WORK-0050",
       "title": "feat(arch): installer projection model — adopt a tracked manifest (.hedl-manifest.json) as the Hedl<->adopter contract",
       "phase": 2,
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "status": "backlog",
-      "priority_band": "high",
+      "priority_band": "normal",
       "dependencies": [],
       "adr_class": true,
       "description": "ADR-CLASS (Proposed ADR before child work can be specified). MORATORIUM CAVEAT: forced by the Lume bootstrap 2026-05-29 surface — six independent findings collapse to one root cause. Operator decides whether to land the Proposed ADR now or defer the cluster to /phase-complete; if deferred, Lume hand-patches each gap as it surfaces.\n\nROOT: install.py treats projection as a one-shot copy (read tiers.json, walk projections, write/skip, exit) with NO durable record of what was projected, when, from which Hedl source. This produces a family of asymmetric failures observed live during Lume bootstrap: (1=.gitignore/WORK-0042) can't ship adopter-protection files with a recorded reason; (2=drift/WORK-0043) silently overwrites adopter edits — no last-projected state to diff; (6) workflow projections carry preconditions (pyproject.toml + uv.lock) the installer can't audit; (7=.pymarkdown.json) config the outputs depend on but the installer doesn't ship; (8) docs/spec/ files create a downstream README docs-index obligation the installer doesn't track; (9) same-tier re-install can't detect files Hedl has since removed (orphans). All six share one gap: installer state lives only in tiers.json (Hedl-side) + touched paths (adopter-side); nothing records the RELATIONSHIP across versions.\n\nPROPOSED ABSTRACTION: replace minimal .hedl-tier with a tracked-in-git .hedl-manifest.json the installer writes on every action — {schema_version, tier, hedl_version, last_installed_at, projections:{<target>:{source, source_hash, kind:projection|init|starter, ...}}}. Every install/upgrade reads the prior manifest, diffs vs current tiers.json, reconciles. Adopters commit it (multi-operator per ADR-018 sees the same state). Post-manifest each finding becomes: gitignore=append-or-create projection recorded as Hedl-managed block; drift=hash-diff vs manifest source_hash, skip-by-default + --force-overwrite-drift; pyproject/.pymarkdown=starter projections on_exists:skip; docs-index=starter README projection OR docs-index reads manifest to exempt unmodified starter files; orphans=previous_paths - current_paths, log + --remove-orphans (file-deletion blast radius => not auto).\n\nEXISTENTIAL CHALLENGE (ADR-017): prior art is mature — Homebrew install records, apt/dpkg .list, Helm releases, Terraform state, npm package-lock. Risk = over-engineering (Hedl is a workflow scaffold, not a package manager). Challenge: (1) does it already exist (yes, compare the five); (2) manifest vs fixing each finding bespoke — list the bespoke code each individual fix adds and compare; (3) replace .hedl-tier vs compose alongside; (4) migration for existing adopters (synthesize v1 manifest from tiers.json + current source hashes, idempotent, one-time); (5) does committing it leak Hedl version vs invisible-mode (ADR-023).",
@@ -536,7 +611,8 @@
       "supersedes_if_accepted": [
         "WORK-0042",
         "WORK-0043"
-      ]
+      ],
+      "notes": "Reframed adjacent (was high). The tracked-manifest installer contract is distribution-adjacent and could later support the bootstrap pillar, but ADR-036 does not make it v0.2.0 critical path (the gate must work first; the manifest is hardening of distribution, not the gate itself). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
     },
     {
       "id": "WORK-0051",
@@ -564,7 +640,8 @@
         "WORK-0012",
         "ADR-018",
         "ADR-021"
-      ]
+      ],
+      "notes": "Adjacent improvement, not v0.2.0 critical path (DIRECTION-2). GitHub Projects is a presentation surface, not a gate primitive. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
     },
     {
       "id": "WORK-0052",
@@ -592,7 +669,8 @@
         "WORK-0007",
         "WORK-0028",
         "WORK-0032"
-      ]
+      ],
+      "notes": "Adjacent improvement, not v0.2.0 critical path (DIRECTION-2). Schema validation for generated state is hardening, not a pillar. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
     },
     {
       "id": "WORK-0053",
@@ -699,7 +777,7 @@
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "status": "backlog",
-      "priority_band": "MODEL",
+      "priority_band": "DEFERRED",
       "description": "Per the (now-superseded) ADR-019 design — retained here as the design reference; ADR-019 itself is superseded (WORK-0027) and this item is demand-gated (see reclassify_reason) — `.work/work.json` migrates from flat active/backlog/completed arrays to a recursive tree of workstreams. A leaf-level workstream = today's work item; a top-level workstream = today's phase. Bump `schema_version` and add a migration in install.py's registry that converts existing flat state to the recursive shape idempotently (with archival per the existing migration pattern). Solo + flat usage must remain functionally unchanged — leaf-only workstreams are the default for lightweight tier. Recursive composition is opt-in. Depends on WORK-0027 (canonical workstream definition) being settled. Forward-compatibility (ADR-031, Proposed-deferred): design the schema so dependency-edge fields (depends_on / parallel / conflicts_with) can be added without a further migration when ADR-031 is activated — do not foreclose them, but do not build them now (ADR-031 is gated on this item landing + real demand).",
       "acceptance_criteria": [
         "`.work/work.json` schema supports recursive workstreams (children: [workstream...]); flat work items remain valid as leaf workstreams.",
@@ -712,7 +790,8 @@
       ],
       "note": "Data-model-adoption threshold (dogfood 2026-05-29, N=2 adopters): the recursive model's benefit exceeds prose-template cost only when concurrently-active workstreams exceed ~5-7, OR >1 concurrent operator needs shared machine-readable state, OR a parallel-bootstrap-under-coordination-strain repeats. Below that, prose templates (docs/templates/bootstrap-adopter.md) are the right tool. See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
       "reclassify_reason": "Reclassified to Phase 2 (operator decision at /phase-complete 2026-05-30: defer, not cull). Recursive workstream data model is demand-gated; the 2026-05-29 dogfood found the benefit exceeds prose-template cost only above ~5-7 concurrent workstreams, a threshold not met. ADR-019 superseded; kept deferred pending real demand.",
-      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
+      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR).",
+      "notes": "DEFERRED (band; was MODEL) — consistent with the recorded operator decision at /phase-complete 2026-05-30 ('defer, not cull') and ADR-036 DIRECTION-2 (not v0.2.0 scope). Trigger to revisit: demonstrated demand for the recursive container model — the 2026-05-29 dogfood set the threshold at ~5-7 concurrently-active work-trees (the recursive model's benefit exceeds prose-template cost only above that); below it prose templates win. ADR-019 superseded the recursive primitive; the WS-* classification keeps its name regardless. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
     },
     {
       "id": "WORK-0011",
@@ -721,7 +800,7 @@
       "workstream": "WS-ARCH",
       "change_class": "feat",
       "status": "backlog",
-      "priority_band": "MODEL",
+      "priority_band": "DEFERRED",
       "description": "Per ADR-020, two prose-form reference templates ship in `skill/hedl/templates/workstreams/`. existential-review: iteration 1 = identify capability + competitors; iterations 2..N = investigate each competitor; final iteration = report and culling decision (consumed by ADR-012's managed competitive lifecycle). problem-statement: iteration 1 = broad problem + objective; iterations 2..N = discovery, planning, refinement; final iteration = deliverables (may spawn child workstreams). Workstream creation flow consults the template at start; the agent follows the iteration pattern. Adopter-authored templates live alongside the shipped ones; path configurable via hedl.toml. Templates are prose-form for v0.2; executable templates deferred. The first concrete use of existential-review template is the workstream that produced the 2026-05-28 alternatives.md.",
       "acceptance_criteria": [
         "`skill/hedl/templates/workstreams/existential-review.md` exists with the iteration pattern described above.",
@@ -733,7 +812,8 @@
       ],
       "note": "When this ships workstream templates in data-form (ADR-020), fold in / supersede the prose docs/templates/bootstrap-adopter.md (authored 2026-05-29 from the Lume/Wyrd bootstraps). See .work/insights/dogfood-workstream-spawn-adopters-2026-05-29.md.",
       "reclassify_reason": "Reclassified to Phase 2 (defer). Named forward-capability exception that did not ship as data-form templates; prose templates (docs/templates/bootstrap-adopter.md) serve below the recursive-model threshold. Carries to Phase 2 with WORK-0010.",
-      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
+      "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR).",
+      "notes": "DEFERRED (band; was MODEL) — consistent with the recorded operator decision at /phase-complete 2026-05-30 ('defer, not cull') and ADR-036 DIRECTION-2 (not v0.2.0 scope). Trigger to revisit: demonstrated demand for the recursive container model — the 2026-05-29 dogfood set the threshold at ~5-7 concurrently-active work-trees (the recursive model's benefit exceeds prose-template cost only above that); below it prose templates win. ADR-019 superseded the recursive primitive; the WS-* classification keeps its name regardless. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
     },
     {
       "id": "WORK-0004",
@@ -771,24 +851,6 @@
         "WORK-0015"
       ],
       "reconcile_2026_05_30": "RECONCILE 2026-05-30: cull-or-prove candidate. Both the Full repo-health and the external review converge on CUT; Phase-2 DoD forces the decision at /phase-complete. Recommendation recorded, item retained until decided (cutting code is its own PR)."
-    },
-    {
-      "id": "WORK-0068",
-      "title": "fix: gate-tier CI fails on fresh install — shipped am-i-done.yml runs uv sync but the tier projects no pyproject/uv.lock",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "priority_band": "high",
-      "dependencies": null,
-      "status": "backlog",
-      "description": "External review (external-2026-05-30-1, Utility 5/10) finding, verified first-hand. The gate tier projects workflows/am-i-done.yml — which runs `uv sync --frozen --only-group dev --python ...` (skill/hedl/workflows/am-i-done.yml:41) — and requirements-ci.txt, but NOT pyproject.toml or uv.lock (verified: tiers.json gate.projections lists am_i_done.py/budget_manager.py/check_pr_template.py/check_markdown_schema.py, the three workflow files, PR template, and requirements-ci.txt only). On a fresh gate-tier adopter repo `uv sync --frozen` has no manifest/lockfile, so the CI install step fails before the gate runs, breaking the README:39-41 'local pass = green PR' promise. The documented pip fallback (`pip install -r requirements-ci.txt`) is not what the shipped workflow uses. Distinct from WORK-0061 (check_docs_index adopter guard) and WORK-0062 (template/lockfile drift).",
-      "acceptance_criteria": [
-        "A fresh gate-tier install yields a CI workflow whose dev-toolchain install uses only artifacts the gate tier actually projects (e.g. switch the shipped am-i-done.yml to `pip install -r requirements-ci.txt`, OR project pyproject.toml + uv.lock into the gate tier); the chosen approach is recorded.",
-        "A test simulates the gate-tier projection set and asserts the shipped am-i-done.yml install step references only projected files (no dependency on an unprojected pyproject.toml/uv.lock).",
-        "The README 'local pass = green PR' claim holds for a gate-tier adopter, or is scoped to tiers that project the toolchain.",
-        "am_i_done.py passes."
-      ],
-      "source": "external-2026-05-30-1 (Utility 5/10; verified tiers.json gate.projections vs skill/hedl/workflows/am-i-done.yml:41)"
     },
     {
       "id": "WORK-0069",
