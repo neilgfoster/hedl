@@ -32,8 +32,13 @@ M = _load_module()
 
 
 def _make_repo(readme_content: str, docs: list[str]) -> str:
-    """Write README.md and docs into a temp directory; return the directory path."""
+    """Write README.md and docs into a temp directory; return the directory path.
+
+    Includes a skill/hedl/ marker so check_docs_index treats the fixture as the
+    framework source repo (WORK-0061 added an adopter-repo skip keyed on that
+    directory's absence)."""
     tmpdir = tempfile.mkdtemp()
+    os.makedirs(os.path.join(tmpdir, "skill", "hedl"), exist_ok=True)
     with open(os.path.join(tmpdir, "README.md"), "w", encoding="utf-8") as fh:
         fh.write(readme_content)
     for doc in docs:
@@ -86,6 +91,8 @@ class TestCheckDocsIndex:
 
     def test_missing_readme_fails(self) -> None:
         tmpdir = tempfile.mkdtemp()
+        # Framework-repo marker so the adopter-skip guard (WORK-0061) does not fire.
+        os.makedirs(os.path.join(tmpdir, "skill", "hedl"), exist_ok=True)
         with mock.patch.object(M, "REPO_ROOT", tmpdir):
             result = M.check_docs_index()
         assert result is not None
