@@ -75,3 +75,15 @@ self-improvement loop (reflect + contribute) gets one honest prove-or-cull date 
 PASS → commit the revised ADR + review records, raise PR, await operator
 ratification. Code-level findings (reflect.py test, record_insights drift=WORK-0069)
 are out of scope for this docs-only PR.
+
+## pr-ready re-review (2026-05-31)
+
+Re-ran existential-challenger (mandatory) + historian on the final diff per
+/pr-ready. **No BLOCKING, no SIGNIFICANT requiring revision.** Refinements applied:
+Status line tightened to the merged ADR-036 form; Prior-art "solved"→"tractable"
+(WORK-0028 ships one such check, the rest are domain rules to add in the same lane);
+`main` merged in so the ADR-036 cross-reference resolves on-branch (ADR-036 landed in
+#77). Verified: the historian "ADR-036 doesn't exist" finding was branch-visibility
+(ADR-036 is on main); the existential "verify the DoD" MINOR is satisfied —
+phase-2.json's DoD explicitly lists "self-improvement loop (>=1 /contribute PR
+end-to-end or cut)" with "a decision DATE this phase". Stop condition met.

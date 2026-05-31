@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed — 2026-05-31 — Phase 2 — recommends **Rejected** (with a non-committed
-reopen condition) for the detector, and a **prove-or-cull** decision for the
-self-improvement loop.
+Proposed — 2026-05-31 — Phase 2 — recommends **Reject** (detector, with a
+non-committed reopen condition) + **prove-or-cull** (reflect/contribute). The
+full decision is in the Decision section below.
 
 Drafted during an autonomous /iterate session while the operator was AFK, under
 explicit delegated authority. Recorded **Proposed**; ratification is the PR merge
@@ -158,9 +158,11 @@ deterministically":
   enforcement path.
 
 **What is different / what is uniquely Hedl:** nothing — and that is the point.
-Detection of these anti-patterns is a *solved, deterministic* problem (linters +
-WORK-0028). There is no Hedl-unique reason to introduce an LLM classifier; doing so
-would be strictly worse (anti-ADR-003, token cost, non-reproducible).
+Detection of these anti-patterns is a *tractable, deterministic* problem in the
+existing linter / WORK-0028 lane (WORK-0028 ships one such check today; the others
+are Hedl-domain rules a deterministic matcher would add there, not new science).
+There is no Hedl-unique reason to introduce an LLM classifier; doing so would be
+strictly worse (anti-ADR-003, token cost, non-reproducible).
 
 **Why the difference is worth the cost:** it is not, today — hence REJECT. If
 demand ever appears, the deterministic pattern-matcher reuses the existing
