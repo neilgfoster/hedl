@@ -12,7 +12,10 @@ import importlib.util
 import os
 import pathlib
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 from typing import Any
 from unittest import mock
@@ -1113,6 +1116,72 @@ class TestCheckStreams(unittest.TestCase):
         )
         self.assertFalse(result.passed)
         self.assertIn("could not diff stream", result.message)
+
+
+class TestCheckStreamsRealGit(unittest.TestCase):
+    """WORK-0074: exercise --streams against a REAL two-branch git repo end to
+    end (the sanctioned 'or equivalent' of the Lume+Wyrd dogfood), verifying both
+    overlap detection and the refuse-to-merge exit code via the actual CLI."""
+
+    def _git(self, repo: str, *args: str) -> None:
+        subprocess.run(["git", "-C", repo, *args], check=True, capture_output=True, text=True)
+
+    def _make_repo(self) -> str:
+        repo = tempfile.mkdtemp()
+        # Register cleanup before any git command can raise, so a setup failure
+        # (e.g. git missing) never leaks the temp dir.
+        self.addCleanup(shutil.rmtree, repo, ignore_errors=True)
+        self._git(repo, "init", "-q")
+        self._git(repo, "config", "user.email", "t@example.com")
+        self._git(repo, "config", "user.name", "tester")
+        (pathlib.Path(repo) / "base.txt").write_text("base\n")
+        self._git(repo, "add", ".")
+        self._git(repo, "commit", "-q", "-m", "base")
+        self._git(repo, "branch", "-M", "main")
+        return repo
+
+    def _stream(self, repo: str, branch: str, files: dict[str, str]) -> None:
+        self._git(repo, "checkout", "-q", "-b", branch, "main")
+        for name, content in files.items():
+            (pathlib.Path(repo) / name).write_text(content)
+        self._git(repo, "add", ".")
+        self._git(repo, "commit", "-q", "-m", f"work on {branch}")
+        self._git(repo, "checkout", "-q", "main")
+
+    def _run_gate(self, repo: str, streams: str) -> subprocess.CompletedProcess[str]:
+        # --check streams runs ONLY check_streams. The git diff runs against
+        # REPO_ROOT, which am_i_done.py resolves at import via
+        # `git rev-parse --show-toplevel` from the process CWD — so cwd=repo is
+        # load-bearing: it makes REPO_ROOT (and therefore the diff) the temp repo.
+        return subprocess.run(
+            [sys.executable, str(_SCRIPT), "--check", "streams", "--streams", streams],
+            cwd=repo, capture_output=True, text=True,
+        )
+
+    def test_overlapping_streams_refuse_with_exit_1(self) -> None:
+        repo = self._make_repo()
+        self._stream(repo, "feat/a", {"shared.py": "a\n", "a_only.py": "a\n"})
+        self._stream(repo, "feat/b", {"shared.py": "b\n", "b_only.py": "b\n"})
+        r = self._run_gate(repo, "feat/a,feat/b")
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("shared.py", r.stdout)
+        self.assertIn("touched by multiple streams", r.stdout)
+
+    def test_disjoint_streams_pass_with_exit_0(self) -> None:
+        repo = self._make_repo()
+        self._stream(repo, "feat/a", {"a_only.py": "a\n"})
+        self._stream(repo, "feat/b", {"b_only.py": "b\n"})
+        r = self._run_gate(repo, "feat/a,feat/b")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("clean", r.stdout)
+
+    def test_duplicate_stream_is_not_self_overlap(self) -> None:
+        # Passing the same branch twice must not report a false self-overlap.
+        repo = self._make_repo()
+        self._stream(repo, "feat/a", {"a_only.py": "a\n"})
+        r = self._run_gate(repo, "feat/a,feat/a")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("clean", r.stdout)
 
 
 class TestDeclaredVerify(unittest.TestCase):

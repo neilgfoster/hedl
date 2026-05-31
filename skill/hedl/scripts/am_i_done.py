@@ -1238,12 +1238,32 @@ def check_streams(streams: list[str]) -> CheckResult:
     """Validate no file overlap across parallel worktree streams.
 
     Each stream is a branch name. The check diffs each branch against main
-    (falling back to origin/main) and fails if any file is touched by more
-    than one stream. Gate-only installs that don't use parallel worktrees
-    never pass --streams, so this check never runs for them.
+    (three-dot ``main...branch`` — the branch's own changes since its
+    merge-base; falling back to ``origin/main`` when local ``main`` is absent,
+    e.g. a fresh CI checkout) and REFUSES — exit code 1 — if any file is
+    touched by more than one stream.
+
+    Refusal behaviour (intentionally conservative, pre-merge):
+
+    - Overlap is detected at FILE granularity, not line granularity: two
+      streams editing different lines of the same file still refuse. This is a
+      merge-safety floor — it stops two parallel operators silently racing the
+      same file — not a textual-conflict predictor.
+    - A branch that cannot be diffed against either ``main`` or ``origin/main``
+      FAILS the check (a missing or mistyped stream is surfaced, not skipped).
+    - Duplicate branch names are de-duplicated up front, so passing the same
+      stream twice is one stream (no self-overlap, no redundant diff).
+
+    Gate-only installs that don't use parallel worktrees never pass --streams,
+    so this check never runs for them.
     """
     if not streams:
         return CheckResult("streams", True, "no parallel streams specified")
+
+    # Dedupe up front (order-preserving): a branch listed twice is one stream,
+    # so this avoids a redundant git diff per duplicate and prevents any
+    # false self-overlap regardless of how owners are later tallied.
+    streams = list(dict.fromkeys(streams))
 
     stream_files: dict[str, list[str]] = {}
     for branch in streams:

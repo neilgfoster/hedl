@@ -1,6 +1,10 @@
 {
-  "date": "2026-05-30",
+  "date": "2026-05-31",
   "completed": [
+    "WORK-0074: hardened --streams (explicit dedup in check_streams + real-git two-stream regression tests for overlap/exit-code + documented file-level conservative refusal). Panel CONDITIONAL->PASS (temp-dir leak fixed). 419 tests.",
+    "WORK-0068: gate-tier CI installs from projected requirements-ci.txt (pip --require-hashes + setup-python), fixing the broken fresh adopter install. PR #80.",
+    "WORK-0061: check_docs_index skips adopter repos (framework-self invariant). PR #81.",
+    "Phase-2 strategic-compass bundle landed: ADR-036 DIRECTION-2 ratified (#77), ADR-035 reject auto-detector (#78), Unit A framing-gap insight (#76), Unit C backlog reconciliation around the five pillars (#79).",
     "WORK-0014: README positioning per ADR-011 (disqualifiers-first) + ADR-023 ('Use Hedl if'); gate as second section; iteration-layer glossed; invisible mode + github write-back both flagged planned. Panel caught a dropped 'Use Hedl if' section (re-added) + comprehension fixes. AC1 reconciled to ADR-011.",
     "WORK-0041: gate template check exempts Dependabot PRs (verified author is_bot+login, never body/branch); humans fully enforced. Panel PASS (2 BLOCKINGs rebutted: globally-unique app slug; PR-gate re-run handles TOCTOU); defensive fail-closed tests added. 413 tests.",
     "WORK-0048: install.py _load_tiers raises TiersConfigError (clean exit, no traceback) for missing/unreadable/invalid-JSON/non-UTF-8/wrong-shape tiers.json (WORK-0022 pattern). Panel caught 2 BLOCKING traceback paths (binary UnicodeDecodeError; valid-JSON-wrong-shape) — both fixed. 407 tests.",
@@ -37,5 +41,6 @@
   ],
   "next_item": "WORK-0001",
   "blockers": [],
-  "notes": "Phase 1 COMPLETE -> Phase 2 (Adoption readiness & deferred-bet resolution). Release 0.1.0. active_item null. First task: WORK-0001 (consumer install path) — needs the held a/b/c fix-approach pick. Phase-2 DoD forces cull-or-prove on the deferred bets (github-issues dogfood, recursive cluster, budget_manager, self-improvement loop, multi-operator) — no third deferral. LG2/LG3 inherited."
+  "notes": "Phase 1 COMPLETE -> Phase 2 (Adoption readiness & deferred-bet resolution). Release 0.1.0. active_item null. First task: WORK-0001 (consumer install path) — needs the held a/b/c fix-approach pick. Phase-2 DoD forces cull-or-prove on the deferred bets (github-issues dogfood, recursive cluster, budget_manager, self-improvement loop, multi-operator) — no third deferral. LG2/LG3 inherited.",
+  "next": "WORK-0076 (.work/ cross-harness) or WORK-0075 (bootstrap-adopter) — next DIRECTION-2 pillars; WORK-0047 (harness projections) is the spike-gated headline."
 }

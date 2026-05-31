@@ -8,43 +8,6 @@
   "active": [],
   "backlog": [
     {
-      "id": "WORK-0068",
-      "title": "fix: gate-tier CI fails on fresh install — shipped am-i-done.yml runs uv sync but the tier projects no pyproject/uv.lock",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "priority_band": "high",
-      "dependencies": null,
-      "status": "backlog",
-      "description": "External review (external-2026-05-30-1, Utility 5/10) finding, verified first-hand. The gate tier projects workflows/am-i-done.yml — which runs `uv sync --frozen --only-group dev --python ...` (skill/hedl/workflows/am-i-done.yml:41) — and requirements-ci.txt, but NOT pyproject.toml or uv.lock (verified: tiers.json gate.projections lists am_i_done.py/budget_manager.py/check_pr_template.py/check_markdown_schema.py, the three workflow files, PR template, and requirements-ci.txt only). On a fresh gate-tier adopter repo `uv sync --frozen` has no manifest/lockfile, so the CI install step fails before the gate runs, breaking the README:39-41 'local pass = green PR' promise. The documented pip fallback (`pip install -r requirements-ci.txt`) is not what the shipped workflow uses. Distinct from WORK-0061 (check_docs_index adopter guard) and WORK-0062 (template/lockfile drift).",
-      "acceptance_criteria": [
-        "A fresh gate-tier install yields a CI workflow whose dev-toolchain install uses only artifacts the gate tier actually projects (e.g. switch the shipped am-i-done.yml to `pip install -r requirements-ci.txt`, OR project pyproject.toml + uv.lock into the gate tier); the chosen approach is recorded.",
-        "A test simulates the gate-tier projection set and asserts the shipped am-i-done.yml install step references only projected files (no dependency on an unprojected pyproject.toml/uv.lock).",
-        "The README 'local pass = green PR' claim holds for a gate-tier adopter, or is scoped to tiers that project the toolchain.",
-        "am_i_done.py passes."
-      ],
-      "source": "external-2026-05-30-1 (Utility 5/10; verified tiers.json gate.projections vs skill/hedl/workflows/am-i-done.yml:41)",
-      "notes": "DIRECTION-2 pillar 1 (kept high; ordered first). Per ADR-036 the broken adopter install is the FIRST execution item — the gate must produce a passing adopter repo before any positioning claim. Install-correctness cluster: WORK-0061, WORK-0001 realize the same pillar. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
-    },
-    {
-      "id": "WORK-0074",
-      "title": "feat: harden --streams cross-stream conflict refusal and exercise it with a second operator",
-      "phase": 2,
-      "workstream": "WS-TECH",
-      "change_class": "feat",
-      "priority_band": "high",
-      "dependencies": [],
-      "status": "backlog",
-      "description": "DIRECTION-2 pillar (--streams). The external review confirmed --streams is uniquely additive (pre-merge overlap refusal) but flagged it unproven — never exercised by a second operator. Exercise it across two concurrently-active streams and harden the refusal path so the honest caveat in ADR-036 can be retired.",
-      "acceptance_criteria": [
-        "--streams exercised across two concurrently-active streams (Lume + Wyrd dogfood or equivalent), with the refusal behaviour documented.",
-        "Regression tests cover overlap detection and the refuse-to-merge exit code.",
-        "am_i_done.py passes."
-      ],
-      "source": "ADR-036 DIRECTION-2 pillar; external-2026-05-30-1 §4 (--streams ADOPT, unproven caveat).",
-      "notes": "Minted by Unit C to make the --streams pillar a top item (the operator named it a pillar but no item existed). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted."
-    },
-    {
       "id": "WORK-0076",
       "title": "feat: document and guard .work/ as the cross-harness work-item state layer",
       "phase": 2,
@@ -139,24 +102,6 @@
         "am_i_done.py passes."
       ],
       "reclassify_reason": "Reclassified to Phase 2. BLIND-SPOT consumer-install-path fix; its a/b/c fix-approach decision (symlink projection breaks under --copy) is deferred with it and decided when built."
-    },
-    {
-      "id": "WORK-0061",
-      "title": "fix: check_docs_index skips adopter repos so the gate passes on first install",
-      "phase": 2,
-      "workstream": "WS-ARCH",
-      "change_class": "fix",
-      "priority_band": "high",
-      "dependencies": null,
-      "status": "backlog",
-      "description": "Internal Full repo-health (2026-05-30, new-engineer BLOCKING), verified against the clone: check_docs_index (am_i_done.py:1360) has no adopter/framework guard, unlike check_state_template_sync (am_i_done.py:677, returns None for adopter layout). It always runs (am_i_done.py:1623) and FAILs if any docs/**/*.md is unlinked from README. The lightweight tier projects docs/spec/{prd,epic,task}-template.md (tiers.json:36-38) into the adopter's docs/, which their README will not link, so the gate command getting-started.md:88-91 presents as the install-verification step goes red on a fresh adopter's very first run. Anticipated as finding (8) under the WORK-0050 manifest ADR, but that is a large speculative abstraction; this is the focused fix.",
-      "acceptance_criteria": [
-        "check_docs_index returns None (skip) in adopter repos using the same skill/hedl-at-root guard as check_state_template_sync, OR exempts installer-projected starter docs from the in_scope set.",
-        "A test simulating the adopter layout (skill under .claude/skills/hedl/, docs/spec/ templates present, adopter README) shows am_i_done.py green.",
-        "Framework-repo behaviour (docs-index still enforced) is unchanged, with a test.",
-        "am_i_done.py passes."
-      ],
-      "source": "repo-health-2026-05-30-full (new-engineer BLOCKING); cross-link WORK-0050 finding (8)."
     },
     {
       "id": "WORK-0062",
@@ -1602,6 +1547,70 @@
       "started_date": "2026-05-28",
       "completed_date": "2026-05-30",
       "resolution": "Discipline tracker closed at /phase-complete 2026-05-30. AC1: every other Phase-1 item closed (29) or reclassified to Phase 2 with rationale (WORK-0001/0010/0011/0015/0032/0033/0035). AC2: repo-health re-run (.work/reviews/repo-health-2026-05-30/) shows both 2026-05-28 BLOCKING findings RESOLVED — goal-displacement (Python 9,691 vs process ~3,358, ratio flipped from ~4145/~4650) and validation-theatre (14 review runs, 10 this session, vs README/.gitkeep at phase start). AC3: .work/reviews/ holds the 2026-05-28 run + the phase-1-complete-2026-05-30 existential cycle. AC4: gate green. Caveat recorded in the phase retro: surplus was largely justified/carried not retired (recursive cluster + budget_manager kept-deferred; Lume bootstrap accreted 5 ADR-class items) — Phase 2 inherits the 'watch net-new process' caution + 2 culling-candidates."
+    },
+    {
+      "id": "WORK-0074",
+      "title": "feat: harden --streams cross-stream conflict refusal and exercise it with a second operator",
+      "phase": 2,
+      "workstream": "WS-TECH",
+      "change_class": "feat",
+      "priority_band": "high",
+      "dependencies": [],
+      "status": "complete",
+      "description": "DIRECTION-2 pillar (--streams). The external review confirmed --streams is uniquely additive (pre-merge overlap refusal) but flagged it unproven — never exercised by a second operator. Exercise it across two concurrently-active streams and harden the refusal path so the honest caveat in ADR-036 can be retired.",
+      "acceptance_criteria": [
+        "--streams exercised across two concurrently-active streams (Lume + Wyrd dogfood or equivalent), with the refusal behaviour documented.",
+        "Regression tests cover overlap detection and the refuse-to-merge exit code.",
+        "am_i_done.py passes."
+      ],
+      "source": "ADR-036 DIRECTION-2 pillar; external-2026-05-30-1 §4 (--streams ADOPT, unproven caveat).",
+      "notes": "Minted by Unit C to make the --streams pillar a top item (the operator named it a pillar but no item existed). Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted.",
+      "started_date": "2026-05-31",
+      "completed_date": "2026-05-31",
+      "resolution": "Hardened --streams: explicit up-front dedup in check_streams (no redundant git diff / no false self-overlap) + real-git regression tests (overlap->exit 1, disjoint->exit 0, duplicate->no self-overlap) exercising two concurrent streams (the sanctioned Lume+Wyrd equivalent) + documented the file-level conservative refusal behaviour in the docstring. Panel (edge-case-hunter, scope-auditor): CONDITIONAL->PASS (BLOCKING temp-dir leak fixed via addCleanup; dedup added; comment/assert fixes). 419 tests. This PR (feat/streams-hardening)."
+    },
+    {
+      "id": "WORK-0068",
+      "title": "fix: gate-tier CI fails on fresh install — shipped am-i-done.yml runs uv sync but the tier projects no pyproject/uv.lock",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "complete",
+      "description": "External review (external-2026-05-30-1, Utility 5/10) finding, verified first-hand. The gate tier projects workflows/am-i-done.yml — which runs `uv sync --frozen --only-group dev --python ...` (skill/hedl/workflows/am-i-done.yml:41) — and requirements-ci.txt, but NOT pyproject.toml or uv.lock (verified: tiers.json gate.projections lists am_i_done.py/budget_manager.py/check_pr_template.py/check_markdown_schema.py, the three workflow files, PR template, and requirements-ci.txt only). On a fresh gate-tier adopter repo `uv sync --frozen` has no manifest/lockfile, so the CI install step fails before the gate runs, breaking the README:39-41 'local pass = green PR' promise. The documented pip fallback (`pip install -r requirements-ci.txt`) is not what the shipped workflow uses. Distinct from WORK-0061 (check_docs_index adopter guard) and WORK-0062 (template/lockfile drift).",
+      "acceptance_criteria": [
+        "A fresh gate-tier install yields a CI workflow whose dev-toolchain install uses only artifacts the gate tier actually projects (e.g. switch the shipped am-i-done.yml to `pip install -r requirements-ci.txt`, OR project pyproject.toml + uv.lock into the gate tier); the chosen approach is recorded.",
+        "A test simulates the gate-tier projection set and asserts the shipped am-i-done.yml install step references only projected files (no dependency on an unprojected pyproject.toml/uv.lock).",
+        "The README 'local pass = green PR' claim holds for a gate-tier adopter, or is scoped to tiers that project the toolchain.",
+        "am_i_done.py passes."
+      ],
+      "source": "external-2026-05-30-1 (Utility 5/10; verified tiers.json gate.projections vs skill/hedl/workflows/am-i-done.yml:41)",
+      "notes": "DIRECTION-2 pillar 1 (kept high; ordered first). Per ADR-036 the broken adopter install is the FIRST execution item — the gate must produce a passing adopter repo before any positioning claim. Install-correctness cluster: WORK-0061, WORK-0001 realize the same pillar. Contingent on operator ratification of ADR-036 (DIRECTION-2); if DIRECTION-1 is chosen this reconciliation is reverted.",
+      "started_date": "2026-05-31",
+      "completed_date": "2026-05-31",
+      "resolution": "Shipped gate-tier am-i-done.yml installs from the projected requirements-ci.txt via `pip install --require-hashes` + setup-python (not `uv sync --frozen`, which had no projected lockfile in a gate-tier adopter). Regression test asserts the shipped workflow installs only from projected files. Panel PASS. PR #80 (merged). Status transition deferred from #80 to avoid a work.json conflict with #79; recorded here."
+    },
+    {
+      "id": "WORK-0061",
+      "title": "fix: check_docs_index skips adopter repos so the gate passes on first install",
+      "phase": 2,
+      "workstream": "WS-ARCH",
+      "change_class": "fix",
+      "priority_band": "high",
+      "dependencies": null,
+      "status": "complete",
+      "description": "Internal Full repo-health (2026-05-30, new-engineer BLOCKING), verified against the clone: check_docs_index (am_i_done.py:1360) has no adopter/framework guard, unlike check_state_template_sync (am_i_done.py:677, returns None for adopter layout). It always runs (am_i_done.py:1623) and FAILs if any docs/**/*.md is unlinked from README. The lightweight tier projects docs/spec/{prd,epic,task}-template.md (tiers.json:36-38) into the adopter's docs/, which their README will not link, so the gate command getting-started.md:88-91 presents as the install-verification step goes red on a fresh adopter's very first run. Anticipated as finding (8) under the WORK-0050 manifest ADR, but that is a large speculative abstraction; this is the focused fix.",
+      "acceptance_criteria": [
+        "check_docs_index returns None (skip) in adopter repos using the same skill/hedl-at-root guard as check_state_template_sync, OR exempts installer-projected starter docs from the in_scope set.",
+        "A test simulating the adopter layout (skill under .claude/skills/hedl/, docs/spec/ templates present, adopter README) shows am_i_done.py green.",
+        "Framework-repo behaviour (docs-index still enforced) is unchanged, with a test.",
+        "am_i_done.py passes."
+      ],
+      "source": "repo-health-2026-05-30-full (new-engineer BLOCKING); cross-link WORK-0050 finding (8).",
+      "started_date": "2026-05-31",
+      "completed_date": "2026-05-31",
+      "resolution": "check_docs_index skips adopter repos (no skill/hedl/ at root), mirroring check_state_template_sync — docs-reachability is a framework-self invariant, so a fresh adopter's projected docs/spec/ templates no longer red-light the gate. Framework enforcement unchanged + tests. Panel PASS. PR #81 (merged). Status transition deferred from #81; recorded here."
     }
   ]
 }
